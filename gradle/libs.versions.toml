@@ -1,5 +1,6 @@
 [versions]
 agp = "8.7.3"
+desugarJdkLibs = "2.1.5"
 kotlin = "2.0.21"
 ksp = "2.0.21-1.0.28"
 coreKtx = "1.15.0"
@@ -22,6 +23,9 @@ androidxTestJunit = "1.2.1"
 espresso = "3.6.1"
 
 [libraries]
+# Desugaring
+desugar-jdk-libs = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "desugarJdkLibs" }
+
 # AndroidX Core
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }

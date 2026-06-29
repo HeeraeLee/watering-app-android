@@ -9,12 +9,12 @@ plugins {
 
 android {
     namespace = "com.watering.app"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.watering.app"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 1
         versionName = "1.0.0"
 
@@ -53,7 +53,7 @@ android {
 
 dependencies {
     // Java 8+ API desugaring (LocalDate 등 사용)
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.3")
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
 
     // AndroidX Core
     implementation(libs.core.ktx)
