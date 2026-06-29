@@ -56,6 +56,19 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun addWaterCustom(amount: Int, drinkType: DrinkType) {
+        viewModelScope.launch {
+            val current = uiState.value
+            val updated = waterService.addWater(
+                amount = amount,
+                drinkType = drinkType,
+                currentRecord = current.record
+            )
+            waterService.updateStreak(updated, current.streak)
+            _snackbarMessage.value = "${drinkType.emoji} ${drinkType.displayName} +${amount}ml 기록됐어요"
+        }
+    }
+
     fun undoLastEntry() {
         viewModelScope.launch {
             waterService.undoLastEntry(uiState.value.record)

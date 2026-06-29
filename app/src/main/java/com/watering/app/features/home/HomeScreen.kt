@@ -38,7 +38,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import com.watering.app.core.model.DrinkType
+import com.watering.app.features.record.RecordSheet
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,6 +56,7 @@ fun HomeScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarMessage by viewModel.snackbarMessage.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    var showRecordSheet by remember { mutableStateOf(false) }
 
     // 위젯 탭으로 진입한 경우 즉시 기록
     LaunchedEffect(quickRecord) {
@@ -119,6 +124,15 @@ fun HomeScreen(
                 Text("물 마셨어요 💧", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
             }
 
+            Spacer(Modifier.height(8.dp))
+
+            OutlinedButton(
+                onClick = { showRecordSheet = true },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("음료 종류 선택 +")
+            }
+
             Spacer(Modifier.height(12.dp))
 
             // 스트릭 표시
@@ -153,6 +167,13 @@ fun HomeScreen(
                     }
                 }
             }
+        }
+
+        if (showRecordSheet) {
+            RecordSheet(
+                onDismiss = { showRecordSheet = false },
+                onRecord = { amount, drinkType -> viewModel.addWaterCustom(amount, drinkType) }
+            )
         }
     }
 }
