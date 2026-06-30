@@ -1,8 +1,12 @@
 package com.watering.app.features.home
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,39 +14,48 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import com.watering.app.core.model.DrinkType
+import com.watering.app.core.model.WaterEntry
 import com.watering.app.features.record.RecordSheet
+
+private val AquaColor = Color(0xFF00B4D8)
+private val GreenColor = Color(0xFF34C759)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,21 +71,14 @@ fun HomeScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     var showRecordSheet by remember { mutableStateOf(false) }
 
-    // 위젯 탭으로 진입한 경우 즉시 기록
     LaunchedEffect(quickRecord) {
         if (quickRecord) viewModel.addWater()
     }
 
-    // 스낵바 표시 (Undo 포함)
     LaunchedEffect(snackbarMessage) {
         snackbarMessage?.let { msg ->
-            val result = snackbarHostState.showSnackbar(
-                message = msg,
-                actionLabel = "취소"
-            )
-            if (result == SnackbarResult.ActionPerformed) {
-                viewModel.undoLastEntry()
-            }
+            val result = snackbarHostState.showSnackbar(message = msg, actionLabel = "취소")
+            if (result == SnackbarResult.ActionPerformed) viewModel.undoLastEntry()
             viewModel.clearSnackbar()
         }
     }
@@ -80,7 +86,13 @@ fun HomeScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("워터링 💧", fontWeight = FontWeight.Bold) },
+                title = {
+                    Text(
+                        "오늘",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
                 actions = {
                     IconButton(onClick = onNavigateToStats) {
                         Icon(Icons.Default.BarChart, contentDescription = "통계")
@@ -93,78 +105,107 @@ fun HomeScreen(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(padding),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 48.dp)
         ) {
-            Spacer(Modifier.height(24.dp))
-
-            // 진행률 링
-            AchievementRing(
-                current = uiState.record.totalCount,
-                goal = uiState.record.goal,
-                rate = uiState.record.achievementRate
-            )
-
-            Spacer(Modifier.height(32.dp))
-
-            // 1탭 기록 버튼
-            Button(
-                onClick = { viewModel.addWater() },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
+            item {
+                Spacer(Modifier.height(16.dp))
+                AchievementRing(
+                    current = uiState.record.totalCount,
+                    goal = uiState.record.goal,
+                    rate = uiState.record.achievementRate,
+                    isAchieved = uiState.record.isAchieved
                 )
-            ) {
-                Text("물 마셨어요 💧", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+                Spacer(Modifier.height(28.dp))
             }
 
-            Spacer(Modifier.height(8.dp))
-
-            OutlinedButton(
-                onClick = { showRecordSheet = true },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("음료 종류 선택 +")
+            item {
+                Button(
+                    onClick = { viewModel.addWater() },
+                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Text("물 마셨어요 💧", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+                }
+                Spacer(Modifier.height(8.dp))
+                OutlinedButton(
+                    onClick = { showRecordSheet = true },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Text("다른 음료 선택")
+                }
+                Spacer(Modifier.height(20.dp))
             }
 
-            Spacer(Modifier.height(12.dp))
-
-            // 스트릭 표시
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                StreakCard(label = "현재 스트릭", value = "${uiState.streak.currentStreak}일")
-                StreakCard(label = "최장 스트릭", value = "${uiState.streak.longestStreak}일")
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    StreakCard(
+                        emoji = "🔥",
+                        label = "현재 연속",
+                        value = "${uiState.streak.currentStreak}일",
+                        modifier = Modifier.weight(1f)
+                    )
+                    StreakCard(
+                        emoji = "🏆",
+                        label = "최장 연속",
+                        value = "${uiState.streak.longestStreak}일",
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+                Spacer(Modifier.height(24.dp))
             }
 
-            Spacer(Modifier.height(16.dp))
-
-            // 오늘 기록 타임라인
-            Text(
-                "오늘 기록",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(Modifier.height(8.dp))
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("오늘 기록", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                    if (uiState.record.entries.isNotEmpty()) {
+                        Text(
+                            "마지막 취소",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.padding(4.dp)
+                        )
+                    }
+                }
+                Spacer(Modifier.height(8.dp))
+            }
 
             if (uiState.record.entries.isEmpty()) {
-                Text(
-                    "아직 기록이 없어요. 물을 마시고 기록해 보세요!",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            } else {
-                LazyColumn {
-                    items(uiState.record.entries.reversed()) { entry ->
-                        WaterEntryRow(entry = entry)
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 32.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("💧", fontSize = 40.sp)
+                            Spacer(Modifier.height(12.dp))
+                            Text(
+                                "아직 기록이 없어요.\n물을 마시고 기록해 보세요!",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
+                }
+            } else {
+                items(uiState.record.entries.reversed()) { entry ->
+                    WaterEntryRow(entry = entry)
+                    Spacer(Modifier.height(6.dp))
                 }
             }
         }
@@ -179,62 +220,86 @@ fun HomeScreen(
 }
 
 @Composable
-private fun AchievementRing(current: Int, goal: Int, rate: Double) {
-    val ringColor = when {
-        rate >= 1.0 -> Color(0xFF4CAF50)
-        rate >= 0.7 -> Color(0xFF007AFF)
-        rate >= 0.3 -> Color(0xFFFF9800)
-        else -> Color(0xFFF44336)
-    }
-    Box(contentAlignment = Alignment.Center, modifier = Modifier.size(180.dp)) {
+private fun AchievementRing(current: Int, goal: Int, rate: Double, isAchieved: Boolean) {
+    val ringColor = if (isAchieved) GreenColor else AquaColor
+    val animatedRate by animateFloatAsState(
+        targetValue = rate.coerceIn(0.0, 1.0).toFloat(),
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
+        label = "ring"
+    )
+
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.size(220.dp)) {
         androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxSize()) {
-            val strokeWidth = 16.dp.toPx()
-            val sweepAngle = (rate.coerceIn(0.0, 1.0) * 360f).toFloat()
+            val strokeWidth = 18.dp.toPx()
             drawArc(
-                color = ringColor.copy(alpha = 0.2f),
+                color = ringColor.copy(alpha = 0.15f),
                 startAngle = -90f,
                 sweepAngle = 360f,
                 useCenter = false,
-                style = androidx.compose.ui.graphics.drawscope.Stroke(strokeWidth)
+                style = Stroke(strokeWidth)
             )
-            drawArc(
-                color = ringColor,
-                startAngle = -90f,
-                sweepAngle = sweepAngle,
-                useCenter = false,
-                style = androidx.compose.ui.graphics.drawscope.Stroke(
-                    strokeWidth,
-                    cap = androidx.compose.ui.graphics.StrokeCap.Round
+            if (animatedRate > 0f) {
+                drawArc(
+                    color = ringColor,
+                    startAngle = -90f,
+                    sweepAngle = animatedRate * 360f,
+                    useCenter = false,
+                    style = Stroke(strokeWidth, cap = StrokeCap.Round)
                 )
-            )
+            }
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 text = "$current",
-                fontSize = 48.sp,
+                fontSize = 56.sp,
                 fontWeight = FontWeight.Bold,
                 color = ringColor
             )
-            Text(text = "/ $goal 잔", style = MaterialTheme.typography.bodyMedium)
             Text(
-                text = "${(rate * 100).toInt()}%",
-                style = MaterialTheme.typography.labelMedium,
+                text = "/ ${goal}잔",
+                style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+            if (isAchieved) {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = "목표 달성! 🎉",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = GreenColor,
+                    fontWeight = FontWeight.SemiBold
+                )
+            } else {
+                Text(
+                    text = "${(rate * 100).toInt()}%",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun StreakCard(label: String, value: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(value, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-        Text(label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+private fun StreakCard(emoji: String, label: String, value: String, modifier: Modifier = Modifier) {
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        modifier = modifier
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(emoji, fontSize = 24.sp)
+            Spacer(Modifier.height(4.dp))
+            Text(value, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+            Text(label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
     }
 }
 
 @Composable
-private fun WaterEntryRow(entry: com.watering.app.core.model.WaterEntry) {
+private fun WaterEntryRow(entry: WaterEntry) {
     val emoji = when (entry.drinkType) {
         DrinkType.WATER -> "💧"
         DrinkType.COFFEE -> "☕"
@@ -243,19 +308,42 @@ private fun WaterEntryRow(entry: com.watering.app.core.model.WaterEntry) {
         DrinkType.MILK -> "🥛"
         DrinkType.OTHER -> "🫗"
     }
+    val drinkName = when (entry.drinkType) {
+        DrinkType.WATER -> "물"
+        DrinkType.COFFEE -> "커피"
+        DrinkType.TEA -> "차"
+        DrinkType.JUICE -> "주스"
+        DrinkType.MILK -> "우유"
+        DrinkType.OTHER -> "기타"
+    }
     val time = java.time.Instant.ofEpochMilli(entry.timestampMillis)
         .atZone(java.time.ZoneId.systemDefault())
         .toLocalTime()
         .format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"))
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 6.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Text("$emoji ${entry.amount}ml", style = MaterialTheme.typography.bodyMedium)
-        Text(time, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(emoji, fontSize = 22.sp)
+                Spacer(Modifier.width(12.dp))
+                Column {
+                    Text(drinkName, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+                    Text(
+                        "${entry.amount}ml",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+            Text(time, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
     }
 }

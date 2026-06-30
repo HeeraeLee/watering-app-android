@@ -71,6 +71,9 @@ dependencies {
     implementation(libs.compose.material3)
     implementation(libs.compose.material.icons)
 
+    // Material Components (XML 테마용)
+    implementation(libs.material)
+
     // Glance (위젯)
     implementation(libs.glance.appwidget)
     implementation(libs.glance.material3)
@@ -90,9 +93,6 @@ dependencies {
 
     // WorkManager
     implementation(libs.workmanager.ktx)
-
-    // Health Connect
-    implementation(libs.health.connect)
 
     // Google Play Billing
     implementation(libs.billing.ktx)

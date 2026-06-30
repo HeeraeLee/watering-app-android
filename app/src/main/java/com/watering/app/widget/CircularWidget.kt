@@ -1,12 +1,13 @@
 package com.watering.app.widget
 
+import android.content.Intent
 import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
+import androidx.glance.LocalContext
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
@@ -42,24 +43,25 @@ class CircularWidgetReceiver : GlanceAppWidgetReceiver() {
 
 @Composable
 private fun CircularWidgetContent(current: Int, goal: Int, rate: Double) {
+    val context = LocalContext.current
     val bgColor = when {
         rate >= 1.0 -> Color(0xFF4CAF50)
-        rate >= 0.7 -> Color(0xFF007AFF)
+        rate >= 0.7 -> Color(0xFF00B4D8)
         rate >= 0.3 -> Color(0xFFFF9800)
-        else -> Color(0xFFF44336)
+        else        -> Color(0xFFF44336)
     }
     Box(
         modifier = GlanceModifier
             .fillMaxSize()
-            .background(ColorProvider(bgColor, bgColor))
-            .clickable(actionStartActivity<MainActivity>()),
+            .background(ColorProvider(bgColor))
+            .clickable(actionStartActivity(Intent(context, MainActivity::class.java))),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 text = "$current",
                 style = TextStyle(
-                    color = ColorProvider(Color.White, Color.White),
+                    color = ColorProvider(Color.White),
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -67,7 +69,7 @@ private fun CircularWidgetContent(current: Int, goal: Int, rate: Double) {
             Text(
                 text = "/ $goal",
                 style = TextStyle(
-                    color = ColorProvider(Color.White.copy(alpha = 0.8f), Color.White.copy(alpha = 0.8f)),
+                    color = ColorProvider(Color.White.copy(alpha = 0.8f)),
                     fontSize = 13.sp
                 )
             )

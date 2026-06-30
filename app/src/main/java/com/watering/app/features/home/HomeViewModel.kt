@@ -46,10 +46,11 @@ class HomeViewModel @Inject constructor(
     fun addWater(drinkType: DrinkType = DrinkType.WATER) {
         viewModelScope.launch {
             val current = uiState.value
+            val record = current.record.copy(goal = current.settings.dailyGoal)
             val updated = waterService.addWater(
                 amount = current.settings.cupSize,
                 drinkType = drinkType,
-                currentRecord = current.record
+                currentRecord = record
             )
             waterService.updateStreak(updated, current.streak)
             _snackbarMessage.value = "💧 +${current.settings.cupSize}ml 기록됐어요"
@@ -59,10 +60,11 @@ class HomeViewModel @Inject constructor(
     fun addWaterCustom(amount: Int, drinkType: DrinkType) {
         viewModelScope.launch {
             val current = uiState.value
+            val record = current.record.copy(goal = current.settings.dailyGoal)
             val updated = waterService.addWater(
                 amount = amount,
                 drinkType = drinkType,
-                currentRecord = current.record
+                currentRecord = record
             )
             waterService.updateStreak(updated, current.streak)
             _snackbarMessage.value = "${drinkType.emoji} ${drinkType.displayName} +${amount}ml 기록됐어요"

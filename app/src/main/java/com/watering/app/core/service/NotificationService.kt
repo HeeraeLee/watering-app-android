@@ -9,12 +9,16 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.watering.app.MainActivity
 import com.watering.app.R
 import com.watering.app.core.model.UserSettings
 import dagger.hilt.android.qualifiers.ApplicationContext
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -69,6 +73,22 @@ class NotificationService @Inject constructor(
 
     fun cancelReminders() {
         WorkManager.getInstance(context).cancelUniqueWork(WORK_REMINDER)
+    }
+
+    fun scheduleMidnightReset() {
+        val now = LocalDateTime.now()
+        val midnight = now.toLocalDate().plusDays(1).atStartOfDay()
+        val delaySeconds = ChronoUnit.SECONDS.between(now, midnight)
+
+        val request = OneTimeWorkRequestBuilder<MidnightResetWorker>()
+            .setInitialDelay(delaySeconds, TimeUnit.SECONDS)
+            .build()
+
+        WorkManager.getInstance(context).enqueueUniqueWork(
+            WORK_MIDNIGHT_RESET,
+            ExistingWorkPolicy.REPLACE,
+            request
+        )
     }
 
     fun showAchievementNotification() {

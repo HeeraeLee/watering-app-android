@@ -86,4 +86,8 @@ class WaterDataStore @Inject constructor(
             prefs[Keys.TODAY_RECORD] = json.encodeToString(DayRecord(dateKey = todayKey))
         }
     }
+
+    suspend fun clearAllData() {
+        context.waterDataStore.edit { it.clear() }
+    }
 }

@@ -39,4 +39,9 @@ class WaterService @Inject constructor(
         repository.resetToday()
         widgetUpdater.updateAll()
     }
+
+    suspend fun clearAllData() {
+        repository.clearAllData()
+        widgetUpdater.updateAll()
+    }
 }

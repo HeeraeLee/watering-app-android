@@ -13,8 +13,9 @@ lifecycle = "2.8.7"
 navigation = "2.8.4"
 datastore = "1.1.1"
 workmanager = "2.9.1"
-healthConnect = "1.1.0-rc01"
+healthConnect = "1.0.1"
 billing = "7.1.1"
+material = "1.12.0"
 coroutines = "1.9.0"
 kotlinxSerialization = "1.7.3"
 splashscreen = "1.0.1"
@@ -67,6 +68,9 @@ health-connect = { group = "androidx.health.connect", name = "connect-client", v
 
 # Google Play Billing
 billing-ktx = { group = "com.android.billingclient", name = "billing-ktx", version.ref = "billing" }
+
+# Material Components (XML 테마 Theme.Material3.DayNight.NoActionBar 제공)
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 # Coroutines
 coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }

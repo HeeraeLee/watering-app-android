@@ -3,7 +3,7 @@
     <style name="Theme.Watering" parent="Theme.Material3.DayNight.NoActionBar" />
 
     <style name="Theme.Watering.Splash" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">#007AFF</item>
+        <item name="windowSplashScreenBackground">#00B4D8</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_water_drop</item>
         <item name="postSplashScreenTheme">@style/Theme.Watering</item>
     </style>

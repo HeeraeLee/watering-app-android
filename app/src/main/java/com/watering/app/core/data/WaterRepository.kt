@@ -61,4 +61,5 @@ class WaterRepository @Inject constructor(
     }
 
     suspend fun resetToday() = dataStore.resetTodayRecord()
+    suspend fun clearAllData() = dataStore.clearAllData()
 }

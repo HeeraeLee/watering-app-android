@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- 알림 권한 (Android 13+) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -9,9 +10,9 @@
     <!-- WorkManager용 -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <!-- Health Connect -->
-    <uses-permission android:name="android.permission.health.READ_HYDRATION" />
-    <uses-permission android:name="android.permission.health.WRITE_HYDRATION" />
+    <!-- Health Connect (P3 — v2에서 추가 예정) -->
+    <!-- <uses-permission android:name="android.permission.health.READ_HYDRATION" /> -->
+    <!-- <uses-permission android:name="android.permission.health.WRITE_HYDRATION" /> -->
 
     <application
         android:name=".WateringApp"
@@ -74,19 +75,17 @@
                 android:resource="@xml/narrow_widget_info" />
         </receiver>
 
-        <!-- 자정 초기화 WorkManager -->
-        <receiver
-            android:name="androidx.work.impl.utils.ForceStopRunnable$BroadcastReceiver"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-            </intent-filter>
-        </receiver>
-
-        <!-- Health Connect 호환성 선언 -->
-        <activity
-            android:name="androidx.health.connect.client.PermissionController"
-            android:exported="true" />
+        <!-- HiltWorkerFactory 사용을 위해 WorkManager 기본 자동 초기화 비활성화 -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                android:value="androidx.startup"
+                tools:node="remove" />
+        </provider>
 
     </application>
 
