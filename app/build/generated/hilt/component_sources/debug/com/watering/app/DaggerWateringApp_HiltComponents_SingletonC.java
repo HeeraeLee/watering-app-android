@@ -423,30 +423,30 @@ public final class DaggerWateringApp_HiltComponents_SingletonC {
 
     @IdentifierNameString
     private static final class LazyClassKeyProvider {
-      static String com_watering_app_features_record_RecordViewModel = "com.watering.app.features.record.RecordViewModel";
-
-      static String com_watering_app_features_onboarding_OnboardingViewModel = "com.watering.app.features.onboarding.OnboardingViewModel";
-
       static String com_watering_app_features_stats_StatsViewModel = "com.watering.app.features.stats.StatsViewModel";
-
-      static String com_watering_app_features_settings_SettingsViewModel = "com.watering.app.features.settings.SettingsViewModel";
 
       static String com_watering_app_features_home_HomeViewModel = "com.watering.app.features.home.HomeViewModel";
 
-      @KeepFieldType
-      RecordViewModel com_watering_app_features_record_RecordViewModel2;
+      static String com_watering_app_features_onboarding_OnboardingViewModel = "com.watering.app.features.onboarding.OnboardingViewModel";
 
-      @KeepFieldType
-      OnboardingViewModel com_watering_app_features_onboarding_OnboardingViewModel2;
+      static String com_watering_app_features_record_RecordViewModel = "com.watering.app.features.record.RecordViewModel";
+
+      static String com_watering_app_features_settings_SettingsViewModel = "com.watering.app.features.settings.SettingsViewModel";
 
       @KeepFieldType
       StatsViewModel com_watering_app_features_stats_StatsViewModel2;
 
       @KeepFieldType
-      SettingsViewModel com_watering_app_features_settings_SettingsViewModel2;
+      HomeViewModel com_watering_app_features_home_HomeViewModel2;
 
       @KeepFieldType
-      HomeViewModel com_watering_app_features_home_HomeViewModel2;
+      OnboardingViewModel com_watering_app_features_onboarding_OnboardingViewModel2;
+
+      @KeepFieldType
+      RecordViewModel com_watering_app_features_record_RecordViewModel2;
+
+      @KeepFieldType
+      SettingsViewModel com_watering_app_features_settings_SettingsViewModel2;
     }
   }
 
@@ -499,15 +499,18 @@ public final class DaggerWateringApp_HiltComponents_SingletonC {
 
     @IdentifierNameString
     private static final class LazyClassKeyProvider {
+      static String com_watering_app_features_stats_StatsViewModel = "com.watering.app.features.stats.StatsViewModel";
+
       static String com_watering_app_features_onboarding_OnboardingViewModel = "com.watering.app.features.onboarding.OnboardingViewModel";
 
       static String com_watering_app_features_settings_SettingsViewModel = "com.watering.app.features.settings.SettingsViewModel";
 
-      static String com_watering_app_features_stats_StatsViewModel = "com.watering.app.features.stats.StatsViewModel";
+      static String com_watering_app_features_home_HomeViewModel = "com.watering.app.features.home.HomeViewModel";
 
       static String com_watering_app_features_record_RecordViewModel = "com.watering.app.features.record.RecordViewModel";
 
-      static String com_watering_app_features_home_HomeViewModel = "com.watering.app.features.home.HomeViewModel";
+      @KeepFieldType
+      StatsViewModel com_watering_app_features_stats_StatsViewModel2;
 
       @KeepFieldType
       OnboardingViewModel com_watering_app_features_onboarding_OnboardingViewModel2;
@@ -516,13 +519,10 @@ public final class DaggerWateringApp_HiltComponents_SingletonC {
       SettingsViewModel com_watering_app_features_settings_SettingsViewModel2;
 
       @KeepFieldType
-      StatsViewModel com_watering_app_features_stats_StatsViewModel2;
+      HomeViewModel com_watering_app_features_home_HomeViewModel2;
 
       @KeepFieldType
       RecordViewModel com_watering_app_features_record_RecordViewModel2;
-
-      @KeepFieldType
-      HomeViewModel com_watering_app_features_home_HomeViewModel2;
     }
 
     private static final class SwitchingProvider<T> implements Provider<T> {
@@ -556,7 +556,7 @@ public final class DaggerWateringApp_HiltComponents_SingletonC {
           return (T) new RecordViewModel(singletonCImpl.provideSettingsRepositoryProvider.get());
 
           case 3: // com.watering.app.features.settings.SettingsViewModel 
-          return (T) new SettingsViewModel(singletonCImpl.provideSettingsRepositoryProvider.get(), singletonCImpl.provideNotificationServiceProvider.get(), singletonCImpl.provideWaterServiceProvider.get());
+          return (T) new SettingsViewModel(singletonCImpl.provideSettingsRepositoryProvider.get(), singletonCImpl.provideNotificationServiceProvider.get(), singletonCImpl.provideWaterServiceProvider.get(), singletonCImpl.provideWateringWidgetUpdaterProvider.get());
 
           case 4: // com.watering.app.features.stats.StatsViewModel 
           return (T) new StatsViewModel(singletonCImpl.provideWaterRepositoryProvider.get(), singletonCImpl.provideSettingsRepositoryProvider.get());
@@ -706,6 +706,11 @@ public final class DaggerWateringApp_HiltComponents_SingletonC {
     @Override
     public SettingsRepository settingsRepository() {
       return provideSettingsRepositoryProvider.get();
+    }
+
+    @Override
+    public WaterService waterService() {
+      return provideWaterServiceProvider.get();
     }
 
     @Override

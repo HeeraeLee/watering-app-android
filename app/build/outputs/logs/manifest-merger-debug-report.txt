@@ -239,7 +239,7 @@ ADDED from C:\Users\lhr\watering-app-android\app\src\main\AndroidManifest.xml:26
 	android:exported
 		ADDED from C:\Users\lhr\watering-app-android\app\src\main\AndroidManifest.xml:28:13-36
 	android:theme
-		ADDED from C:\Users\lhr\watering-app-android\app\src\main\AndroidManifest.xml:29:13-57
+		ADDED from C:\Users\lhr\watering-app-android\app\src\main\AndroidManifest.xml:29:13-50
 	android:name
 		ADDED from C:\Users\lhr\watering-app-android\app\src\main\AndroidManifest.xml:27:13-41
 intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER

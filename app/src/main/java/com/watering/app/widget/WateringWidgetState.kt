@@ -22,7 +22,6 @@ interface WidgetEntryPoint {
     fun waterRepository(): WaterRepository
     fun settingsRepository(): SettingsRepository
     fun waterService(): WaterService
-    fun widgetUpdater(): WateringWidgetUpdater
 }
 
 suspend fun loadWidgetState(context: Context): WidgetState {

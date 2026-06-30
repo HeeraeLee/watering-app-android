@@ -52,7 +52,7 @@
         <activity
             android:name="com.watering.app.MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.Watering.Splash" >
+            android:theme="@style/Theme.Watering" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

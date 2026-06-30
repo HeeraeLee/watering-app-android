@@ -2,7 +2,9 @@ R_DEF: Internal format may change without notice
 local
 drawable ic_launcher_background
 drawable ic_launcher_foreground
+drawable ic_launcher_icon
 drawable ic_water_drop
+drawable splash_image
 mipmap ic_launcher
 mipmap ic_launcher_round
 string app_name
@@ -23,7 +25,6 @@ string widget_circular_description
 string widget_narrow_description
 string widget_rectangular_description
 style Theme.Watering
-style Theme.Watering.Splash
 xml circular_widget_info
 xml narrow_widget_info
 xml rectangular_widget_info
