@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!--
+      Realistic water drop: small tip at top, large circular body below.
+      Circle center (12,15) radius 7 → bottom at (12,22). Tip at (12,3).
+      G1 continuity at (5,15) and (19,15): bezier tangent (0,±1) = circle tangent ✓
+    -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M12,3 C7,3 5,8 5,15 A7,7,0,0,1,19,15 C19,8 17,3 12,3Z" />
+</vector>

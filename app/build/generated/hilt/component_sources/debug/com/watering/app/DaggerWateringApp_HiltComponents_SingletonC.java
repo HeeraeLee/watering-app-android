@@ -1,0 +1,795 @@
+package com.watering.app;
+
+import android.app.Activity;
+import android.app.Service;
+import android.content.Context;
+import android.view.View;
+import androidx.fragment.app.Fragment;
+import androidx.hilt.work.HiltWorkerFactory;
+import androidx.hilt.work.WorkerAssistedFactory;
+import androidx.hilt.work.WorkerFactoryModule_ProvideFactoryFactory;
+import androidx.lifecycle.SavedStateHandle;
+import androidx.lifecycle.ViewModel;
+import androidx.work.ListenableWorker;
+import androidx.work.WorkerParameters;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.watering.app.core.data.SettingsRepository;
+import com.watering.app.core.data.WaterRepository;
+import com.watering.app.core.datastore.AchievementDataStore;
+import com.watering.app.core.datastore.SettingsDataStore;
+import com.watering.app.core.datastore.WaterDataStore;
+import com.watering.app.core.service.AchievementChecker;
+import com.watering.app.core.service.MidnightResetWorker;
+import com.watering.app.core.service.MidnightResetWorker_AssistedFactory;
+import com.watering.app.core.service.NotificationService;
+import com.watering.app.core.service.NotificationWorker;
+import com.watering.app.core.service.NotificationWorker_AssistedFactory;
+import com.watering.app.core.service.WaterService;
+import com.watering.app.di.DataModule_ProvideSettingsRepositoryFactory;
+import com.watering.app.di.DataModule_ProvideWaterRepositoryFactory;
+import com.watering.app.di.ServiceModule_ProvideNotificationServiceFactory;
+import com.watering.app.di.ServiceModule_ProvideWaterServiceFactory;
+import com.watering.app.di.ServiceModule_ProvideWateringWidgetUpdaterFactory;
+import com.watering.app.features.home.HomeViewModel;
+import com.watering.app.features.home.HomeViewModel_HiltModules;
+import com.watering.app.features.onboarding.OnboardingViewModel;
+import com.watering.app.features.onboarding.OnboardingViewModel_HiltModules;
+import com.watering.app.features.record.RecordViewModel;
+import com.watering.app.features.record.RecordViewModel_HiltModules;
+import com.watering.app.features.settings.SettingsViewModel;
+import com.watering.app.features.settings.SettingsViewModel_HiltModules;
+import com.watering.app.features.stats.StatsViewModel;
+import com.watering.app.features.stats.StatsViewModel_HiltModules;
+import com.watering.app.widget.WateringWidgetUpdater;
+import dagger.hilt.android.ActivityRetainedLifecycle;
+import dagger.hilt.android.ViewModelLifecycle;
+import dagger.hilt.android.internal.builders.ActivityComponentBuilder;
+import dagger.hilt.android.internal.builders.ActivityRetainedComponentBuilder;
+import dagger.hilt.android.internal.builders.FragmentComponentBuilder;
+import dagger.hilt.android.internal.builders.ServiceComponentBuilder;
+import dagger.hilt.android.internal.builders.ViewComponentBuilder;
+import dagger.hilt.android.internal.builders.ViewModelComponentBuilder;
+import dagger.hilt.android.internal.builders.ViewWithFragmentComponentBuilder;
+import dagger.hilt.android.internal.lifecycle.DefaultViewModelFactories;
+import dagger.hilt.android.internal.lifecycle.DefaultViewModelFactories_InternalFactoryFactory_Factory;
+import dagger.hilt.android.internal.managers.ActivityRetainedComponentManager_LifecycleModule_ProvideActivityRetainedLifecycleFactory;
+import dagger.hilt.android.internal.managers.SavedStateHandleHolder;
+import dagger.hilt.android.internal.modules.ApplicationContextModule;
+import dagger.hilt.android.internal.modules.ApplicationContextModule_ProvideContextFactory;
+import dagger.internal.DaggerGenerated;
+import dagger.internal.DoubleCheck;
+import dagger.internal.IdentifierNameString;
+import dagger.internal.KeepFieldType;
+import dagger.internal.LazyClassKeyMap;
+import dagger.internal.MapBuilder;
+import dagger.internal.Preconditions;
+import dagger.internal.Provider;
+import dagger.internal.SingleCheck;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
+import javax.annotation.processing.Generated;
+
+@DaggerGenerated
+@Generated(
+    value = "dagger.internal.codegen.ComponentProcessor",
+    comments = "https://dagger.dev"
+)
+@SuppressWarnings({
+    "unchecked",
+    "rawtypes",
+    "KotlinInternal",
+    "KotlinInternalInJava",
+    "cast",
+    "deprecation"
+})
+public final class DaggerWateringApp_HiltComponents_SingletonC {
+  private DaggerWateringApp_HiltComponents_SingletonC() {
+  }
+
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  public static final class Builder {
+    private ApplicationContextModule applicationContextModule;
+
+    private Builder() {
+    }
+
+    public Builder applicationContextModule(ApplicationContextModule applicationContextModule) {
+      this.applicationContextModule = Preconditions.checkNotNull(applicationContextModule);
+      return this;
+    }
+
+    public WateringApp_HiltComponents.SingletonC build() {
+      Preconditions.checkBuilderRequirement(applicationContextModule, ApplicationContextModule.class);
+      return new SingletonCImpl(applicationContextModule);
+    }
+  }
+
+  private static final class ActivityRetainedCBuilder implements WateringApp_HiltComponents.ActivityRetainedC.Builder {
+    private final SingletonCImpl singletonCImpl;
+
+    private SavedStateHandleHolder savedStateHandleHolder;
+
+    private ActivityRetainedCBuilder(SingletonCImpl singletonCImpl) {
+      this.singletonCImpl = singletonCImpl;
+    }
+
+    @Override
+    public ActivityRetainedCBuilder savedStateHandleHolder(
+        SavedStateHandleHolder savedStateHandleHolder) {
+      this.savedStateHandleHolder = Preconditions.checkNotNull(savedStateHandleHolder);
+      return this;
+    }
+
+    @Override
+    public WateringApp_HiltComponents.ActivityRetainedC build() {
+      Preconditions.checkBuilderRequirement(savedStateHandleHolder, SavedStateHandleHolder.class);
+      return new ActivityRetainedCImpl(singletonCImpl, savedStateHandleHolder);
+    }
+  }
+
+  private static final class ActivityCBuilder implements WateringApp_HiltComponents.ActivityC.Builder {
+    private final SingletonCImpl singletonCImpl;
+
+    private final ActivityRetainedCImpl activityRetainedCImpl;
+
+    private Activity activity;
+
+    private ActivityCBuilder(SingletonCImpl singletonCImpl,
+        ActivityRetainedCImpl activityRetainedCImpl) {
+      this.singletonCImpl = singletonCImpl;
+      this.activityRetainedCImpl = activityRetainedCImpl;
+    }
+
+    @Override
+    public ActivityCBuilder activity(Activity activity) {
+      this.activity = Preconditions.checkNotNull(activity);
+      return this;
+    }
+
+    @Override
+    public WateringApp_HiltComponents.ActivityC build() {
+      Preconditions.checkBuilderRequirement(activity, Activity.class);
+      return new ActivityCImpl(singletonCImpl, activityRetainedCImpl, activity);
+    }
+  }
+
+  private static final class FragmentCBuilder implements WateringApp_HiltComponents.FragmentC.Builder {
+    private final SingletonCImpl singletonCImpl;
+
+    private final ActivityRetainedCImpl activityRetainedCImpl;
+
+    private final ActivityCImpl activityCImpl;
+
+    private Fragment fragment;
+
+    private FragmentCBuilder(SingletonCImpl singletonCImpl,
+        ActivityRetainedCImpl activityRetainedCImpl, ActivityCImpl activityCImpl) {
+      this.singletonCImpl = singletonCImpl;
+      this.activityRetainedCImpl = activityRetainedCImpl;
+      this.activityCImpl = activityCImpl;
+    }
+
+    @Override
+    public FragmentCBuilder fragment(Fragment fragment) {
+      this.fragment = Preconditions.checkNotNull(fragment);
+      return this;
+    }
+
+    @Override
+    public WateringApp_HiltComponents.FragmentC build() {
+      Preconditions.checkBuilderRequirement(fragment, Fragment.class);
+      return new FragmentCImpl(singletonCImpl, activityRetainedCImpl, activityCImpl, fragment);
+    }
+  }
+
+  private static final class ViewWithFragmentCBuilder implements WateringApp_HiltComponents.ViewWithFragmentC.Builder {
+    private final SingletonCImpl singletonCImpl;
+
+    private final ActivityRetainedCImpl activityRetainedCImpl;
+
+    private final ActivityCImpl activityCImpl;
+
+    private final FragmentCImpl fragmentCImpl;
+
+    private View view;
+
+    private ViewWithFragmentCBuilder(SingletonCImpl singletonCImpl,
+        ActivityRetainedCImpl activityRetainedCImpl, ActivityCImpl activityCImpl,
+        FragmentCImpl fragmentCImpl) {
+      this.singletonCImpl = singletonCImpl;
+      this.activityRetainedCImpl = activityRetainedCImpl;
+      this.activityCImpl = activityCImpl;
+      this.fragmentCImpl = fragmentCImpl;
+    }
+
+    @Override
+    public ViewWithFragmentCBuilder view(View view) {
+      this.view = Preconditions.checkNotNull(view);
+      return this;
+    }
+
+    @Override
+    public WateringApp_HiltComponents.ViewWithFragmentC build() {
+      Preconditions.checkBuilderRequirement(view, View.class);
+      return new ViewWithFragmentCImpl(singletonCImpl, activityRetainedCImpl, activityCImpl, fragmentCImpl, view);
+    }
+  }
+
+  private static final class ViewCBuilder implements WateringApp_HiltComponents.ViewC.Builder {
+    private final SingletonCImpl singletonCImpl;
+
+    private final ActivityRetainedCImpl activityRetainedCImpl;
+
+    private final ActivityCImpl activityCImpl;
+
+    private View view;
+
+    private ViewCBuilder(SingletonCImpl singletonCImpl, ActivityRetainedCImpl activityRetainedCImpl,
+        ActivityCImpl activityCImpl) {
+      this.singletonCImpl = singletonCImpl;
+      this.activityRetainedCImpl = activityRetainedCImpl;
+      this.activityCImpl = activityCImpl;
+    }
+
+    @Override
+    public ViewCBuilder view(View view) {
+      this.view = Preconditions.checkNotNull(view);
+      return this;
+    }
+
+    @Override
+    public WateringApp_HiltComponents.ViewC build() {
+      Preconditions.checkBuilderRequirement(view, View.class);
+      return new ViewCImpl(singletonCImpl, activityRetainedCImpl, activityCImpl, view);
+    }
+  }
+
+  private static final class ViewModelCBuilder implements WateringApp_HiltComponents.ViewModelC.Builder {
+    private final SingletonCImpl singletonCImpl;
+
+    private final ActivityRetainedCImpl activityRetainedCImpl;
+
+    private SavedStateHandle savedStateHandle;
+
+    private ViewModelLifecycle viewModelLifecycle;
+
+    private ViewModelCBuilder(SingletonCImpl singletonCImpl,
+        ActivityRetainedCImpl activityRetainedCImpl) {
+      this.singletonCImpl = singletonCImpl;
+      this.activityRetainedCImpl = activityRetainedCImpl;
+    }
+
+    @Override
+    public ViewModelCBuilder savedStateHandle(SavedStateHandle handle) {
+      this.savedStateHandle = Preconditions.checkNotNull(handle);
+      return this;
+    }
+
+    @Override
+    public ViewModelCBuilder viewModelLifecycle(ViewModelLifecycle viewModelLifecycle) {
+      this.viewModelLifecycle = Preconditions.checkNotNull(viewModelLifecycle);
+      return this;
+    }
+
+    @Override
+    public WateringApp_HiltComponents.ViewModelC build() {
+      Preconditions.checkBuilderRequirement(savedStateHandle, SavedStateHandle.class);
+      Preconditions.checkBuilderRequirement(viewModelLifecycle, ViewModelLifecycle.class);
+      return new ViewModelCImpl(singletonCImpl, activityRetainedCImpl, savedStateHandle, viewModelLifecycle);
+    }
+  }
+
+  private static final class ServiceCBuilder implements WateringApp_HiltComponents.ServiceC.Builder {
+    private final SingletonCImpl singletonCImpl;
+
+    private Service service;
+
+    private ServiceCBuilder(SingletonCImpl singletonCImpl) {
+      this.singletonCImpl = singletonCImpl;
+    }
+
+    @Override
+    public ServiceCBuilder service(Service service) {
+      this.service = Preconditions.checkNotNull(service);
+      return this;
+    }
+
+    @Override
+    public WateringApp_HiltComponents.ServiceC build() {
+      Preconditions.checkBuilderRequirement(service, Service.class);
+      return new ServiceCImpl(singletonCImpl, service);
+    }
+  }
+
+  private static final class ViewWithFragmentCImpl extends WateringApp_HiltComponents.ViewWithFragmentC {
+    private final SingletonCImpl singletonCImpl;
+
+    private final ActivityRetainedCImpl activityRetainedCImpl;
+
+    private final ActivityCImpl activityCImpl;
+
+    private final FragmentCImpl fragmentCImpl;
+
+    private final ViewWithFragmentCImpl viewWithFragmentCImpl = this;
+
+    private ViewWithFragmentCImpl(SingletonCImpl singletonCImpl,
+        ActivityRetainedCImpl activityRetainedCImpl, ActivityCImpl activityCImpl,
+        FragmentCImpl fragmentCImpl, View viewParam) {
+      this.singletonCImpl = singletonCImpl;
+      this.activityRetainedCImpl = activityRetainedCImpl;
+      this.activityCImpl = activityCImpl;
+      this.fragmentCImpl = fragmentCImpl;
+
+
+    }
+  }
+
+  private static final class FragmentCImpl extends WateringApp_HiltComponents.FragmentC {
+    private final SingletonCImpl singletonCImpl;
+
+    private final ActivityRetainedCImpl activityRetainedCImpl;
+
+    private final ActivityCImpl activityCImpl;
+
+    private final FragmentCImpl fragmentCImpl = this;
+
+    private FragmentCImpl(SingletonCImpl singletonCImpl,
+        ActivityRetainedCImpl activityRetainedCImpl, ActivityCImpl activityCImpl,
+        Fragment fragmentParam) {
+      this.singletonCImpl = singletonCImpl;
+      this.activityRetainedCImpl = activityRetainedCImpl;
+      this.activityCImpl = activityCImpl;
+
+
+    }
+
+    @Override
+    public DefaultViewModelFactories.InternalFactoryFactory getHiltInternalFactoryFactory() {
+      return activityCImpl.getHiltInternalFactoryFactory();
+    }
+
+    @Override
+    public ViewWithFragmentComponentBuilder viewWithFragmentComponentBuilder() {
+      return new ViewWithFragmentCBuilder(singletonCImpl, activityRetainedCImpl, activityCImpl, fragmentCImpl);
+    }
+  }
+
+  private static final class ViewCImpl extends WateringApp_HiltComponents.ViewC {
+    private final SingletonCImpl singletonCImpl;
+
+    private final ActivityRetainedCImpl activityRetainedCImpl;
+
+    private final ActivityCImpl activityCImpl;
+
+    private final ViewCImpl viewCImpl = this;
+
+    private ViewCImpl(SingletonCImpl singletonCImpl, ActivityRetainedCImpl activityRetainedCImpl,
+        ActivityCImpl activityCImpl, View viewParam) {
+      this.singletonCImpl = singletonCImpl;
+      this.activityRetainedCImpl = activityRetainedCImpl;
+      this.activityCImpl = activityCImpl;
+
+
+    }
+  }
+
+  private static final class ActivityCImpl extends WateringApp_HiltComponents.ActivityC {
+    private final SingletonCImpl singletonCImpl;
+
+    private final ActivityRetainedCImpl activityRetainedCImpl;
+
+    private final ActivityCImpl activityCImpl = this;
+
+    private ActivityCImpl(SingletonCImpl singletonCImpl,
+        ActivityRetainedCImpl activityRetainedCImpl, Activity activityParam) {
+      this.singletonCImpl = singletonCImpl;
+      this.activityRetainedCImpl = activityRetainedCImpl;
+
+
+    }
+
+    @Override
+    public void injectMainActivity(MainActivity arg0) {
+    }
+
+    @Override
+    public DefaultViewModelFactories.InternalFactoryFactory getHiltInternalFactoryFactory() {
+      return DefaultViewModelFactories_InternalFactoryFactory_Factory.newInstance(getViewModelKeys(), new ViewModelCBuilder(singletonCImpl, activityRetainedCImpl));
+    }
+
+    @Override
+    public Map<Class<?>, Boolean> getViewModelKeys() {
+      return LazyClassKeyMap.<Boolean>of(MapBuilder.<String, Boolean>newMapBuilder(5).put(LazyClassKeyProvider.com_watering_app_features_home_HomeViewModel, HomeViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_watering_app_features_onboarding_OnboardingViewModel, OnboardingViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_watering_app_features_record_RecordViewModel, RecordViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_watering_app_features_settings_SettingsViewModel, SettingsViewModel_HiltModules.KeyModule.provide()).put(LazyClassKeyProvider.com_watering_app_features_stats_StatsViewModel, StatsViewModel_HiltModules.KeyModule.provide()).build());
+    }
+
+    @Override
+    public ViewModelComponentBuilder getViewModelComponentBuilder() {
+      return new ViewModelCBuilder(singletonCImpl, activityRetainedCImpl);
+    }
+
+    @Override
+    public FragmentComponentBuilder fragmentComponentBuilder() {
+      return new FragmentCBuilder(singletonCImpl, activityRetainedCImpl, activityCImpl);
+    }
+
+    @Override
+    public ViewComponentBuilder viewComponentBuilder() {
+      return new ViewCBuilder(singletonCImpl, activityRetainedCImpl, activityCImpl);
+    }
+
+    @IdentifierNameString
+    private static final class LazyClassKeyProvider {
+      static String com_watering_app_features_record_RecordViewModel = "com.watering.app.features.record.RecordViewModel";
+
+      static String com_watering_app_features_onboarding_OnboardingViewModel = "com.watering.app.features.onboarding.OnboardingViewModel";
+
+      static String com_watering_app_features_stats_StatsViewModel = "com.watering.app.features.stats.StatsViewModel";
+
+      static String com_watering_app_features_settings_SettingsViewModel = "com.watering.app.features.settings.SettingsViewModel";
+
+      static String com_watering_app_features_home_HomeViewModel = "com.watering.app.features.home.HomeViewModel";
+
+      @KeepFieldType
+      RecordViewModel com_watering_app_features_record_RecordViewModel2;
+
+      @KeepFieldType
+      OnboardingViewModel com_watering_app_features_onboarding_OnboardingViewModel2;
+
+      @KeepFieldType
+      StatsViewModel com_watering_app_features_stats_StatsViewModel2;
+
+      @KeepFieldType
+      SettingsViewModel com_watering_app_features_settings_SettingsViewModel2;
+
+      @KeepFieldType
+      HomeViewModel com_watering_app_features_home_HomeViewModel2;
+    }
+  }
+
+  private static final class ViewModelCImpl extends WateringApp_HiltComponents.ViewModelC {
+    private final SingletonCImpl singletonCImpl;
+
+    private final ActivityRetainedCImpl activityRetainedCImpl;
+
+    private final ViewModelCImpl viewModelCImpl = this;
+
+    private Provider<HomeViewModel> homeViewModelProvider;
+
+    private Provider<OnboardingViewModel> onboardingViewModelProvider;
+
+    private Provider<RecordViewModel> recordViewModelProvider;
+
+    private Provider<SettingsViewModel> settingsViewModelProvider;
+
+    private Provider<StatsViewModel> statsViewModelProvider;
+
+    private ViewModelCImpl(SingletonCImpl singletonCImpl,
+        ActivityRetainedCImpl activityRetainedCImpl, SavedStateHandle savedStateHandleParam,
+        ViewModelLifecycle viewModelLifecycleParam) {
+      this.singletonCImpl = singletonCImpl;
+      this.activityRetainedCImpl = activityRetainedCImpl;
+
+      initialize(savedStateHandleParam, viewModelLifecycleParam);
+
+    }
+
+    @SuppressWarnings("unchecked")
+    private void initialize(final SavedStateHandle savedStateHandleParam,
+        final ViewModelLifecycle viewModelLifecycleParam) {
+      this.homeViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 0);
+      this.onboardingViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 1);
+      this.recordViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 2);
+      this.settingsViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 3);
+      this.statsViewModelProvider = new SwitchingProvider<>(singletonCImpl, activityRetainedCImpl, viewModelCImpl, 4);
+    }
+
+    @Override
+    public Map<Class<?>, javax.inject.Provider<ViewModel>> getHiltViewModelMap() {
+      return LazyClassKeyMap.<javax.inject.Provider<ViewModel>>of(MapBuilder.<String, javax.inject.Provider<ViewModel>>newMapBuilder(5).put(LazyClassKeyProvider.com_watering_app_features_home_HomeViewModel, ((Provider) homeViewModelProvider)).put(LazyClassKeyProvider.com_watering_app_features_onboarding_OnboardingViewModel, ((Provider) onboardingViewModelProvider)).put(LazyClassKeyProvider.com_watering_app_features_record_RecordViewModel, ((Provider) recordViewModelProvider)).put(LazyClassKeyProvider.com_watering_app_features_settings_SettingsViewModel, ((Provider) settingsViewModelProvider)).put(LazyClassKeyProvider.com_watering_app_features_stats_StatsViewModel, ((Provider) statsViewModelProvider)).build());
+    }
+
+    @Override
+    public Map<Class<?>, Object> getHiltViewModelAssistedMap() {
+      return Collections.<Class<?>, Object>emptyMap();
+    }
+
+    @IdentifierNameString
+    private static final class LazyClassKeyProvider {
+      static String com_watering_app_features_onboarding_OnboardingViewModel = "com.watering.app.features.onboarding.OnboardingViewModel";
+
+      static String com_watering_app_features_settings_SettingsViewModel = "com.watering.app.features.settings.SettingsViewModel";
+
+      static String com_watering_app_features_stats_StatsViewModel = "com.watering.app.features.stats.StatsViewModel";
+
+      static String com_watering_app_features_record_RecordViewModel = "com.watering.app.features.record.RecordViewModel";
+
+      static String com_watering_app_features_home_HomeViewModel = "com.watering.app.features.home.HomeViewModel";
+
+      @KeepFieldType
+      OnboardingViewModel com_watering_app_features_onboarding_OnboardingViewModel2;
+
+      @KeepFieldType
+      SettingsViewModel com_watering_app_features_settings_SettingsViewModel2;
+
+      @KeepFieldType
+      StatsViewModel com_watering_app_features_stats_StatsViewModel2;
+
+      @KeepFieldType
+      RecordViewModel com_watering_app_features_record_RecordViewModel2;
+
+      @KeepFieldType
+      HomeViewModel com_watering_app_features_home_HomeViewModel2;
+    }
+
+    private static final class SwitchingProvider<T> implements Provider<T> {
+      private final SingletonCImpl singletonCImpl;
+
+      private final ActivityRetainedCImpl activityRetainedCImpl;
+
+      private final ViewModelCImpl viewModelCImpl;
+
+      private final int id;
+
+      SwitchingProvider(SingletonCImpl singletonCImpl, ActivityRetainedCImpl activityRetainedCImpl,
+          ViewModelCImpl viewModelCImpl, int id) {
+        this.singletonCImpl = singletonCImpl;
+        this.activityRetainedCImpl = activityRetainedCImpl;
+        this.viewModelCImpl = viewModelCImpl;
+        this.id = id;
+      }
+
+      @SuppressWarnings("unchecked")
+      @Override
+      public T get() {
+        switch (id) {
+          case 0: // com.watering.app.features.home.HomeViewModel 
+          return (T) new HomeViewModel(singletonCImpl.provideWaterServiceProvider.get(), singletonCImpl.provideWaterRepositoryProvider.get(), singletonCImpl.provideSettingsRepositoryProvider.get(), singletonCImpl.achievementCheckerProvider.get());
+
+          case 1: // com.watering.app.features.onboarding.OnboardingViewModel 
+          return (T) new OnboardingViewModel(singletonCImpl.provideSettingsRepositoryProvider.get(), singletonCImpl.provideNotificationServiceProvider.get());
+
+          case 2: // com.watering.app.features.record.RecordViewModel 
+          return (T) new RecordViewModel(singletonCImpl.provideSettingsRepositoryProvider.get());
+
+          case 3: // com.watering.app.features.settings.SettingsViewModel 
+          return (T) new SettingsViewModel(singletonCImpl.provideSettingsRepositoryProvider.get(), singletonCImpl.provideNotificationServiceProvider.get(), singletonCImpl.provideWaterServiceProvider.get());
+
+          case 4: // com.watering.app.features.stats.StatsViewModel 
+          return (T) new StatsViewModel(singletonCImpl.provideWaterRepositoryProvider.get(), singletonCImpl.provideSettingsRepositoryProvider.get());
+
+          default: throw new AssertionError(id);
+        }
+      }
+    }
+  }
+
+  private static final class ActivityRetainedCImpl extends WateringApp_HiltComponents.ActivityRetainedC {
+    private final SingletonCImpl singletonCImpl;
+
+    private final ActivityRetainedCImpl activityRetainedCImpl = this;
+
+    private Provider<ActivityRetainedLifecycle> provideActivityRetainedLifecycleProvider;
+
+    private ActivityRetainedCImpl(SingletonCImpl singletonCImpl,
+        SavedStateHandleHolder savedStateHandleHolderParam) {
+      this.singletonCImpl = singletonCImpl;
+
+      initialize(savedStateHandleHolderParam);
+
+    }
+
+    @SuppressWarnings("unchecked")
+    private void initialize(final SavedStateHandleHolder savedStateHandleHolderParam) {
+      this.provideActivityRetainedLifecycleProvider = DoubleCheck.provider(new SwitchingProvider<ActivityRetainedLifecycle>(singletonCImpl, activityRetainedCImpl, 0));
+    }
+
+    @Override
+    public ActivityComponentBuilder activityComponentBuilder() {
+      return new ActivityCBuilder(singletonCImpl, activityRetainedCImpl);
+    }
+
+    @Override
+    public ActivityRetainedLifecycle getActivityRetainedLifecycle() {
+      return provideActivityRetainedLifecycleProvider.get();
+    }
+
+    private static final class SwitchingProvider<T> implements Provider<T> {
+      private final SingletonCImpl singletonCImpl;
+
+      private final ActivityRetainedCImpl activityRetainedCImpl;
+
+      private final int id;
+
+      SwitchingProvider(SingletonCImpl singletonCImpl, ActivityRetainedCImpl activityRetainedCImpl,
+          int id) {
+        this.singletonCImpl = singletonCImpl;
+        this.activityRetainedCImpl = activityRetainedCImpl;
+        this.id = id;
+      }
+
+      @SuppressWarnings("unchecked")
+      @Override
+      public T get() {
+        switch (id) {
+          case 0: // dagger.hilt.android.ActivityRetainedLifecycle 
+          return (T) ActivityRetainedComponentManager_LifecycleModule_ProvideActivityRetainedLifecycleFactory.provideActivityRetainedLifecycle();
+
+          default: throw new AssertionError(id);
+        }
+      }
+    }
+  }
+
+  private static final class ServiceCImpl extends WateringApp_HiltComponents.ServiceC {
+    private final SingletonCImpl singletonCImpl;
+
+    private final ServiceCImpl serviceCImpl = this;
+
+    private ServiceCImpl(SingletonCImpl singletonCImpl, Service serviceParam) {
+      this.singletonCImpl = singletonCImpl;
+
+
+    }
+  }
+
+  private static final class SingletonCImpl extends WateringApp_HiltComponents.SingletonC {
+    private final ApplicationContextModule applicationContextModule;
+
+    private final SingletonCImpl singletonCImpl = this;
+
+    private Provider<NotificationService> provideNotificationServiceProvider;
+
+    private Provider<WaterDataStore> waterDataStoreProvider;
+
+    private Provider<WaterRepository> provideWaterRepositoryProvider;
+
+    private Provider<WateringWidgetUpdater> provideWateringWidgetUpdaterProvider;
+
+    private Provider<WaterService> provideWaterServiceProvider;
+
+    private Provider<MidnightResetWorker_AssistedFactory> midnightResetWorker_AssistedFactoryProvider;
+
+    private Provider<SettingsDataStore> settingsDataStoreProvider;
+
+    private Provider<SettingsRepository> provideSettingsRepositoryProvider;
+
+    private Provider<NotificationWorker_AssistedFactory> notificationWorker_AssistedFactoryProvider;
+
+    private Provider<AchievementDataStore> achievementDataStoreProvider;
+
+    private Provider<AchievementChecker> achievementCheckerProvider;
+
+    private SingletonCImpl(ApplicationContextModule applicationContextModuleParam) {
+      this.applicationContextModule = applicationContextModuleParam;
+      initialize(applicationContextModuleParam);
+
+    }
+
+    private Map<String, javax.inject.Provider<WorkerAssistedFactory<? extends ListenableWorker>>> mapOfStringAndProviderOfWorkerAssistedFactoryOf(
+        ) {
+      return MapBuilder.<String, javax.inject.Provider<WorkerAssistedFactory<? extends ListenableWorker>>>newMapBuilder(2).put("com.watering.app.core.service.MidnightResetWorker", ((Provider) midnightResetWorker_AssistedFactoryProvider)).put("com.watering.app.core.service.NotificationWorker", ((Provider) notificationWorker_AssistedFactoryProvider)).build();
+    }
+
+    private HiltWorkerFactory hiltWorkerFactory() {
+      return WorkerFactoryModule_ProvideFactoryFactory.provideFactory(mapOfStringAndProviderOfWorkerAssistedFactoryOf());
+    }
+
+    @SuppressWarnings("unchecked")
+    private void initialize(final ApplicationContextModule applicationContextModuleParam) {
+      this.provideNotificationServiceProvider = DoubleCheck.provider(new SwitchingProvider<NotificationService>(singletonCImpl, 0));
+      this.waterDataStoreProvider = DoubleCheck.provider(new SwitchingProvider<WaterDataStore>(singletonCImpl, 4));
+      this.provideWaterRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<WaterRepository>(singletonCImpl, 3));
+      this.provideWateringWidgetUpdaterProvider = DoubleCheck.provider(new SwitchingProvider<WateringWidgetUpdater>(singletonCImpl, 5));
+      this.provideWaterServiceProvider = DoubleCheck.provider(new SwitchingProvider<WaterService>(singletonCImpl, 2));
+      this.midnightResetWorker_AssistedFactoryProvider = SingleCheck.provider(new SwitchingProvider<MidnightResetWorker_AssistedFactory>(singletonCImpl, 1));
+      this.settingsDataStoreProvider = DoubleCheck.provider(new SwitchingProvider<SettingsDataStore>(singletonCImpl, 8));
+      this.provideSettingsRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<SettingsRepository>(singletonCImpl, 7));
+      this.notificationWorker_AssistedFactoryProvider = SingleCheck.provider(new SwitchingProvider<NotificationWorker_AssistedFactory>(singletonCImpl, 6));
+      this.achievementDataStoreProvider = DoubleCheck.provider(new SwitchingProvider<AchievementDataStore>(singletonCImpl, 10));
+      this.achievementCheckerProvider = DoubleCheck.provider(new SwitchingProvider<AchievementChecker>(singletonCImpl, 9));
+    }
+
+    @Override
+    public void injectWateringApp(WateringApp wateringApp) {
+      injectWateringApp2(wateringApp);
+    }
+
+    @Override
+    public WaterRepository waterRepository() {
+      return provideWaterRepositoryProvider.get();
+    }
+
+    @Override
+    public SettingsRepository settingsRepository() {
+      return provideSettingsRepositoryProvider.get();
+    }
+
+    @Override
+    public Set<Boolean> getDisableFragmentGetContextFix() {
+      return Collections.<Boolean>emptySet();
+    }
+
+    @Override
+    public ActivityRetainedComponentBuilder retainedComponentBuilder() {
+      return new ActivityRetainedCBuilder(singletonCImpl);
+    }
+
+    @Override
+    public ServiceComponentBuilder serviceComponentBuilder() {
+      return new ServiceCBuilder(singletonCImpl);
+    }
+
+    @CanIgnoreReturnValue
+    private WateringApp injectWateringApp2(WateringApp instance) {
+      WateringApp_MembersInjector.injectNotificationService(instance, provideNotificationServiceProvider.get());
+      WateringApp_MembersInjector.injectWorkerFactory(instance, hiltWorkerFactory());
+      return instance;
+    }
+
+    private static final class SwitchingProvider<T> implements Provider<T> {
+      private final SingletonCImpl singletonCImpl;
+
+      private final int id;
+
+      SwitchingProvider(SingletonCImpl singletonCImpl, int id) {
+        this.singletonCImpl = singletonCImpl;
+        this.id = id;
+      }
+
+      @SuppressWarnings("unchecked")
+      @Override
+      public T get() {
+        switch (id) {
+          case 0: // com.watering.app.core.service.NotificationService 
+          return (T) ServiceModule_ProvideNotificationServiceFactory.provideNotificationService(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
+
+          case 1: // com.watering.app.core.service.MidnightResetWorker_AssistedFactory 
+          return (T) new MidnightResetWorker_AssistedFactory() {
+            @Override
+            public MidnightResetWorker create(Context context, WorkerParameters params) {
+              return new MidnightResetWorker(context, params, singletonCImpl.provideWaterServiceProvider.get(), singletonCImpl.provideNotificationServiceProvider.get());
+            }
+          };
+
+          case 2: // com.watering.app.core.service.WaterService 
+          return (T) ServiceModule_ProvideWaterServiceFactory.provideWaterService(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule), singletonCImpl.provideWaterRepositoryProvider.get(), singletonCImpl.provideWateringWidgetUpdaterProvider.get());
+
+          case 3: // com.watering.app.core.data.WaterRepository 
+          return (T) DataModule_ProvideWaterRepositoryFactory.provideWaterRepository(singletonCImpl.waterDataStoreProvider.get());
+
+          case 4: // com.watering.app.core.datastore.WaterDataStore 
+          return (T) new WaterDataStore(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
+
+          case 5: // com.watering.app.widget.WateringWidgetUpdater 
+          return (T) ServiceModule_ProvideWateringWidgetUpdaterFactory.provideWateringWidgetUpdater(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
+
+          case 6: // com.watering.app.core.service.NotificationWorker_AssistedFactory 
+          return (T) new NotificationWorker_AssistedFactory() {
+            @Override
+            public NotificationWorker create(Context context2, WorkerParameters params2) {
+              return new NotificationWorker(context2, params2, singletonCImpl.provideWaterRepositoryProvider.get(), singletonCImpl.provideSettingsRepositoryProvider.get());
+            }
+          };
+
+          case 7: // com.watering.app.core.data.SettingsRepository 
+          return (T) DataModule_ProvideSettingsRepositoryFactory.provideSettingsRepository(singletonCImpl.settingsDataStoreProvider.get());
+
+          case 8: // com.watering.app.core.datastore.SettingsDataStore 
+          return (T) new SettingsDataStore(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
+
+          case 9: // com.watering.app.core.service.AchievementChecker 
+          return (T) new AchievementChecker(singletonCImpl.achievementDataStoreProvider.get());
+
+          case 10: // com.watering.app.core.datastore.AchievementDataStore 
+          return (T) new AchievementDataStore(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
+
+          default: throw new AssertionError(id);
+        }
+      }
+    }
+  }
+}

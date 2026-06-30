@@ -4,10 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.watering.app.core.data.SettingsRepository
 import com.watering.app.core.data.WaterRepository
+import com.watering.app.core.model.Achievement
 import com.watering.app.core.model.DayRecord
 import com.watering.app.core.model.DrinkType
 import com.watering.app.core.model.StreakInfo
 import com.watering.app.core.model.UserSettings
+import com.watering.app.core.service.AchievementChecker
 import com.watering.app.core.service.WaterService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,7 +31,8 @@ data class HomeUiState(
 class HomeViewModel @Inject constructor(
     private val waterService: WaterService,
     private val waterRepository: WaterRepository,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    private val achievementChecker: AchievementChecker
 ) : ViewModel() {
 
     val uiState: StateFlow<HomeUiState> = combine(
@@ -47,32 +50,41 @@ class HomeViewModel @Inject constructor(
     private val _snackbarMessage = MutableStateFlow<String?>(null)
     val snackbarMessage: StateFlow<String?> = _snackbarMessage
 
+    private val _pendingAchievement = MutableStateFlow<Achievement?>(null)
+    val pendingAchievement: StateFlow<Achievement?> = _pendingAchievement
+
     fun addWater(drinkType: DrinkType = DrinkType.WATER) {
         viewModelScope.launch {
             val current = uiState.value
-            val record = current.record.copy(goal = current.settings.dailyGoal)
+            val prev = current.record.copy(goal = current.settings.dailyGoal)
             val updated = waterService.addWater(
                 amount = current.settings.cupSize,
                 drinkType = drinkType,
-                currentRecord = record
+                currentRecord = prev
             )
-            waterService.updateStreak(updated, current.streak)
+            val streak = waterService.updateStreak(updated, current.streak)
             _snackbarMessage.value = "💧 +${current.settings.cupSize}ml 기록됐어요"
+            achievementChecker.check(prev, updated, streak)?.let { _pendingAchievement.value = it }
         }
     }
 
     fun addWaterCustom(amount: Int, drinkType: DrinkType) {
         viewModelScope.launch {
             val current = uiState.value
-            val record = current.record.copy(goal = current.settings.dailyGoal)
+            val prev = current.record.copy(goal = current.settings.dailyGoal)
             val updated = waterService.addWater(
                 amount = amount,
                 drinkType = drinkType,
-                currentRecord = record
+                currentRecord = prev
             )
-            waterService.updateStreak(updated, current.streak)
+            val streak = waterService.updateStreak(updated, current.streak)
             _snackbarMessage.value = "${drinkType.emoji} ${drinkType.displayName} +${amount}ml 기록됐어요"
+            achievementChecker.check(prev, updated, streak)?.let { _pendingAchievement.value = it }
         }
+    }
+
+    fun dismissAchievement() {
+        _pendingAchievement.value = null
     }
 
     fun undoLastEntry() {

@@ -68,6 +68,7 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarMessage by viewModel.snackbarMessage.collectAsStateWithLifecycle()
+    val pendingAchievement by viewModel.pendingAchievement.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     var showRecordSheet by remember { mutableStateOf(false) }
 
@@ -214,6 +215,13 @@ fun HomeScreen(
             RecordSheet(
                 onDismiss = { showRecordSheet = false },
                 onRecord = { amount, drinkType -> viewModel.addWaterCustom(amount, drinkType) }
+            )
+        }
+
+        pendingAchievement?.let { achievement ->
+            AchievementDialog(
+                achievement = achievement,
+                onDismiss = { viewModel.dismissAchievement() }
             )
         }
     }
