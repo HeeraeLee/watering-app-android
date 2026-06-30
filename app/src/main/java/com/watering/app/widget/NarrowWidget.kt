@@ -1,7 +1,6 @@
 package com.watering.app.widget
 
 import android.content.Context
-import android.content.Intent
 import android.content.res.Configuration
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
@@ -18,7 +17,7 @@ import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.SizeMode
-import androidx.glance.appwidget.action.actionStartActivity
+import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
@@ -36,7 +35,6 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
-import com.watering.app.MainActivity
 import com.watering.app.R
 
 class NarrowWidget : GlanceAppWidget() {
@@ -73,7 +71,7 @@ private fun NarrowWidgetContent(state: WidgetState) {
             .fillMaxSize()
             .background(ColorProvider(bgColor))
             .cornerRadius(16.dp)
-            .clickable(actionStartActivity(Intent(context, MainActivity::class.java)))
+            .clickable(actionRunCallback<AddWaterAction>())
             .padding(horizontal = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

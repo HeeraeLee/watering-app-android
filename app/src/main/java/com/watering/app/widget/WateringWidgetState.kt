@@ -3,6 +3,7 @@ package com.watering.app.widget
 import android.content.Context
 import com.watering.app.core.data.SettingsRepository
 import com.watering.app.core.data.WaterRepository
+import com.watering.app.core.service.WaterService
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
@@ -20,6 +21,7 @@ data class WidgetState(
 interface WidgetEntryPoint {
     fun waterRepository(): WaterRepository
     fun settingsRepository(): SettingsRepository
+    fun waterService(): WaterService
 }
 
 suspend fun loadWidgetState(context: Context): WidgetState {
