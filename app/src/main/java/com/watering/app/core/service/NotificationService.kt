@@ -5,7 +5,6 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.ExistingPeriodicWorkPolicy
@@ -92,7 +91,7 @@ class NotificationService @Inject constructor(
     }
 
     fun showAchievementNotification() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) return  // 권한 없으면 skip
+        if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) return
 
         val intent = Intent(context, MainActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(
