@@ -146,17 +146,21 @@ watering-app-android/
 │   │   │   │       └── Type.kt
 │   │   │   └── res/
 │   │   │       ├── drawable/
-│   │   │       │   ├── ic_water_drop.xml       # 스플래시 아이콘
-│   │   │       │   ├── ic_launcher_foreground.xml
-│   │   │       │   └── ic_launcher_background.xml
-│   │   │       ├── mipmap-anydpi-v26/
-│   │   │       │   ├── ic_launcher.xml
-│   │   │       │   └── ic_launcher_round.xml
+│   │   │       │   ├── ic_water_drop.xml           # 위젯용 물방울 아이콘
+│   │   │       │   ├── ic_launcher_foreground.xml  # (미사용 — 보관용)
+│   │   │       │   ├── ic_launcher_background.xml  # (미사용 — 보관용)
+│   │   │       │   ├── ic_launcher_icon.png        # 사용자 제공 아이콘 원본
+│   │   │       │   └── splash_image.png            # 스플래시 전체화면 이미지
+│   │   │       ├── mipmap-{mdpi|hdpi|xhdpi|xxhdpi|xxxhdpi}/
+│   │   │       │   ├── ic_launcher.png             # 앱 아이콘 (밀도별)
+│   │   │       │   └── ic_launcher_round.png       # 앱 아이콘 원형 (밀도별)
 │   │   │       ├── values/
 │   │   │       │   ├── themes.xml
 │   │   │       │   └── strings.xml
 │   │   │       └── xml/
-│   │   │           └── widget_info.xml
+│   │   │           ├── circular_widget_info.xml
+│   │   │           ├── rectangular_widget_info.xml
+│   │   │           └── narrow_widget_info.xml
 │   │   └── test/
 │   │       └── java/com/watering/app/
 └── docs/
