@@ -32,5 +32,6 @@ class AddWaterAction : ActionCallback {
             currentRecord = currentRecord
         )
         waterService.updateStreak(updated, waterRepository.streakInfo.first())
+        entryPoint.widgetUpdater().updateAll()
     }
 }
