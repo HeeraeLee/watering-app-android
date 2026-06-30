@@ -2,6 +2,7 @@ package com.watering.app.widget
 
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -61,21 +62,28 @@ class RectangularWidgetReceiver : GlanceAppWidgetReceiver() {
 private fun RectangularWidgetContent(state: WidgetState) {
     val context = LocalContext.current
     val size = LocalSize.current
+    val isDark = (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
+            Configuration.UI_MODE_NIGHT_YES
     val isAchieved = state.achievementRate >= 1.0
     val accent = if (isAchieved) GreenColor else AquaColor
     val rate = state.achievementRate.coerceIn(0.0, 1.0).toFloat()
     val barWidth = (size.width - 32.dp) * rate
     val motivationText = when {
-        isAchieved              -> "목표 달성! 🎉"
+        isAchieved                   -> "목표 달성! 🎉"
         state.achievementRate >= 0.7 -> "거의 다 왔어요!"
         state.achievementRate >= 0.3 -> "잘 하고 있어요"
-        else                    -> "물 마실 시간이에요 💧"
+        else                         -> "물 마실 시간이에요 💧"
     }
+
+    val bgColor = if (isDark) DarkBg else Color.White
+    val primaryText = if (isDark) Color.White else Color(0xFF0D1B2A)
+    val secondaryText = if (isDark) Color.White.copy(alpha = 0.5f) else Color(0xFF888888)
+    val barTrack = if (isDark) Color.White.copy(alpha = 0.15f) else accent.copy(alpha = 0.12f)
 
     Box(
         modifier = GlanceModifier
             .fillMaxSize()
-            .background(ColorProvider(DarkBg))
+            .background(ColorProvider(bgColor))
             .cornerRadius(20.dp)
             .clickable(actionStartActivity(Intent(context, MainActivity::class.java)))
     ) {
@@ -83,7 +91,6 @@ private fun RectangularWidgetContent(state: WidgetState) {
             modifier = GlanceModifier.fillMaxSize().padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // 타이틀 행
             Row(
                 modifier = GlanceModifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -101,7 +108,6 @@ private fun RectangularWidgetContent(state: WidgetState) {
                 )
             }
             Spacer(GlanceModifier.height(6.dp))
-            // 잔 수 + 퍼센트 행
             Row(
                 modifier = GlanceModifier.fillMaxWidth(),
                 verticalAlignment = Alignment.Bottom
@@ -109,7 +115,7 @@ private fun RectangularWidgetContent(state: WidgetState) {
                 Text(
                     text = "${state.totalCount}",
                     style = TextStyle(
-                        color = ColorProvider(Color.White),
+                        color = ColorProvider(primaryText),
                         fontSize = 38.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -117,10 +123,7 @@ private fun RectangularWidgetContent(state: WidgetState) {
                 Spacer(GlanceModifier.width(5.dp))
                 Text(
                     text = "/ ${state.goal} 잔",
-                    style = TextStyle(
-                        color = ColorProvider(Color.White.copy(alpha = 0.5f)),
-                        fontSize = 14.sp
-                    )
+                    style = TextStyle(color = ColorProvider(secondaryText), fontSize = 14.sp)
                 )
                 Spacer(GlanceModifier.defaultWeight())
                 Text(
@@ -133,13 +136,12 @@ private fun RectangularWidgetContent(state: WidgetState) {
                 )
             }
             Spacer(GlanceModifier.height(10.dp))
-            // 진행 바
             Box(
                 modifier = GlanceModifier
                     .fillMaxWidth()
                     .height(5.dp)
                     .cornerRadius(3.dp)
-                    .background(ColorProvider(Color.White.copy(alpha = 0.15f)))
+                    .background(ColorProvider(barTrack))
             ) {
                 if (rate > 0f) {
                     Box(
@@ -154,10 +156,7 @@ private fun RectangularWidgetContent(state: WidgetState) {
             Spacer(GlanceModifier.height(8.dp))
             Text(
                 text = motivationText,
-                style = TextStyle(
-                    color = ColorProvider(Color.White.copy(alpha = 0.5f)),
-                    fontSize = 11.sp
-                )
+                style = TextStyle(color = ColorProvider(secondaryText), fontSize = 11.sp)
             )
         }
     }

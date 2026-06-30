@@ -2,6 +2,7 @@ package com.watering.app.widget
 
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -55,17 +56,22 @@ class NarrowWidgetReceiver : GlanceAppWidgetReceiver() {
 private fun NarrowWidgetContent(state: WidgetState) {
     val context = LocalContext.current
     val size = LocalSize.current
+    val isDark = (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
+            Configuration.UI_MODE_NIGHT_YES
     val isAchieved = state.achievementRate >= 1.0
     val accent = if (isAchieved) Color(0xFF34C759) else Color(0xFF00B4D8)
     val rate = state.achievementRate.coerceIn(0.0, 1.0).toFloat()
-    // 고정 요소 너비 제외: 좌우padding(28) + 아이콘(16) + spacer(8) + 텍스트 추정(68) + spacer(10) + 퍼센트(36) + spacer(8) = 174dp
     val barTotal = (size.width - 174.dp).coerceAtLeast(8.dp)
     val barFill = (barTotal * rate).coerceAtLeast(0.dp)
+
+    val bgColor = if (isDark) Color(0xEE0D1B2A) else Color.White
+    val textColor = if (isDark) Color.White else Color(0xFF0D1B2A)
+    val barTrack = if (isDark) Color.White.copy(alpha = 0.15f) else accent.copy(alpha = 0.12f)
 
     Row(
         modifier = GlanceModifier
             .fillMaxSize()
-            .background(ColorProvider(Color(0xEE0D1B2A)))
+            .background(ColorProvider(bgColor))
             .cornerRadius(16.dp)
             .clickable(actionStartActivity(Intent(context, MainActivity::class.java)))
             .padding(horizontal = 14.dp),
@@ -81,19 +87,18 @@ private fun NarrowWidgetContent(state: WidgetState) {
         Text(
             text = "${state.totalCount} / ${state.goal}",
             style = TextStyle(
-                color = ColorProvider(Color.White),
+                color = ColorProvider(textColor),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold
             )
         )
         Spacer(GlanceModifier.width(10.dp))
-        // 진행 바 (남은 공간 전체)
         Box(
             modifier = GlanceModifier
                 .defaultWeight()
                 .height(4.dp)
                 .cornerRadius(2.dp)
-                .background(ColorProvider(Color.White.copy(alpha = 0.15f)))
+                .background(ColorProvider(barTrack))
         ) {
             if (rate > 0f) {
                 Box(

@@ -2,6 +2,7 @@ package com.watering.app.widget
 
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -56,10 +57,19 @@ class CircularWidgetReceiver : GlanceAppWidgetReceiver() {
 private fun CircularWidgetContent(state: WidgetState) {
     val context = LocalContext.current
     val size = LocalSize.current
+    val isDark = (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
+            Configuration.UI_MODE_NIGHT_YES
     val isAchieved = state.achievementRate >= 1.0
-    val bgColor = if (isAchieved) Color(0xFF34C759) else Color(0xFF00B4D8)
+    val accent = if (isAchieved) Color(0xFF34C759) else Color(0xFF00B4D8)
     val rate = state.achievementRate.coerceIn(0.0, 1.0).toFloat()
     val barWidth = (size.width - 28.dp) * rate
+
+    // 다크: 아쿠아/그린 배경 + 흰 텍스트 / 라이트: 흰 배경 + 아쿠아/그린 텍스트
+    val bgColor = if (isDark) accent else Color.White
+    val textColor = if (isDark) Color.White else accent
+    val subTextColor = if (isDark) Color.White.copy(alpha = 0.75f) else Color(0xFF666666)
+    val barTrackColor = if (isDark) Color.White.copy(alpha = 0.3f) else accent.copy(alpha = 0.15f)
+    val barFillColor = if (isDark) Color.White else accent
 
     Box(
         modifier = GlanceModifier
@@ -77,13 +87,13 @@ private fun CircularWidgetContent(state: WidgetState) {
                 provider = ImageProvider(R.drawable.ic_water_drop),
                 contentDescription = null,
                 modifier = GlanceModifier.size(22.dp),
-                colorFilter = ColorFilter.tint(ColorProvider(Color.White.copy(alpha = 0.9f)))
+                colorFilter = ColorFilter.tint(ColorProvider(textColor))
             )
             Spacer(GlanceModifier.height(4.dp))
             Text(
                 text = "${state.totalCount}",
                 style = TextStyle(
-                    color = ColorProvider(Color.White),
+                    color = ColorProvider(textColor),
                     fontSize = 40.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -91,7 +101,7 @@ private fun CircularWidgetContent(state: WidgetState) {
             Text(
                 text = "/ ${state.goal}잔",
                 style = TextStyle(
-                    color = ColorProvider(Color.White.copy(alpha = 0.75f)),
+                    color = ColorProvider(subTextColor),
                     fontSize = 13.sp
                 )
             )
@@ -101,7 +111,7 @@ private fun CircularWidgetContent(state: WidgetState) {
                     .fillMaxWidth()
                     .height(4.dp)
                     .cornerRadius(2.dp)
-                    .background(ColorProvider(Color.White.copy(alpha = 0.3f)))
+                    .background(ColorProvider(barTrackColor))
             ) {
                 if (rate > 0f) {
                     Box(
@@ -109,7 +119,7 @@ private fun CircularWidgetContent(state: WidgetState) {
                             .width(barWidth)
                             .fillMaxHeight()
                             .cornerRadius(2.dp)
-                            .background(ColorProvider(Color.White))
+                            .background(ColorProvider(barFillColor))
                     ) {}
                 }
             }
