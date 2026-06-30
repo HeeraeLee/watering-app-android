@@ -13,10 +13,12 @@ import com.watering.app.features.home.HomeViewModel
 import com.watering.app.features.onboarding.OnboardingScreen
 import com.watering.app.features.onboarding.OnboardingViewModel
 import com.watering.app.features.settings.SettingsScreen
+import com.watering.app.features.splash.SplashScreen
 import com.watering.app.features.stats.StatsScreen
 import com.watering.app.features.premium.PremiumScreen
 
 sealed class Screen(val route: String) {
+    object Splash : Screen("splash")
     object Onboarding : Screen("onboarding")
     object Home : Screen("home")
     object Stats : Screen("stats")
@@ -32,12 +34,15 @@ fun WateringNavGraph(
     val onboardingViewModel: OnboardingViewModel = hiltViewModel()
     val isOnboardingDone by onboardingViewModel.isOnboardingDone.collectAsStateWithLifecycle()
 
-    val startDestination = when {
-        isOnboardingDone == false -> Screen.Onboarding.route
-        else -> Screen.Home.route
-    }
-
-    NavHost(navController = navController, startDestination = startDestination) {
+    NavHost(navController = navController, startDestination = Screen.Splash.route) {
+        composable(Screen.Splash.route) {
+            SplashScreen(onFinished = {
+                val dest = if (isOnboardingDone == true) Screen.Home.route else Screen.Onboarding.route
+                navController.navigate(dest) {
+                    popUpTo(Screen.Splash.route) { inclusive = true }
+                }
+            })
+        }
         composable(Screen.Onboarding.route) {
             OnboardingScreen(
                 onComplete = {
