@@ -6,6 +6,7 @@ import com.watering.app.core.data.SettingsRepository
 import com.watering.app.core.model.UserSettings
 import com.watering.app.core.service.NotificationService
 import com.watering.app.core.service.WaterService
+import com.watering.app.widget.WateringWidgetUpdater
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +18,8 @@ import javax.inject.Inject
 class SettingsViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val notificationService: NotificationService,
-    private val waterService: WaterService
+    private val waterService: WaterService,
+    private val widgetUpdater: WateringWidgetUpdater
 ) : ViewModel() {
 
     val settings: StateFlow<UserSettings> = settingsRepository.userSettings
@@ -39,6 +41,7 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             val updated = transform(settings.value)
             settingsRepository.updateSettings(updated)
+            widgetUpdater.updateAll()
             if (updated.notificationEnabled) {
                 notificationService.scheduleReminders(updated)
             } else {
