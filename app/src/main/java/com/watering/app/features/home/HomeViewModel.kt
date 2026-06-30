@@ -37,7 +37,11 @@ class HomeViewModel @Inject constructor(
         waterRepository.streakInfo,
         settingsRepository.userSettings
     ) { record, streak, settings ->
-        HomeUiState(record = record, streak = streak, settings = settings)
+        HomeUiState(
+            record = record.copy(goal = settings.dailyGoal),
+            streak = streak,
+            settings = settings
+        )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
 
     private val _snackbarMessage = MutableStateFlow<String?>(null)
