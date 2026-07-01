@@ -1,5 +1,7 @@
 package com.watering.app.features.settings
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -38,10 +40,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.watering.app.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,6 +55,8 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val privacyPolicyUrl = stringResource(R.string.privacy_policy_url)
     var showResetDialog by remember { mutableStateOf(false) }
 
     if (showResetDialog) {
@@ -158,6 +165,26 @@ fun SettingsScreen(
                     checked = settings.healthConnectEnabled,
                     onCheckedChange = viewModel::updateHealthConnect
                 )
+            }
+
+            item { SectionDivider() }
+            item { SectionHeader(stringResource(R.string.settings_app_info)) }
+
+            item {
+                TextButton(
+                    onClick = {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(privacyPolicyUrl))
+                        context.startActivity(intent)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                ) {
+                    Text(
+                        stringResource(R.string.settings_privacy_policy),
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
             }
 
             item { SectionDivider() }

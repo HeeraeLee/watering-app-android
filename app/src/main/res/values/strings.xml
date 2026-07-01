@@ -21,6 +21,11 @@
     <string name="drink_milk">우유</string>
     <string name="drink_other">기타</string>
 
+    <!-- 앱 정보 -->
+    <string name="settings_app_info">앱 정보</string>
+    <string name="settings_privacy_policy">개인정보처리방침</string>
+    <string name="privacy_policy_url">https://sites.google.com/view/watering-privacy/%ED%99%88</string>
+
     <!-- 위젯 -->
     <string name="widget_circular_description">워터링 원형 위젯</string>
     <string name="widget_rectangular_description">워터링 직사각형 위젯</string>
