@@ -19,15 +19,15 @@ class WaterService @Inject constructor(
     suspend fun addWater(
         amount: Int,
         drinkType: DrinkType = DrinkType.WATER,
-        currentRecord: DayRecord
+        goal: Int
     ): DayRecord {
-        val updated = repository.addEntry(amount, drinkType, currentRecord)
+        val updated = repository.addEntry(amount, drinkType, goal)
         widgetUpdater.updateAll()
         return updated
     }
 
-    suspend fun undoLastEntry(currentRecord: DayRecord): DayRecord {
-        val updated = repository.removeLastEntry(currentRecord)
+    suspend fun undoLastEntry(goal: Int): DayRecord {
+        val updated = repository.removeLastEntry(goal)
         widgetUpdater.updateAll()
         return updated
     }

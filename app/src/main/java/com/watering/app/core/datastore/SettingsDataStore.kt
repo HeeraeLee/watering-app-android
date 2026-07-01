@@ -1,7 +1,9 @@
 package com.watering.app.core.datastore
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -14,6 +16,8 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
+
+private const val TAG = "SettingsDataStore"
 
 private val Context.settingsDataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
@@ -33,14 +37,23 @@ class SettingsDataStore @Inject constructor(
             ?: UserSettings()
     }
 
+    private suspend fun editSafely(transform: suspend (MutablePreferences) -> Unit) {
+        try {
+            context.settingsDataStore.edit(transform)
+        } catch (e: Exception) {
+            Log.e(TAG, "설정 저장 실패", e)
+            throw e
+        }
+    }
+
     suspend fun updateSettings(settings: UserSettings) {
-        context.settingsDataStore.edit { prefs ->
+        editSafely { prefs ->
             prefs[Keys.USER_SETTINGS] = json.encodeToString(settings)
         }
     }
 
     suspend fun updatePremium(isPremium: Boolean) {
-        context.settingsDataStore.edit { prefs ->
+        editSafely { prefs ->
             val current = prefs[Keys.USER_SETTINGS]
                 ?.let { runCatching { json.decodeFromString<UserSettings>(it) }.getOrNull() }
                 ?: UserSettings()
@@ -49,7 +62,7 @@ class SettingsDataStore @Inject constructor(
     }
 
     suspend fun completeOnboarding() {
-        context.settingsDataStore.edit { prefs ->
+        editSafely { prefs ->
             val current = prefs[Keys.USER_SETTINGS]
                 ?.let { runCatching { json.decodeFromString<UserSettings>(it) }.getOrNull() }
                 ?: UserSettings()

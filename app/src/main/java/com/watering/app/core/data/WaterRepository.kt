@@ -3,7 +3,6 @@ package com.watering.app.core.data
 import com.watering.app.core.model.DayRecord
 import com.watering.app.core.model.DrinkType
 import com.watering.app.core.model.StreakInfo
-import com.watering.app.core.model.WaterEntry
 import com.watering.app.core.datastore.WaterDataStore
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
@@ -21,23 +20,11 @@ class WaterRepository @Inject constructor(
     val streakInfo: Flow<StreakInfo> = dataStore.streakInfo
     fun getHistory(): Flow<Map<String, DayRecord>> = dataStore.getHistory()
 
-    suspend fun addEntry(amount: Int, drinkType: DrinkType, currentRecord: DayRecord): DayRecord {
-        val entry = WaterEntry(
-            timestampMillis = System.currentTimeMillis(),
-            amount = amount,
-            drinkType = drinkType
-        )
-        val updated = currentRecord.copy(entries = currentRecord.entries + entry)
-        dataStore.saveTodayRecord(updated)
-        return updated
-    }
+    suspend fun addEntry(amount: Int, drinkType: DrinkType, goal: Int): DayRecord =
+        dataStore.addEntry(amount, drinkType, goal)
 
-    suspend fun removeLastEntry(currentRecord: DayRecord): DayRecord {
-        if (currentRecord.entries.isEmpty()) return currentRecord
-        val updated = currentRecord.copy(entries = currentRecord.entries.dropLast(1))
-        dataStore.saveTodayRecord(updated)
-        return updated
-    }
+    suspend fun removeLastEntry(goal: Int): DayRecord =
+        dataStore.removeLastEntry(goal)
 
     suspend fun updateStreak(record: DayRecord, current: StreakInfo): StreakInfo {
         val todayKey = LocalDate.now().format(formatter)

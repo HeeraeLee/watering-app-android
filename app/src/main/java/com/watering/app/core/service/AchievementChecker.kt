@@ -29,7 +29,7 @@ class AchievementChecker @Inject constructor(
 
         // 목표 달성 (이번 잔으로 달성)
         if (!prev.isAchieved && next.isAchieved) {
-            // 스트릭 기반 타이틀 우선 (더 특별함)
+            // 연속 기록 기반 타이틀 우선 (더 특별함)
             val streakAchievement = when {
                 streak.currentStreak >= 30 -> Achievement.STREAK_30
                 streak.currentStreak >= 7  -> Achievement.STREAK_7

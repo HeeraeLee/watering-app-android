@@ -56,11 +56,11 @@ class HomeViewModel @Inject constructor(
     fun addWater(drinkType: DrinkType = DrinkType.WATER) {
         viewModelScope.launch {
             val current = uiState.value
-            val prev = current.record.copy(goal = current.settings.dailyGoal)
+            val prev = current.record
             val updated = waterService.addWater(
                 amount = current.settings.cupSize,
                 drinkType = drinkType,
-                currentRecord = prev
+                goal = current.settings.dailyGoal
             )
             val streak = waterService.updateStreak(updated, current.streak)
             _snackbarMessage.value = "💧 +${current.settings.cupSize}ml 기록됐어요"
@@ -71,11 +71,11 @@ class HomeViewModel @Inject constructor(
     fun addWaterCustom(amount: Int, drinkType: DrinkType) {
         viewModelScope.launch {
             val current = uiState.value
-            val prev = current.record.copy(goal = current.settings.dailyGoal)
+            val prev = current.record
             val updated = waterService.addWater(
                 amount = amount,
                 drinkType = drinkType,
-                currentRecord = prev
+                goal = current.settings.dailyGoal
             )
             val streak = waterService.updateStreak(updated, current.streak)
             _snackbarMessage.value = "${drinkType.emoji} ${drinkType.displayName} +${amount}ml 기록됐어요"
@@ -89,7 +89,7 @@ class HomeViewModel @Inject constructor(
 
     fun undoLastEntry() {
         viewModelScope.launch {
-            waterService.undoLastEntry(uiState.value.record)
+            waterService.undoLastEntry(uiState.value.settings.dailyGoal)
             _snackbarMessage.value = null
         }
     }

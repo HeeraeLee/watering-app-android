@@ -25,7 +25,7 @@ class SettingsViewModel @Inject constructor(
     val settings: StateFlow<UserSettings> = settingsRepository.userSettings
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), UserSettings())
 
-    fun updateDailyGoal(goal: Int) = update { it.copy(dailyGoal = goal) }
+    fun updateDailyGoal(goal: Int) = update(refreshWidget = true) { it.copy(dailyGoal = goal) }
     fun updateCupSize(size: Int) = update { it.copy(cupSize = size) }
     fun updateNotificationEnabled(enabled: Boolean) = update { it.copy(notificationEnabled = enabled) }
     fun updateNotificationInterval(minutes: Int) = update { it.copy(notificationInterval = minutes) }
@@ -37,11 +37,11 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { waterService.clearAllData() }
     }
 
-    private fun update(transform: (UserSettings) -> UserSettings) {
+    private fun update(refreshWidget: Boolean = false, transform: (UserSettings) -> UserSettings) {
         viewModelScope.launch {
             val updated = transform(settings.value)
             settingsRepository.updateSettings(updated)
-            widgetUpdater.updateAll()
+            if (refreshWidget) widgetUpdater.updateAll()
             if (updated.notificationEnabled) {
                 notificationService.scheduleReminders(updated)
             } else {

@@ -25,15 +25,11 @@ class AddWaterAction : ActionCallback {
             val settingsRepository = entryPoint.settingsRepository()
             val waterService = entryPoint.waterService()
 
-            val record = waterRepository.todayRecord.first()
             val settings = settingsRepository.userSettings.first()
-            val currentRecord = record.copy(goal = settings.dailyGoal)
-            Log.d("WateringWidget", "before: ${currentRecord.totalCount}/${currentRecord.goal}")
-
             val updated = waterService.addWater(
                 amount = settings.cupSize,
                 drinkType = DrinkType.WATER,
-                currentRecord = currentRecord
+                goal = settings.dailyGoal
             )
             waterService.updateStreak(updated, waterRepository.streakInfo.first())
             Log.d("WateringWidget", "after: ${updated.totalCount}/${updated.goal}")
