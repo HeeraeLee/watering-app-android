@@ -13,12 +13,10 @@ import com.watering.app.features.home.HomeViewModel
 import com.watering.app.features.onboarding.OnboardingScreen
 import com.watering.app.features.onboarding.OnboardingViewModel
 import com.watering.app.features.settings.SettingsScreen
-import com.watering.app.features.splash.SplashScreen
 import com.watering.app.features.stats.StatsScreen
 import com.watering.app.features.premium.PremiumScreen
 
 sealed class Screen(val route: String) {
-    object Splash : Screen("splash")
     object Onboarding : Screen("onboarding")
     object Home : Screen("home")
     object Stats : Screen("stats")
@@ -34,15 +32,13 @@ fun WateringNavGraph(
     val onboardingViewModel: OnboardingViewModel = hiltViewModel()
     val isOnboardingDone by onboardingViewModel.isOnboardingDone.collectAsStateWithLifecycle()
 
-    NavHost(navController = navController, startDestination = Screen.Splash.route) {
-        composable(Screen.Splash.route) {
-            SplashScreen(onFinished = {
-                val dest = if (isOnboardingDone == true) Screen.Home.route else Screen.Onboarding.route
-                navController.navigate(dest) {
-                    popUpTo(Screen.Splash.route) { inclusive = true }
-                }
-            })
-        }
+    // DataStore 로드 전(null): 빈 화면 유지 — 보통 100ms 이내 해소
+    if (isOnboardingDone == null) return
+
+    NavHost(
+        navController = navController,
+        startDestination = if (isOnboardingDone == true) Screen.Home.route else Screen.Onboarding.route
+    ) {
         composable(Screen.Onboarding.route) {
             OnboardingScreen(
                 onComplete = {
