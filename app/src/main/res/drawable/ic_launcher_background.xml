@@ -1,7 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <gradient
-        android:startColor="#79BDE8"
-        android:endColor="#77D9C9"
-        android:angle="135"/>
-</shape>
+<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+    android:src="@drawable/watering_icon3"
+    android:gravity="fill"/>
