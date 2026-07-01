@@ -47,8 +47,7 @@ class RectangularWidget : GlanceAppWidget() {
     override val sizeMode = SizeMode.Exact
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        val state = loadWidgetState(context)
-        provideContent { RectangularWidgetContent(state) }
+        provideContent { RectangularWidgetContent(rememberWidgetState(context)) }
     }
 }
 
