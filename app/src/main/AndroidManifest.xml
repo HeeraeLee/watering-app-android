@@ -11,6 +11,11 @@
     <!-- <uses-permission android:name="android.permission.health.READ_HYDRATION" /> -->
     <!-- <uses-permission android:name="android.permission.health.WRITE_HYDRATION" /> -->
 
+    <!-- Firebase Analytics가 자동으로 추가하는 광고 식별자 권한 제거 — 앱은 광고/개인화 기능이 없고
+         "광고 식별자 사용 안 함" 방침을 유지하므로 명시적으로 opt-out -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" tools:node="remove" />
+    <uses-permission android:name="android.permission.ACCESS_ADSERVICES_AD_ID" tools:node="remove" />
+
     <application
         android:name=".WateringApp"
         android:allowBackup="true"
@@ -19,6 +24,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Watering">
+
+        <!-- 광고 식별자 수집 비활성화 (권한 제거와 이중 처리) -->
+        <meta-data
+            android:name="google_analytics_adid_collection_enabled"
+            android:value="false" />
 
         <activity
             android:name=".MainActivity"
