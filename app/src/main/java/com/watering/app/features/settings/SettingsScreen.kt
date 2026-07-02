@@ -26,16 +26,21 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Backup
+import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.NotificationsOff
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -57,7 +62,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.google.firebase.auth.FirebaseUser
 import com.watering.app.R
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 // ACTION_SENDTO + EXTRA_SUBJECT는 한국어·특수문자를 시스템이 알아서 인코딩하므로 별도 URL 인코딩 불필요
 private fun Context.sendSupportEmail(subject: String) {
@@ -76,17 +85,42 @@ private fun Context.sendSupportEmail(subject: String) {
 fun SettingsScreen(
     onBack: () -> Unit,
     onNavigateToPremium: () -> Unit = {},
-    viewModel: SettingsViewModel = hiltViewModel()
+    viewModel: SettingsViewModel = hiltViewModel(),
+    backupViewModel: BackupViewModel = hiltViewModel()
 ) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val notificationPermissionGranted by viewModel.notificationPermissionGranted.collectAsStateWithLifecycle()
+    val currentUser by backupViewModel.currentUser.collectAsStateWithLifecycle()
+    val backupUiState by backupViewModel.backupUiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val privacyPolicyUrl = stringResource(R.string.privacy_policy_url)
     var showResetDialog by remember { mutableStateOf(false) }
+    var showRestoreDialog by remember { mutableStateOf(false) }
 
     // 시스템 알림 설정 화면을 다녀온 뒤에도 최신 권한 상태를 반영
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         viewModel.refreshNotificationPermission()
+    }
+
+    if (showRestoreDialog) {
+        AlertDialog(
+            onDismissRequest = { showRestoreDialog = false },
+            title = { Text("복원하시겠어요?") },
+            text = { Text("기기에 저장된 현재 기록이 클라우드 백업 내용으로 덮어써집니다.\n이 작업은 되돌릴 수 없습니다.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    backupViewModel.restore()
+                    showRestoreDialog = false
+                }) {
+                    Text("복원", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showRestoreDialog = false }) {
+                    Text("취소")
+                }
+            }
+        )
     }
 
     if (showResetDialog) {
@@ -211,6 +245,20 @@ fun SettingsScreen(
             }
 
             item { SectionDivider() }
+            item { SectionHeader("백업 및 복원") }
+
+            item {
+                BackupSection(
+                    currentUser = currentUser,
+                    backupUiState = backupUiState,
+                    onSignIn = { backupViewModel.signIn(context) },
+                    onSignOut = backupViewModel::signOut,
+                    onBackup = backupViewModel::backup,
+                    onRestoreClick = { showRestoreDialog = true }
+                )
+            }
+
+            item { SectionDivider() }
             item { SectionHeader(stringResource(R.string.settings_app_info)) }
 
             item {
@@ -327,6 +375,106 @@ private fun NotificationPermissionBanner(onOpenSettings: () -> Unit) {
         }
     }
 }
+
+@Composable
+private fun BackupSection(
+    currentUser: FirebaseUser?,
+    backupUiState: BackupUiState,
+    onSignIn: () -> Unit,
+    onSignOut: () -> Unit,
+    onBackup: () -> Unit,
+    onRestoreClick: () -> Unit
+) {
+    val infoColor = MaterialTheme.colorScheme.primary
+    val isLoading = backupUiState is BackupUiState.Loading
+
+    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(infoColor.copy(alpha = 0.1f), RoundedCornerShape(12.dp))
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                if (currentUser != null) Icons.Filled.CloudDone else Icons.Filled.Backup,
+                contentDescription = null,
+                tint = infoColor
+            )
+            Spacer(Modifier.width(10.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                if (currentUser != null) {
+                    Text(
+                        currentUser.email ?: "로그인됨",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        text = when (backupUiState) {
+                            is BackupUiState.Success -> "마지막 백업: ${formatBackupTimestamp(backupUiState.timestampMillis)}"
+                            else -> "백업 기록 없음"
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                } else {
+                    Text(
+                        "구글 계정으로 로그인하면 기록을 클라우드에 백업할 수 있어요",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        "백업은 실시간 동기화가 아니에요. 여러 기기를 쓰신다면 최신 기기에서 백업해주세요",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+            if (currentUser != null) {
+                TextButton(onClick = onSignOut) { Text("로그아웃") }
+            } else {
+                TextButton(onClick = onSignIn) { Text("구글로 로그인") }
+            }
+        }
+
+        if (currentUser != null) {
+            Spacer(Modifier.height(8.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Button(
+                    onClick = onBackup,
+                    enabled = !isLoading,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("지금 백업하기")
+                }
+                OutlinedButton(
+                    onClick = onRestoreClick,
+                    enabled = !isLoading,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("복원하기")
+                }
+            }
+        }
+
+        if (isLoading) {
+            Spacer(Modifier.height(8.dp))
+            CircularProgressIndicator(modifier = Modifier.size(20.dp))
+        }
+        if (backupUiState is BackupUiState.Error) {
+            Spacer(Modifier.height(4.dp))
+            Text(
+                backupUiState.message,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error
+            )
+        }
+    }
+}
+
+private fun formatBackupTimestamp(millis: Long): String =
+    SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.KOREA).format(Date(millis))
 
 @Composable
 private fun SectionHeader(title: String) {

@@ -102,13 +102,21 @@ dependencies {
     // Google Play In-App Review
     implementation(libs.review.ktx)
 
-    // Firebase (Crashlytics + Analytics)
+    // Firebase (Crashlytics + Analytics + Auth + Firestore)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.analytics)
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
+
+    // Google Sign-In (Credential Manager)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
 
     // Coroutines
     implementation(libs.coroutines.android)
+    implementation(libs.coroutines.play.services)
 
     // Kotlinx Serialization
     implementation(libs.kotlinx.serialization.json)

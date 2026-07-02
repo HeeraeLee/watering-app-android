@@ -132,4 +132,13 @@ class WaterDataStore @Inject constructor(
     suspend fun clearAllData() {
         editSafely { it.clear() }
     }
+
+    // 백업 복원 전용 — 오늘 기록/연속 기록/히스토리를 클라우드 백업 스냅샷으로 전체 덮어쓴다
+    suspend fun restoreAll(today: DayRecord, streak: StreakInfo, history: Map<String, DayRecord>) {
+        editSafely { prefs ->
+            prefs[Keys.TODAY_RECORD] = json.encodeToString(today)
+            prefs[Keys.STREAK_INFO] = json.encodeToString(streak)
+            prefs[Keys.HISTORY] = json.encodeToString(history)
+        }
+    }
 }

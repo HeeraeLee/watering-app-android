@@ -12,7 +12,12 @@
           "package_name": "com.watering.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "158413884060-b2a6b6ci9hv66bbu2qgpbqp2u0mk6uj2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCxFYapiQx-sWxoxgmtLRWjBV4H2_mwBKs"
@@ -20,7 +25,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "158413884060-b2a6b6ci9hv66bbu2qgpbqp2u0mk6uj2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     },
@@ -31,7 +41,12 @@
           "package_name": "com.watering.app.debug"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "158413884060-b2a6b6ci9hv66bbu2qgpbqp2u0mk6uj2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCxFYapiQx-sWxoxgmtLRWjBV4H2_mwBKs"
@@ -39,7 +54,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "158413884060-b2a6b6ci9hv66bbu2qgpbqp2u0mk6uj2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
