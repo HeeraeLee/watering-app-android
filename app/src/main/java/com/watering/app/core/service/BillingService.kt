@@ -216,7 +216,7 @@ fun ProductDetails.SubscriptionOfferDetails.freeTrialDays(): Int? {
     return parseIsoPeriodDays(trialPhase.billingPeriod)
 }
 
-private fun parseIsoPeriodDays(period: String): Int {
+internal fun parseIsoPeriodDays(period: String): Int {
     val regex = Regex("""P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)W)?(?:(\d+)D)?""")
     val match = regex.matchEntire(period) ?: return 0
     val (years, months, weeks, days) = match.destructured
