@@ -14,5 +14,6 @@ data class UserSettings(
     val heatAlertEnabled: Boolean = false,
     val healthConnectEnabled: Boolean = false,
     val isPremium: Boolean = false,
-    val isOnboardingDone: Boolean = false
+    val isOnboardingDone: Boolean = false,
+    val reviewRequested: Boolean = false  // 인앱 리뷰 요청 1회 제한용
 )

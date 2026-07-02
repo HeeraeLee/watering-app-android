@@ -1,5 +1,6 @@
 package com.watering.app.features.home
 
+import android.app.Activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.watering.app.core.data.SettingsRepository
@@ -10,6 +11,7 @@ import com.watering.app.core.model.DrinkType
 import com.watering.app.core.model.StreakInfo
 import com.watering.app.core.model.UserSettings
 import com.watering.app.core.service.AchievementChecker
+import com.watering.app.core.service.ReviewService
 import com.watering.app.core.service.WaterService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,7 +34,8 @@ class HomeViewModel @Inject constructor(
     private val waterService: WaterService,
     private val waterRepository: WaterRepository,
     private val settingsRepository: SettingsRepository,
-    private val achievementChecker: AchievementChecker
+    private val achievementChecker: AchievementChecker,
+    private val reviewService: ReviewService
 ) : ViewModel() {
 
     val uiState: StateFlow<HomeUiState> = combine(
@@ -83,8 +86,12 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun dismissAchievement() {
+    fun dismissAchievement(activity: Activity? = null) {
+        val achievement = _pendingAchievement.value
         _pendingAchievement.value = null
+        if (achievement == Achievement.STREAK_7 && activity != null) {
+            viewModelScope.launch { reviewService.requestReviewIfEligible(activity) }
+        }
     }
 
     fun undoLastEntry() {

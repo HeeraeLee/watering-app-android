@@ -69,4 +69,13 @@ class SettingsDataStore @Inject constructor(
             prefs[Keys.USER_SETTINGS] = json.encodeToString(current.copy(isOnboardingDone = true))
         }
     }
+
+    suspend fun markReviewRequested() {
+        editSafely { prefs ->
+            val current = prefs[Keys.USER_SETTINGS]
+                ?.let { runCatching { json.decodeFromString<UserSettings>(it) }.getOrNull() }
+                ?: UserSettings()
+            prefs[Keys.USER_SETTINGS] = json.encodeToString(current.copy(reviewRequested = true))
+        }
+    }
 }

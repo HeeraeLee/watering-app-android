@@ -1,5 +1,8 @@
 package com.watering.app.features.home
 
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -53,6 +56,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.watering.app.core.model.DrinkType
 import com.watering.app.core.model.WaterEntry
@@ -60,6 +64,12 @@ import com.watering.app.features.record.RecordSheet
 
 private val AquaColor = Color(0xFF00B4D8)
 private val GreenColor = Color(0xFF34C759)
+
+private fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -73,6 +83,7 @@ fun HomeScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarMessage by viewModel.snackbarMessage.collectAsStateWithLifecycle()
     val pendingAchievement by viewModel.pendingAchievement.collectAsStateWithLifecycle()
+    val activity = LocalContext.current.findActivity()
     val snackbarHostState = remember { SnackbarHostState() }
     var showRecordSheet by remember { mutableStateOf(false) }
 
@@ -228,7 +239,7 @@ fun HomeScreen(
         pendingAchievement?.let { achievement ->
             AchievementDialog(
                 achievement = achievement,
-                onDismiss = { viewModel.dismissAchievement() }
+                onDismiss = { viewModel.dismissAchievement(activity) }
             )
         }
     }

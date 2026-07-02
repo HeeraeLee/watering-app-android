@@ -97,6 +97,9 @@ dependencies {
     // Google Play Billing
     implementation(libs.billing.ktx)
 
+    // Google Play In-App Review
+    implementation(libs.review.ktx)
+
     // Coroutines
     implementation(libs.coroutines.android)
 
