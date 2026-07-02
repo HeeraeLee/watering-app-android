@@ -1,5 +1,6 @@
 package com.watering.app.features.settings
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -57,6 +58,18 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.watering.app.R
+
+// ACTION_SENDTO + EXTRA_SUBJECT는 한국어·특수문자를 시스템이 알아서 인코딩하므로 별도 URL 인코딩 불필요
+private fun Context.sendSupportEmail(subject: String) {
+    val intent = Intent(Intent.ACTION_SENDTO).apply {
+        data = Uri.parse("mailto:")
+        putExtra(Intent.EXTRA_EMAIL, arrayOf(getString(R.string.support_email)))
+        putExtra(Intent.EXTRA_SUBJECT, subject)
+    }
+    if (intent.resolveActivity(packageManager) != null) {
+        startActivity(intent)
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -224,6 +237,20 @@ fun SettingsScreen(
                 ) {
                     Text(
                         stringResource(R.string.settings_privacy_policy),
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+            }
+
+            item {
+                TextButton(
+                    onClick = { context.sendSupportEmail(subject = "워터링 의견") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                ) {
+                    Text(
+                        stringResource(R.string.settings_send_feedback),
                         style = MaterialTheme.typography.bodyLarge
                     )
                 }
