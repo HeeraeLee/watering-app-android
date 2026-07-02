@@ -21,6 +21,8 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -84,8 +86,10 @@ class BillingService @Inject constructor(
         })
     }
 
+    // 상품 3종(월간/연간/평생) 모두 확보되기 전까지는 재시도 — 일부만 로드된 상태로 영구 캐싱되는 것 방지
+    // (Play Console에 상품이 순차 등록되는 동안 일부 ID만 조회 실패하는 경우 대응)
     suspend fun loadProducts() {
-        if (_products.value.isNotEmpty()) return
+        if (_products.value.size >= SUBSCRIPTION_IDS.size + 1) return
 
         val subProducts = SUBSCRIPTION_IDS.map {
             QueryProductDetailsParams.Product.newBuilder()
@@ -100,24 +104,39 @@ class BillingService @Inject constructor(
                 .build()
         )
 
-        val subResult = billingClient.queryProductDetails(
-            QueryProductDetailsParams.newBuilder().setProductList(subProducts).build()
-        )
-        val inAppResult = billingClient.queryProductDetails(
-            QueryProductDetailsParams.newBuilder().setProductList(inAppProducts).build()
-        )
+        // 구독/일회성 조회는 서로 독립적이므로 병렬로 실행해 왕복 지연을 절반으로 줄인다
+        val (subResult, inAppResult) = coroutineScope {
+            val subDeferred = async {
+                billingClient.queryProductDetails(
+                    QueryProductDetailsParams.newBuilder().setProductList(subProducts).build()
+                )
+            }
+            val inAppDeferred = async {
+                billingClient.queryProductDetails(
+                    QueryProductDetailsParams.newBuilder().setProductList(inAppProducts).build()
+                )
+            }
+            subDeferred.await() to inAppDeferred.await()
+        }
 
         _products.value = subResult.productDetailsList.orEmpty() + inAppResult.productDetailsList.orEmpty()
     }
 
     // 복원 버튼 및 앱 시작 시 호출 — Play Billing은 별도 restore API 없이 재조회로 충분
     suspend fun queryPurchases() {
-        val subPurchases = billingClient.queryPurchasesAsync(
-            QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.SUBS).build()
-        )
-        val inAppPurchases = billingClient.queryPurchasesAsync(
-            QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.INAPP).build()
-        )
+        val (subPurchases, inAppPurchases) = coroutineScope {
+            val subDeferred = async {
+                billingClient.queryPurchasesAsync(
+                    QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.SUBS).build()
+                )
+            }
+            val inAppDeferred = async {
+                billingClient.queryPurchasesAsync(
+                    QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.INAPP).build()
+                )
+            }
+            subDeferred.await() to inAppDeferred.await()
+        }
         val allPurchases = subPurchases.purchasesList + inAppPurchases.purchasesList
         val active = allPurchases.any { it.purchaseState == Purchase.PurchaseState.PURCHASED }
 
