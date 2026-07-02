@@ -62,7 +62,10 @@ fun WateringNavGraph(
             StatsScreen(onBack = { navController.popBackStack() })
         }
         composable(Screen.Settings.route) {
-            SettingsScreen(onBack = { navController.popBackStack() })
+            SettingsScreen(
+                onBack = { navController.popBackStack() },
+                onNavigateToPremium = { navController.navigate(Screen.Premium.route) }
+            )
         }
         composable(Screen.Premium.route) {
             PremiumScreen(onBack = { navController.popBackStack() })

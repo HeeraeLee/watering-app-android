@@ -31,7 +31,7 @@ class AddWaterAction : ActionCallback {
                 drinkType = DrinkType.WATER,
                 goal = settings.dailyGoal
             )
-            waterService.updateStreak(updated, waterRepository.streakInfo.first())
+            waterService.updateStreak(updated, waterRepository.streakInfo.first(), settings.isPremium)
             Log.d("WateringWidget", "after: ${updated.totalCount}/${updated.goal}")
         } catch (e: Exception) {
             Log.e("WateringWidget", "AddWaterAction failed", e)

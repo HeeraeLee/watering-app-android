@@ -62,7 +62,7 @@ class HomeViewModel @Inject constructor(
                 drinkType = drinkType,
                 goal = current.settings.dailyGoal
             )
-            val streak = waterService.updateStreak(updated, current.streak)
+            val streak = waterService.updateStreak(updated, current.streak, current.settings.isPremium)
             _snackbarMessage.value = "💧 +${current.settings.cupSize}ml 기록됐어요"
             achievementChecker.check(prev, updated, streak)?.let { _pendingAchievement.value = it }
         }
@@ -77,7 +77,7 @@ class HomeViewModel @Inject constructor(
                 drinkType = drinkType,
                 goal = current.settings.dailyGoal
             )
-            val streak = waterService.updateStreak(updated, current.streak)
+            val streak = waterService.updateStreak(updated, current.streak, current.settings.isPremium)
             _snackbarMessage.value = "${drinkType.emoji} ${drinkType.displayName} +${amount}ml 기록됐어요"
             achievementChecker.check(prev, updated, streak)?.let { _pendingAchievement.value = it }
         }

@@ -32,8 +32,8 @@ class WaterService @Inject constructor(
         return updated
     }
 
-    suspend fun updateStreak(record: DayRecord, current: StreakInfo): StreakInfo =
-        repository.updateStreak(record, current)
+    suspend fun updateStreak(record: DayRecord, current: StreakInfo, isPremium: Boolean): StreakInfo =
+        repository.updateStreak(record, current, isPremium)
 
     suspend fun resetToday() {
         repository.resetToday()
