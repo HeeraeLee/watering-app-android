@@ -355,7 +355,7 @@ private fun SettingSwitchRow(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun IntervalSetting(interval: Int, onIntervalChange: (Int) -> Unit) {
-    val intervals = listOf(30 to "30분", 60 to "1시간", 120 to "2시간", 180 to "3시간")
+    val intervals = listOf(30 to "30분", 60 to "1시간", 120 to "2시간", 180 to "3시간", 240 to "4시간")
 
     Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
         Text("알림 간격", style = MaterialTheme.typography.bodyLarge)

@@ -5,11 +5,11 @@
     android:viewportWidth="24"
     android:viewportHeight="24">
     <!--
-      Realistic water drop: small tip at top, large circular body below.
-      Circle center (12,15) radius 7 → bottom at (12,22). Tip at (12,3).
-      G1 continuity at (5,15) and (19,15): bezier tangent (0,±1) = circle tangent ✓
+      물방울: 뾰족한 상단(12,2)에서 둥근 하단으로 이어지는 형태.
+      RemoteViews(Glance 위젯)에서 호(A) 명령 경로가 작은 크기에서 깨지는 문제가 있어
+      3차 베지어(C) 곡선만으로 구성 — 앱 아이콘이 아닌 위젯 전용 아이콘이라 별도 관리.
     -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M12,3 C7,3 5,8 5,15 A7,7,0,0,1,19,15 C19,8 17,3 12,3Z" />
+        android:pathData="M12,2 C12,2 4,12 4,16 C4,19.31 7.58,22 12,22 C16.42,22 20,19.31 20,16 C20,12 12,2 12,2 Z" />
 </vector>
