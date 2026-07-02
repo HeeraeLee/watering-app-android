@@ -129,7 +129,8 @@ class BillingService @Inject constructor(
 
     fun launchPurchase(activity: Activity, productDetails: ProductDetails) {
         val paramsList = if (productDetails.productType == BillingClient.ProductType.SUBS) {
-            val offerToken = productDetails.subscriptionOfferDetails?.firstOrNull()?.offerToken ?: run {
+            // 무료체험 오퍼가 있으면 우선 선택 — Play는 가입 이력상 자격 없는 유저에게는 애초에 내려주지 않는다
+            val offerToken = productDetails.trialOfferOrDefault()?.offerToken ?: run {
                 _errorMessage.value = "상품 정보를 불러오지 못했습니다."
                 return
             }
@@ -180,4 +181,28 @@ class BillingService @Inject constructor(
             billingClient.acknowledgePurchase(params) { }
         }
     }
+}
+
+// 구독 오퍼 중 무료체험(가격 0원) 단계가 포함된 오퍼를 우선 반환 — 없으면 첫 오퍼로 폴백
+fun ProductDetails.trialOfferOrDefault(): ProductDetails.SubscriptionOfferDetails? {
+    val offers = subscriptionOfferDetails ?: return null
+    val trialOffer = offers.firstOrNull { offer ->
+        offer.pricingPhases.pricingPhaseList.any { it.priceAmountMicros == 0L }
+    }
+    return trialOffer ?: offers.firstOrNull()
+}
+
+fun ProductDetails.SubscriptionOfferDetails.freeTrialDays(): Int? {
+    val trialPhase = pricingPhases.pricingPhaseList.firstOrNull { it.priceAmountMicros == 0L } ?: return null
+    return parseIsoPeriodDays(trialPhase.billingPeriod)
+}
+
+private fun parseIsoPeriodDays(period: String): Int {
+    val regex = Regex("""P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)W)?(?:(\d+)D)?""")
+    val match = regex.matchEntire(period) ?: return 0
+    val (years, months, weeks, days) = match.destructured
+    return (years.toIntOrNull() ?: 0) * 365 +
+        (months.toIntOrNull() ?: 0) * 30 +
+        (weeks.toIntOrNull() ?: 0) * 7 +
+        (days.toIntOrNull() ?: 0)
 }

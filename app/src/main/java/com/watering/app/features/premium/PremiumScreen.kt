@@ -51,6 +51,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.billingclient.api.BillingClient
 import com.android.billingclient.api.ProductDetails
 import com.watering.app.core.service.BillingService
+import com.watering.app.core.service.freeTrialDays
+import com.watering.app.core.service.trialOfferOrDefault
 
 private data class PremiumFeature(val icon: String, val title: String, val description: String)
 
@@ -68,10 +70,26 @@ private fun Context.findActivity(): Activity? = when (this) {
     else -> null
 }
 
-private fun ProductDetails.priceText(): String = when (productType) {
-    BillingClient.ProductType.SUBS ->
-        subscriptionOfferDetails?.firstOrNull()?.pricingPhases?.pricingPhaseList?.firstOrNull()?.formattedPrice.orEmpty()
-    else -> oneTimePurchaseOfferDetails?.formattedPrice.orEmpty()
+private fun ProductDetails.freeTrialDaysOrNull(): Int? {
+    if (productType != BillingClient.ProductType.SUBS) return null
+    return trialOfferOrDefault()?.freeTrialDays()
+}
+
+// 무료체험이 있으면 "7일 무료체험 후 ₩3,900 / 월", 없으면 "₩3,900 / 월"
+private fun ProductDetails.priceLine(suffix: String): String {
+    if (productType != BillingClient.ProductType.SUBS) {
+        return oneTimePurchaseOfferDetails?.formattedPrice.orEmpty() + suffix
+    }
+    val offer = trialOfferOrDefault()
+    val paidPhase = offer?.pricingPhases?.pricingPhaseList?.lastOrNull { it.priceAmountMicros > 0L }
+        ?: offer?.pricingPhases?.pricingPhaseList?.firstOrNull()
+    val price = paidPhase?.formattedPrice.orEmpty()
+    val trialDays = offer?.freeTrialDays()
+    return if (trialDays != null && trialDays > 0) {
+        "${trialDays}일 무료체험 후 $price$suffix"
+    } else {
+        price + suffix
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -227,11 +245,12 @@ private fun PlanSection(
             .padding(bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
+        val monthlyProduct = products.firstOrNull { it.productId == BillingService.MONTHLY_ID }
         PlanCard(
             id = BillingService.MONTHLY_ID,
             title = "월간",
-            badge = null,
-            product = products.firstOrNull { it.productId == BillingService.MONTHLY_ID },
+            badge = if (monthlyProduct?.freeTrialDaysOrNull() != null) "7일 무료체험" else null,
+            product = monthlyProduct,
             suffix = " / 월",
             isSelected = selectedPlanId == BillingService.MONTHLY_ID,
             onSelect = onSelect
@@ -296,7 +315,7 @@ private fun PlanCard(
                 }
             }
             Text(
-                text = if (product != null) product.priceText() + suffix else "불러오는 중…",
+                text = product?.priceLine(suffix) ?: "불러오는 중…",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
