@@ -56,7 +56,6 @@ class SettingsViewModel @Inject constructor(
     fun updateNotificationInterval(minutes: Int) = update { it.copy(notificationInterval = minutes) }
     fun updateNotificationStart(hour: Int) = update { it.copy(notificationStart = hour) }
     fun updateNotificationEnd(hour: Int) = update { it.copy(notificationEnd = hour) }
-    fun updateHealthConnect(enabled: Boolean) = update { it.copy(healthConnectEnabled = enabled) }
 
     fun resetAllData() {
         viewModelScope.launch { waterService.clearAllData() }

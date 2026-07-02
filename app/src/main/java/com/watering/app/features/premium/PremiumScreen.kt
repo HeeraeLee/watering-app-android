@@ -56,12 +56,10 @@ import com.watering.app.core.service.trialOfferOrDefault
 
 private data class PremiumFeature(val icon: String, val title: String, val description: String)
 
+// 실제 구현된 프리미엄 혜택만 노출 — 미구현 기능을 광고하면 스토어 정책·환불 리스크가 있음
+// (30일/연간 통계, 수분 섭취율 분석, CSV 내보내기, 미세먼지·폭염 알림은 구현 후 추가할 것)
 private val PREMIUM_FEATURES = listOf(
-    PremiumFeature("🛡️", "연속 기록 보호", "한 달에 하루 놓쳐도 연속 기록이 유지돼요"),
-    PremiumFeature("📅", "30일 · 연간 통계", "장기 추이와 연간 달성률을 확인해요"),
-    PremiumFeature("💧", "수분 섭취율 분석", "음료 종류별 실제 수분 흡수율을 계산해요"),
-    PremiumFeature("📤", "CSV 내보내기", "기록을 내려받아 직접 활용할 수 있어요"),
-    PremiumFeature("🌫️", "미세먼지 · 폭염 알림", "기상청·에어코리아 데이터로 맞춤 알림을 받아요")
+    PremiumFeature("🛡️", "연속 기록 보호", "한 달에 하루 놓쳐도 연속 기록이 유지돼요")
 )
 
 private fun Context.findActivity(): Activity? = when (this) {

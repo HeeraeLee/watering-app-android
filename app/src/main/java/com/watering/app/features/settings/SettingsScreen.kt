@@ -211,18 +211,6 @@ fun SettingsScreen(
             }
 
             item { SectionDivider() }
-            item { SectionHeader("기타") }
-
-            item {
-                SettingSwitchRow(
-                    title = "Health Connect 연동",
-                    subtitle = "기록을 Health Connect와 동기화해요",
-                    checked = settings.healthConnectEnabled,
-                    onCheckedChange = viewModel::updateHealthConnect
-                )
-            }
-
-            item { SectionDivider() }
             item { SectionHeader(stringResource(R.string.settings_app_info)) }
 
             item {
@@ -300,7 +288,7 @@ private fun PremiumSection(isPremium: Boolean, onClick: () -> Unit) {
             )
             if (!isPremium) {
                 Text(
-                    "연속 기록 보호 · 상세 통계 · 수분 섭취율 · CSV 내보내기",
+                    "한 달에 하루 놓쳐도 연속 기록이 유지돼요",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
