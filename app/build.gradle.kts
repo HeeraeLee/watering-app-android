@@ -5,6 +5,8 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.firebase.crashlytics)
 }
 
 android {
@@ -99,6 +101,11 @@ dependencies {
 
     // Google Play In-App Review
     implementation(libs.review.ktx)
+
+    // Firebase (Crashlytics + Analytics)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.analytics)
 
     // Coroutines
     implementation(libs.coroutines.android)
