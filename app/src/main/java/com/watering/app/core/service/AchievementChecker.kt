@@ -4,8 +4,6 @@ import com.watering.app.core.datastore.AchievementDataStore
 import com.watering.app.core.model.Achievement
 import com.watering.app.core.model.DayRecord
 import com.watering.app.core.model.StreakInfo
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -14,14 +12,13 @@ class AchievementChecker @Inject constructor(
     private val dataStore: AchievementDataStore,
     private val analyticsService: AnalyticsService
 ) {
-    private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
     suspend fun check(
         prev: DayRecord,
         next: DayRecord,
         streak: StreakInfo
     ): Achievement? {
-        val dateKey = LocalDate.now().format(formatter)
+        val dateKey = next.dateKey
 
         // 첫 잔
         if (prev.totalCount == 0 && next.totalCount == 1) {
