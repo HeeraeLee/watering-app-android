@@ -2,6 +2,7 @@ package com.watering.app.di
 
 import android.content.Context
 import com.watering.app.core.data.WaterRepository
+import com.watering.app.core.service.HealthConnectService
 import com.watering.app.core.service.NotificationService
 import com.watering.app.core.service.WaterService
 import com.watering.app.widget.WateringWidgetUpdater
@@ -35,4 +36,10 @@ object ServiceModule {
     fun provideNotificationService(
         @ApplicationContext context: Context
     ): NotificationService = NotificationService(context)
+
+    @Provides
+    @Singleton
+    fun provideHealthConnectService(
+        @ApplicationContext context: Context
+    ): HealthConnectService = HealthConnectService(context)
 }

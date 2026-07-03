@@ -102,6 +102,9 @@ dependencies {
     // Google Play In-App Review
     implementation(libs.review.ktx)
 
+    // Health Connect
+    implementation(libs.health.connect)
+
     // Firebase (Crashlytics + Analytics + Auth + Firestore)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.crashlytics)

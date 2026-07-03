@@ -7,9 +7,11 @@
     <!-- WorkManager용 -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <!-- Health Connect (P3 — v2에서 추가 예정) -->
-    <!-- <uses-permission android:name="android.permission.health.READ_HYDRATION" /> -->
-    <!-- <uses-permission android:name="android.permission.health.WRITE_HYDRATION" /> -->
+    <!-- Health Connect -->
+    <uses-permission android:name="android.permission.health.READ_HYDRATION" />
+    <uses-permission android:name="android.permission.health.WRITE_HYDRATION" />
+    <!-- 스마트 목표 추천(Phase 3)에서 체중 읽기용 — 지금 함께 선언해 재심사 방지 -->
+    <uses-permission android:name="android.permission.health.READ_WEIGHT" />
 
     <!-- Firebase Analytics가 자동으로 추가하는 광고 식별자 권한 제거 — 앱은 광고/개인화 기능이 없고
          "광고 식별자 사용 안 함" 방침을 유지하므로 명시적으로 opt-out -->
@@ -43,6 +45,10 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:scheme="watering" android:host="quick-record" />
+            </intent-filter>
+            <!-- Health Connect 권한 설명(rationale) 화면 요청 처리 -->
+            <intent-filter>
+                <action android:name="androidx.health.connect.action.SHOW_PERMISSIONS_RATIONALE" />
             </intent-filter>
         </activity>
 
