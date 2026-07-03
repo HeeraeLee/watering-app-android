@@ -78,6 +78,8 @@ fun SmartStatsScreen(
                     MonthBarChart(stats = uiState.monthStats)
                     Spacer(Modifier.height(16.dp))
                     InsightCard(insight = uiState.insight)
+                    Spacer(Modifier.height(12.dp))
+                    HydrationVolumeCard(volumeMl = uiState.todayHydrationVolumeMl)
                 }
             }
 
@@ -139,6 +141,27 @@ private fun InsightCard(insight: TimeOfDayInsightResult) {
                     TimeOfDayInsightResult.InsufficientData ->
                         stringResource(R.string.smart_stats_insight_placeholder)
                 },
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
+}
+
+@Composable
+private fun HydrationVolumeCard(volumeMl: Int) {
+    Surface(
+        shape = RoundedCornerShape(14.dp),
+        color = MaterialTheme.colorScheme.surface,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("🧪", fontSize = 20.sp)
+            Spacer(Modifier.width(8.dp))
+            Text(
+                text = stringResource(R.string.smart_stats_hydration_volume, volumeMl),
                 style = MaterialTheme.typography.bodyMedium
             )
         }

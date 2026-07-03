@@ -120,4 +120,46 @@ class StatsInsightServiceTest {
 
         assertEquals(TimeOfDayInsightResult.InsufficientData, result)
     }
+
+    private fun entryOf(amount: Int, drinkType: DrinkType) = WaterEntry(
+        timestampMillis = 0L,
+        amount = amount,
+        drinkType = drinkType
+    )
+
+    @Test
+    fun calculateHydrationVolumeMl_물만있으면환산없이그대로합산한다() {
+        val entries = listOf(entryOf(200, DrinkType.WATER), entryOf(200, DrinkType.WATER))
+
+        val result = StatsInsightService.calculateHydrationVolumeMl(entries)
+
+        assertEquals(400, result)
+    }
+
+    @Test
+    fun calculateHydrationVolumeMl_음료별환산율을적용해합산한다() {
+        // 물 200ml(1.0) + 커피 200ml(0.7) = 200 + 140 = 340
+        val entries = listOf(entryOf(200, DrinkType.WATER), entryOf(200, DrinkType.COFFEE))
+
+        val result = StatsInsightService.calculateHydrationVolumeMl(entries)
+
+        assertEquals(340, result)
+    }
+
+    @Test
+    fun calculateHydrationVolumeMl_소수점은반올림한다() {
+        // 333ml * 0.85(JUICE) = 283.05 -> 283
+        val entries = listOf(entryOf(333, DrinkType.JUICE))
+
+        val result = StatsInsightService.calculateHydrationVolumeMl(entries)
+
+        assertEquals(283, result)
+    }
+
+    @Test
+    fun calculateHydrationVolumeMl_엔트리가없으면0이다() {
+        val result = StatsInsightService.calculateHydrationVolumeMl(emptyList())
+
+        assertEquals(0, result)
+    }
 }

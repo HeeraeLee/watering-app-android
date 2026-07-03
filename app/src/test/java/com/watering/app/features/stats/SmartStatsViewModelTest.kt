@@ -130,4 +130,22 @@ class SmartStatsViewModelTest {
             assertEquals(3, todayAchievement?.totalCount)
         }
     }
+
+    @Test
+    fun uiState_오늘의수분환산량을음료별환산율을적용해계산한다() = runTest(mainDispatcherRule.testDispatcher) {
+        // 물 200ml(1.0) + 커피 200ml(0.7) = 200 + 140 = 340ml
+        val today = DayRecord(
+            dateKey = todayKey,
+            entries = listOf(
+                WaterEntry(timestampMillis = 0L, amount = 200, drinkType = DrinkType.WATER),
+                WaterEntry(timestampMillis = 0L, amount = 200, drinkType = DrinkType.COFFEE)
+            ),
+            goal = 8
+        )
+        val viewModel = createViewModel(today = today)
+
+        viewModel.uiState.test {
+            assertEquals(340, awaitItem().todayHydrationVolumeMl)
+        }
+    }
 }

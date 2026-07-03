@@ -1,8 +1,10 @@
 package com.watering.app.core.service
 
 import com.watering.app.core.model.DayRecord
+import com.watering.app.core.model.WaterEntry
 import java.time.Instant
 import java.time.ZoneId
+import kotlin.math.roundToInt
 
 // 데이터 부족(기록일 미달)과 패턴 없음(데이터는 충분하지만 고르게 마심)은 사용자에게 다른 의미라
 // 별개 결과로 구분한다 — 후자를 "데이터가 더 필요해요"로 뭉뚱그리면 이미 규칙적인 사용자에게
@@ -53,4 +55,10 @@ object StatsInsightService {
 
     private fun hourOf(timestampMillis: Long): Int =
         Instant.ofEpochMilli(timestampMillis).atZone(ZoneId.systemDefault()).hour
+
+    // 잔 수 기반 목표 달성(totalCount/isAchieved)은 그대로 두고, 실제 수분 섭취량은 정보성
+    // 지표로만 별도 계산 — 커피 한 잔을 물 한 잔과 다르게 취급해 기존 달성/스트릭 로직에
+    // 영향을 주지 않기 위함.
+    fun calculateHydrationVolumeMl(entries: List<WaterEntry>): Int =
+        entries.sumOf { it.amount * it.drinkType.hydrationRate }.roundToInt()
 }

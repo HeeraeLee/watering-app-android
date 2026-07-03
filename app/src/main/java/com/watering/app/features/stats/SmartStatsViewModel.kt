@@ -21,7 +21,9 @@ data class SmartStatsUiState(
     val monthStats: List<DayStat> = emptyList(),
     val insight: TimeOfDayInsightResult = TimeOfDayInsightResult.InsufficientData,
     // 최근 365일, 기록 없는 날은 null (히트맵에서 빈 칸으로 표시)
-    val annualDays: List<DailyAchievement?> = emptyList()
+    val annualDays: List<DailyAchievement?> = emptyList(),
+    // 음료별 수분 환산율(DrinkType.hydrationRate) 적용한 정보성 지표 — 잔 수 기반 목표/달성과는 무관
+    val todayHydrationVolumeMl: Int = 0
 )
 
 @HiltViewModel
@@ -71,6 +73,13 @@ class SmartStatsViewModel @Inject constructor(
             if (key == today.dateKey) todayAchievement else annualHistory[key]
         }
 
-        SmartStatsUiState(monthStats = monthStats, insight = insight, annualDays = annualDays)
+        val todayHydrationVolumeMl = StatsInsightService.calculateHydrationVolumeMl(today.entries)
+
+        SmartStatsUiState(
+            monthStats = monthStats,
+            insight = insight,
+            annualDays = annualDays,
+            todayHydrationVolumeMl = todayHydrationVolumeMl
+        )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SmartStatsUiState())
 }
