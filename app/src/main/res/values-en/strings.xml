@@ -95,6 +95,14 @@
     <string name="stats_weekly_total_value">%1$d glasses</string>
     <string name="stats_streak_section">Streak</string>
     <string name="stats_goal_line">Goal: %1$d glasses</string>
+    <string name="smart_stats_title">Smart Stats</string>
+    <string name="stats_smart_cta_description">Check your 30-day trend and annual record</string>
+    <string name="smart_stats_month_trend_title">30-Day Trend</string>
+    <string name="smart_stats_annual_title">Annual Record</string>
+    <string name="smart_stats_insight_template">You often miss it between %1$d:00–%2$d:00</string>
+    <string name="smart_stats_insight_placeholder">Not enough data yet to find a pattern</string>
+    <string name="smart_stats_insight_no_pattern">No particular time you tend to miss — you\'re staying consistent!</string>
+    <string name="feature_smart_stats_description">See your 30-day trend and time-of-day patterns</string>
     <string-array name="weekday_labels_short">
         <item>Sun</item>
         <item>Mon</item>

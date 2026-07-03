@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.watering.app.core.model.DailyAchievement
 import com.watering.app.core.model.DayRecord
 import com.watering.app.core.model.DrinkType
 import com.watering.app.core.model.StreakInfo
@@ -45,7 +46,8 @@ class WaterDataStore @Inject constructor(
     private object Keys {
         val TODAY_RECORD = stringPreferencesKey("today_record")
         val STREAK_INFO = stringPreferencesKey("streak_info")
-        val HISTORY = stringPreferencesKey("record_history")   // JSON map
+        val HISTORY = stringPreferencesKey("record_history")   // JSON map, 상세 90일
+        val ANNUAL_HISTORY = stringPreferencesKey("annual_history")   // JSON map, 경량 365일 집계
         val LAST_UPDATED = stringPreferencesKey("last_updated")
     }
 
@@ -81,6 +83,7 @@ class WaterDataStore @Inject constructor(
             prefs[Keys.LAST_UPDATED] = System.currentTimeMillis().toString()
         }
         archiveTodayToHistory(updated)
+        archiveToAnnualHistory(updated)
         return updated
     }
 
@@ -120,6 +123,31 @@ class WaterDataStore @Inject constructor(
                 .associate { it.key to it.value }
             prefs[Keys.HISTORY] = json.encodeToString(updated)
         }
+    }
+
+    // 연간 통계(히트맵)용 — 90일 상세 이력과 별개로, 엔트리 상세 없이 일별 집계만 365일치 보관한다
+    // (엔트리 전체를 1년치 담으면 Preferences 쓰기마다 커지는 blob을 통째로 재저장해야 해 지연 우려가 있음)
+    private suspend fun archiveToAnnualHistory(record: DayRecord) {
+        editSafely { prefs ->
+            val existing = prefs[Keys.ANNUAL_HISTORY]
+                ?.let { runCatching { json.decodeFromString<Map<String, DailyAchievement>>(it) }.getOrNull() }
+                ?: emptyMap()
+            val achievement = DailyAchievement(
+                dateKey = record.dateKey,
+                totalCount = record.totalCount,
+                goal = record.goal
+            )
+            val updated = (existing + (record.dateKey to achievement))
+                .entries.sortedByDescending { it.key }.take(365)
+                .associate { it.key to it.value }
+            prefs[Keys.ANNUAL_HISTORY] = json.encodeToString(updated)
+        }
+    }
+
+    fun getAnnualHistory(): Flow<Map<String, DailyAchievement>> = context.waterDataStore.data.map { prefs ->
+        prefs[Keys.ANNUAL_HISTORY]
+            ?.let { runCatching { json.decodeFromString<Map<String, DailyAchievement>>(it) }.getOrNull() }
+            ?: emptyMap()
     }
 
     suspend fun resetTodayRecord() {

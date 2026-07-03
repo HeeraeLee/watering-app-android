@@ -95,6 +95,14 @@
     <string name="stats_weekly_total_value">%1$d잔</string>
     <string name="stats_streak_section">연속 기록</string>
     <string name="stats_goal_line">목표: %1$d잔</string>
+    <string name="smart_stats_title">스마트 통계</string>
+    <string name="stats_smart_cta_description">30일 트렌드와 연간 기록을 확인해보세요</string>
+    <string name="smart_stats_month_trend_title">30일 트렌드</string>
+    <string name="smart_stats_annual_title">연간 기록</string>
+    <string name="smart_stats_insight_template">%1$d시~%2$d시에 자주 놓쳐요</string>
+    <string name="smart_stats_insight_placeholder">아직 패턴을 찾을 데이터가 부족해요</string>
+    <string name="smart_stats_insight_no_pattern">특별히 놓치는 시간대가 없어요. 고르게 잘 마시고 있어요!</string>
+    <string name="feature_smart_stats_description">30일 트렌드와 시간대별 패턴을 확인하세요</string>
     <string-array name="weekday_labels_short">
         <item>일</item>
         <item>월</item>

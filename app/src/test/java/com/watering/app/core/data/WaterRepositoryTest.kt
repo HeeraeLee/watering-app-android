@@ -1,13 +1,17 @@
 package com.watering.app.core.data
 
+import app.cash.turbine.test
 import com.watering.app.core.datastore.WaterDataStore
+import com.watering.app.core.model.DailyAchievement
 import com.watering.app.core.model.DayRecord
 import com.watering.app.core.model.StreakInfo
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -191,5 +195,17 @@ class WaterRepositoryTest {
         repository.clearAllData()
 
         coVerify { dataStore.clearAllData() }
+    }
+
+    @Test
+    fun getAnnualHistory_dataStore의연간이력을그대로전달한다() = runTest {
+        val annualHistory = mapOf(
+            todayKey to DailyAchievement(dateKey = todayKey, totalCount = 8, goal = 8)
+        )
+        every { dataStore.getAnnualHistory() } returns MutableStateFlow(annualHistory)
+
+        repository.getAnnualHistory().test {
+            assertEquals(annualHistory, awaitItem())
+        }
     }
 }

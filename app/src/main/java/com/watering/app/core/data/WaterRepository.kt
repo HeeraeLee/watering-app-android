@@ -1,5 +1,6 @@
 package com.watering.app.core.data
 
+import com.watering.app.core.model.DailyAchievement
 import com.watering.app.core.model.DayRecord
 import com.watering.app.core.model.DrinkType
 import com.watering.app.core.model.StreakInfo
@@ -20,6 +21,7 @@ class WaterRepository @Inject constructor(
     val todayRecord: Flow<DayRecord> = dataStore.todayRecord
     val streakInfo: Flow<StreakInfo> = dataStore.streakInfo
     fun getHistory(): Flow<Map<String, DayRecord>> = dataStore.getHistory()
+    fun getAnnualHistory(): Flow<Map<String, DailyAchievement>> = dataStore.getAnnualHistory()
 
     suspend fun addEntry(amount: Int, drinkType: DrinkType, goal: Int): DayRecord =
         dataStore.addEntry(amount, drinkType, goal)

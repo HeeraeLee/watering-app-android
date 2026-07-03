@@ -15,6 +15,7 @@ import com.watering.app.features.home.HomeViewModel
 import com.watering.app.features.onboarding.OnboardingScreen
 import com.watering.app.features.onboarding.OnboardingViewModel
 import com.watering.app.features.settings.SettingsScreen
+import com.watering.app.features.stats.SmartStatsScreen
 import com.watering.app.features.stats.StatsScreen
 import com.watering.app.features.premium.PremiumScreen
 
@@ -22,6 +23,7 @@ sealed class Screen(val route: String) {
     object Onboarding : Screen("onboarding")
     object Home : Screen("home")
     object Stats : Screen("stats")
+    object SmartStats : Screen("smart_stats")
     object Settings : Screen("settings")
     object Premium : Screen("premium")
 }
@@ -68,7 +70,14 @@ fun WateringNavGraph(
             )
         }
         composable(Screen.Stats.route) {
-            StatsScreen(onBack = { navController.popBackStack() })
+            StatsScreen(
+                onBack = { navController.popBackStack() },
+                onNavigateToSmartStats = { navController.navigate(Screen.SmartStats.route) },
+                onNavigateToPremium = { navController.navigate(Screen.Premium.route) }
+            )
+        }
+        composable(Screen.SmartStats.route) {
+            SmartStatsScreen(onBack = { navController.popBackStack() })
         }
         composable(Screen.Settings.route) {
             SettingsScreen(
