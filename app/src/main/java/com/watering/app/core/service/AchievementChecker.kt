@@ -11,7 +11,8 @@ import javax.inject.Singleton
 
 @Singleton
 class AchievementChecker @Inject constructor(
-    private val dataStore: AchievementDataStore
+    private val dataStore: AchievementDataStore,
+    private val analyticsService: AnalyticsService
 ) {
     private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
@@ -56,6 +57,7 @@ class AchievementChecker @Inject constructor(
     private suspend fun emit(dateKey: String, achievement: Achievement): Achievement? {
         if (dataStore.isAlreadyEarned(dateKey, achievement)) return null
         dataStore.markEarned(dateKey, achievement)
+        analyticsService.logAchievementUnlocked(achievement.name)
         return achievement
     }
 }

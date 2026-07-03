@@ -10,6 +10,7 @@ import com.watering.app.core.model.DrinkType
 import com.watering.app.core.model.StreakInfo
 import com.watering.app.core.model.UserSettings
 import com.watering.app.core.service.AchievementChecker
+import com.watering.app.core.service.AnalyticsService
 import com.watering.app.core.service.ReviewService
 import com.watering.app.core.service.WaterService
 import com.watering.app.testutil.MainDispatcherRule
@@ -34,6 +35,7 @@ class HomeViewModelTest {
     private lateinit var settingsRepository: SettingsRepository
     private lateinit var achievementChecker: AchievementChecker
     private lateinit var reviewService: ReviewService
+    private lateinit var analyticsService: AnalyticsService
 
     private val record = DayRecord(dateKey = "2026-07-02", goal = 8)
     private val streak = StreakInfo(currentStreak = 2)
@@ -50,7 +52,8 @@ class HomeViewModelTest {
         }
         achievementChecker = mockk()
         reviewService = mockk(relaxed = true)
-        return HomeViewModel(waterService, waterRepository, settingsRepository, achievementChecker, reviewService)
+        analyticsService = mockk(relaxed = true)
+        return HomeViewModel(waterService, waterRepository, settingsRepository, achievementChecker, reviewService, analyticsService)
     }
 
     @Test

@@ -34,7 +34,8 @@ import javax.inject.Singleton
 @Singleton
 class BillingService @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    private val analyticsService: AnalyticsService
 ) : PurchasesUpdatedListener {
 
     companion object {
@@ -46,6 +47,9 @@ class BillingService @Inject constructor(
     }
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    // 취소/실패 콜백엔 어떤 상품을 시도했는지 정보가 없어, 구매 시작 시점의 상품 ID를 기억해둔다
+    private var lastAttemptedProductId: String? = null
 
     private val _products = MutableStateFlow<List<ProductDetails>>(emptyList())
     val products: StateFlow<List<ProductDetails>> = _products.asStateFlow()
@@ -142,11 +146,14 @@ class BillingService @Inject constructor(
 
         _isPremium.value = active
         settingsRepository.updatePremium(active)
+        analyticsService.setPremiumUserProperty(active)
 
         allPurchases.forEach { acknowledgeIfNeeded(it) }
     }
 
     fun launchPurchase(activity: Activity, productDetails: ProductDetails) {
+        lastAttemptedProductId = productDetails.productId
+        analyticsService.logPurchaseStarted(productDetails.productId)
         val paramsList = if (productDetails.productType == BillingClient.ProductType.SUBS) {
             // 무료체험 오퍼가 있으면 우선 선택 — Play는 가입 이력상 자격 없는 유저에게는 애초에 내려주지 않는다
             val offerToken = productDetails.trialOfferOrDefault()?.offerToken ?: run {
@@ -178,13 +185,23 @@ class BillingService @Inject constructor(
         _isPurchasing.value = false
         when (result.responseCode) {
             BillingClient.BillingResponseCode.OK -> {
+                purchases.orEmpty().forEach { purchase ->
+                    analyticsService.logPurchaseSuccess(purchase.products.firstOrNull() ?: "unknown")
+                }
                 scope.launch {
                     purchases.orEmpty().forEach { acknowledgeIfNeeded(it) }
                     queryPurchases()
                 }
             }
-            BillingClient.BillingResponseCode.USER_CANCELED -> Unit
-            else -> _errorMessage.value = result.debugMessage
+            BillingClient.BillingResponseCode.USER_CANCELED ->
+                analyticsService.logPurchaseCancelled(lastAttemptedProductId ?: "unknown")
+            else -> {
+                _errorMessage.value = result.debugMessage
+                analyticsService.logPurchaseFailed(
+                    lastAttemptedProductId ?: "unknown",
+                    result.responseCode.toString()
+                )
+            }
         }
     }
 

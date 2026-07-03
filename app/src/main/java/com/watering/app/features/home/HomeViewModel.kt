@@ -11,6 +11,7 @@ import com.watering.app.core.model.DrinkType
 import com.watering.app.core.model.StreakInfo
 import com.watering.app.core.model.UserSettings
 import com.watering.app.core.service.AchievementChecker
+import com.watering.app.core.service.AnalyticsService
 import com.watering.app.core.service.ReviewService
 import com.watering.app.core.service.WaterService
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -35,7 +36,8 @@ class HomeViewModel @Inject constructor(
     private val waterRepository: WaterRepository,
     private val settingsRepository: SettingsRepository,
     private val achievementChecker: AchievementChecker,
-    private val reviewService: ReviewService
+    private val reviewService: ReviewService,
+    private val analyticsService: AnalyticsService
 ) : ViewModel() {
 
     val uiState: StateFlow<HomeUiState> = combine(
@@ -67,6 +69,7 @@ class HomeViewModel @Inject constructor(
             )
             val streak = waterService.updateStreak(updated, current.streak, current.settings.isPremium)
             _snackbarMessage.value = "💧 +${current.settings.cupSize}ml 기록됐어요"
+            analyticsService.logRecordAdd(current.settings.cupSize, drinkType.name, source = "home")
             achievementChecker.check(prev, updated, streak)?.let { _pendingAchievement.value = it }
         }
     }
@@ -82,6 +85,7 @@ class HomeViewModel @Inject constructor(
             )
             val streak = waterService.updateStreak(updated, current.streak, current.settings.isPremium)
             _snackbarMessage.value = "${drinkType.emoji} ${drinkType.displayName} +${amount}ml 기록됐어요"
+            analyticsService.logRecordAdd(amount, drinkType.name, source = "home")
             achievementChecker.check(prev, updated, streak)?.let { _pendingAchievement.value = it }
         }
     }
@@ -98,6 +102,7 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             waterService.undoLastEntry(uiState.value.settings.dailyGoal)
             _snackbarMessage.value = null
+            analyticsService.logRecordUndo()
         }
     }
 

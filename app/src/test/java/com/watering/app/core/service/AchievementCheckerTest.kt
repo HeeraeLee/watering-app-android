@@ -16,12 +16,14 @@ import org.junit.Test
 class AchievementCheckerTest {
 
     private lateinit var dataStore: AchievementDataStore
+    private lateinit var analyticsService: AnalyticsService
     private lateinit var checker: AchievementChecker
 
     @Before
     fun setUp() {
         dataStore = mockk()
-        checker = AchievementChecker(dataStore)
+        analyticsService = mockk(relaxed = true)
+        checker = AchievementChecker(dataStore, analyticsService)
         coEvery { dataStore.isAlreadyEarned(any(), any()) } returns false
         coEvery { dataStore.markEarned(any(), any()) } returns Unit
     }

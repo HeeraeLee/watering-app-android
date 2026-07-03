@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.glance.currentState
 import com.watering.app.core.data.SettingsRepository
 import com.watering.app.core.data.WaterRepository
+import com.watering.app.core.service.AnalyticsService
 import com.watering.app.core.service.WaterService
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
@@ -40,6 +41,7 @@ interface WidgetEntryPoint {
     fun waterRepository(): WaterRepository
     fun settingsRepository(): SettingsRepository
     fun waterService(): WaterService
+    fun analyticsService(): AnalyticsService
 }
 
 suspend fun loadWidgetState(context: Context): WidgetState {

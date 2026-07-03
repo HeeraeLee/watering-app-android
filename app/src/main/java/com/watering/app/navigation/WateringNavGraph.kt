@@ -1,6 +1,7 @@
 package com.watering.app.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -8,6 +9,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.watering.app.core.service.AnalyticsService
 import com.watering.app.features.home.HomeScreen
 import com.watering.app.features.home.HomeViewModel
 import com.watering.app.features.onboarding.OnboardingScreen
@@ -27,10 +29,17 @@ sealed class Screen(val route: String) {
 @Composable
 fun WateringNavGraph(
     quickRecord: Boolean = false,
+    analyticsService: AnalyticsService,
     navController: NavHostController = rememberNavController()
 ) {
     val onboardingViewModel: OnboardingViewModel = hiltViewModel()
     val isOnboardingDone by onboardingViewModel.isOnboardingDone.collectAsStateWithLifecycle()
+
+    LaunchedEffect(navController) {
+        navController.currentBackStackEntryFlow.collect { entry ->
+            entry.destination.route?.let { analyticsService.logScreenView(it) }
+        }
+    }
 
     // DataStore 로드 전(null): 빈 화면 유지 — 보통 100ms 이내 해소
     if (isOnboardingDone == null) return

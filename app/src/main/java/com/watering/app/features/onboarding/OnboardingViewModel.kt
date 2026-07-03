@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.watering.app.core.data.SettingsRepository
 import com.watering.app.core.model.UserSettings
+import com.watering.app.core.service.AnalyticsService
 import com.watering.app.core.service.NotificationService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -16,7 +17,8 @@ import javax.inject.Inject
 @HiltViewModel
 class OnboardingViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
-    private val notificationService: NotificationService
+    private val notificationService: NotificationService,
+    private val analyticsService: AnalyticsService
 ) : ViewModel() {
 
     val isOnboardingDone: StateFlow<Boolean?> = settingsRepository.userSettings
@@ -35,6 +37,7 @@ class OnboardingViewModel @Inject constructor(
             if (notificationEnabled) {
                 notificationService.scheduleReminders(settings)
             }
+            analyticsService.logOnboardingComplete(dailyGoal, cupSize, notificationEnabled)
         }
     }
 }

@@ -3,6 +3,7 @@ package com.watering.app.features.onboarding
 import app.cash.turbine.test
 import com.watering.app.core.data.SettingsRepository
 import com.watering.app.core.model.UserSettings
+import com.watering.app.core.service.AnalyticsService
 import com.watering.app.core.service.NotificationService
 import com.watering.app.testutil.MainDispatcherRule
 import io.mockk.coEvery
@@ -24,6 +25,7 @@ class OnboardingViewModelTest {
 
     private lateinit var settingsRepository: SettingsRepository
     private lateinit var notificationService: NotificationService
+    private lateinit var analyticsService: AnalyticsService
     private lateinit var settingsFlow: MutableStateFlow<UserSettings>
 
     private fun createViewModel(): OnboardingViewModel {
@@ -33,7 +35,8 @@ class OnboardingViewModelTest {
             coEvery { updateSettings(any()) } returns Unit
         }
         notificationService = mockk(relaxed = true)
-        return OnboardingViewModel(settingsRepository, notificationService)
+        analyticsService = mockk(relaxed = true)
+        return OnboardingViewModel(settingsRepository, notificationService, analyticsService)
     }
 
     @Test
@@ -52,7 +55,8 @@ class OnboardingViewModelTest {
             every { userSettings } returns settingsFlow
         }
         notificationService = mockk(relaxed = true)
-        val viewModel = OnboardingViewModel(settingsRepository, notificationService)
+        analyticsService = mockk(relaxed = true)
+        val viewModel = OnboardingViewModel(settingsRepository, notificationService, analyticsService)
 
         viewModel.isOnboardingDone.test {
             assertEquals(true, awaitItem())
