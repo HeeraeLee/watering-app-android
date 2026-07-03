@@ -163,6 +163,13 @@
     <string name="settings_weight_goal_confirm_apply">Apply</string>
     <string name="settings_weight_goal_dialog_ok">OK</string>
     <string name="settings_section_recording">Recording</string>
+    <string name="settings_section_health">Health Sync</string>
+    <string name="settings_hydration_sync_title">Auto-Save to Health Connect</string>
+    <string name="settings_hydration_sync_subtitle">Save every drink to Health Connect as you log it</string>
+    <string name="settings_hydration_sync_not_available_title">Health Connect Required</string>
+    <string name="settings_hydration_sync_not_available_body">To turn on auto-save, please install (or update) the Health Connect app.</string>
+    <string name="settings_hydration_sync_permission_denied_title">Permission Needed</string>
+    <string name="settings_hydration_sync_permission_denied_body">Without Health Connect write permission, auto-save can\'t be turned on. This won\'t affect any other feature.</string>
     <string name="settings_section_notification">Notifications</string>
     <string name="settings_section_backup">Backup &amp; Restore</string>
     <string name="settings_notification_switch_title">Water Reminders</string>

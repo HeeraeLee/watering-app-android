@@ -104,6 +104,7 @@ fun SettingsScreen(
     val currentUser by backupViewModel.currentUser.collectAsStateWithLifecycle()
     val backupUiState by backupViewModel.backupUiState.collectAsStateWithLifecycle()
     val weightGoalUiState by viewModel.weightGoalUiState.collectAsStateWithLifecycle()
+    val hydrationSyncUiState by viewModel.hydrationSyncUiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val privacyPolicyUrl = stringResource(R.string.privacy_policy_url)
     var showResetDialog by remember { mutableStateOf(false) }
@@ -118,6 +119,18 @@ fun SettingsScreen(
     LaunchedEffect(weightGoalUiState) {
         if (weightGoalUiState is WeightGoalUiState.NeedsPermission) {
             weightPermissionLauncher.launch(HealthConnectService.WEIGHT_PERMISSIONS)
+        }
+    }
+
+    val hydrationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = viewModel.healthConnectPermissionContract()
+    ) { granted ->
+        viewModel.onHydrationPermissionResult(granted)
+    }
+
+    LaunchedEffect(hydrationSyncUiState) {
+        if (hydrationSyncUiState is HydrationSyncUiState.NeedsPermission) {
+            hydrationPermissionLauncher.launch(HealthConnectService.HYDRATION_PERMISSIONS)
         }
     }
 
@@ -172,6 +185,11 @@ fun SettingsScreen(
         uiState = weightGoalUiState,
         onDismiss = viewModel::dismissWeightGoalState,
         onApply = viewModel::applyRecommendedGoal
+    )
+
+    HydrationSyncDialogs(
+        uiState = hydrationSyncUiState,
+        onDismiss = viewModel::dismissHydrationSyncState
     )
 
     Scaffold(
@@ -236,6 +254,18 @@ fun SettingsScreen(
                     isPremium = settings.isPremium,
                     onClick = viewModel::requestWeightBasedGoal,
                     onLockedClick = onNavigateToPremium
+                )
+            }
+
+            item { SectionDivider() }
+            item { SectionHeader(stringResource(R.string.settings_section_health)) }
+
+            item {
+                SettingSwitchRow(
+                    title = stringResource(R.string.settings_hydration_sync_title),
+                    subtitle = stringResource(R.string.settings_hydration_sync_subtitle),
+                    checked = settings.healthConnectEnabled,
+                    onCheckedChange = viewModel::onHydrationSyncToggle
                 )
             }
 
@@ -757,6 +787,54 @@ private fun WeightGoalDialogs(
             dismissButton = {
                 TextButton(onClick = onDismiss) {
                     Text(stringResource(R.string.settings_dialog_cancel))
+                }
+            }
+        )
+    }
+}
+
+@Composable
+private fun HydrationSyncDialogs(
+    uiState: HydrationSyncUiState,
+    onDismiss: () -> Unit
+) {
+    val context = LocalContext.current
+
+    when (uiState) {
+        is HydrationSyncUiState.Idle, is HydrationSyncUiState.NeedsPermission -> Unit
+
+        is HydrationSyncUiState.NotAvailable -> AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { Text(stringResource(R.string.settings_hydration_sync_not_available_title)) },
+            text = { Text(stringResource(R.string.settings_hydration_sync_not_available_body)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    val intent = Intent(
+                        Intent.ACTION_VIEW,
+                        Uri.parse("market://details?id=com.google.android.apps.healthdata")
+                    )
+                    if (intent.resolveActivity(context.packageManager) != null) {
+                        context.startActivity(intent)
+                    }
+                    onDismiss()
+                }) {
+                    Text(stringResource(R.string.settings_weight_goal_open_play_store))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismiss) {
+                    Text(stringResource(R.string.settings_dialog_cancel))
+                }
+            }
+        )
+
+        is HydrationSyncUiState.PermissionDenied -> AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { Text(stringResource(R.string.settings_hydration_sync_permission_denied_title)) },
+            text = { Text(stringResource(R.string.settings_hydration_sync_permission_denied_body)) },
+            confirmButton = {
+                TextButton(onClick = onDismiss) {
+                    Text(stringResource(R.string.settings_weight_goal_dialog_ok))
                 }
             }
         )

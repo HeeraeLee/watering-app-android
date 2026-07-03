@@ -249,4 +249,86 @@ class SettingsViewModelTest {
             assertEquals(10, slot.captured.dailyGoal)
             assertEquals(WeightGoalUiState.Idle, viewModel.weightGoalUiState.value)
         }
+
+    @Test
+    fun onHydrationSyncToggle_false면바로저장하고끈다() = runTest(mainDispatcherRule.testDispatcher) {
+        val viewModel = createViewModel(UserSettings(healthConnectEnabled = true))
+        val slot = slot<UserSettings>()
+        coEvery { settingsRepository.updateSettings(capture(slot)) } returns Unit
+
+        viewModel.settings.test {
+            awaitItem()
+            viewModel.onHydrationSyncToggle(false)
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        assertEquals(false, slot.captured.healthConnectEnabled)
+    }
+
+    @Test
+    fun onHydrationSyncToggle_true인데SDK사용불가면NotAvailable상태가된다() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val viewModel = createViewModel()
+            every { healthConnectService.availability } returns HealthConnectAvailability.NOT_INSTALLED
+
+            viewModel.onHydrationSyncToggle(true)
+
+            assertEquals(
+                HydrationSyncUiState.NotAvailable(HealthConnectAvailability.NOT_INSTALLED),
+                viewModel.hydrationSyncUiState.value
+            )
+        }
+
+    @Test
+    fun onHydrationSyncToggle_true이고권한이미있으면바로저장한다() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val viewModel = createViewModel()
+            coEvery { healthConnectService.hasPermissions(HealthConnectService.HYDRATION_PERMISSIONS) } returns true
+            val slot = slot<UserSettings>()
+            coEvery { settingsRepository.updateSettings(capture(slot)) } returns Unit
+
+            viewModel.settings.test {
+                awaitItem()
+                viewModel.onHydrationSyncToggle(true)
+                cancelAndIgnoreRemainingEvents()
+            }
+
+            assertEquals(true, slot.captured.healthConnectEnabled)
+        }
+
+    @Test
+    fun onHydrationSyncToggle_true인데권한없으면NeedsPermission상태가된다() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val viewModel = createViewModel()
+            coEvery { healthConnectService.hasPermissions(HealthConnectService.HYDRATION_PERMISSIONS) } returns false
+
+            viewModel.onHydrationSyncToggle(true)
+
+            assertEquals(HydrationSyncUiState.NeedsPermission, viewModel.hydrationSyncUiState.value)
+        }
+
+    @Test
+    fun onHydrationPermissionResult_승인되면저장한다() = runTest(mainDispatcherRule.testDispatcher) {
+        val viewModel = createViewModel()
+        val slot = slot<UserSettings>()
+        coEvery { settingsRepository.updateSettings(capture(slot)) } returns Unit
+
+        viewModel.settings.test {
+            awaitItem()
+            viewModel.onHydrationPermissionResult(HealthConnectService.HYDRATION_PERMISSIONS)
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        assertEquals(true, slot.captured.healthConnectEnabled)
+    }
+
+    @Test
+    fun onHydrationPermissionResult_거부되면PermissionDenied상태가된다() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val viewModel = createViewModel()
+
+            viewModel.onHydrationPermissionResult(emptySet())
+
+            assertEquals(HydrationSyncUiState.PermissionDenied, viewModel.hydrationSyncUiState.value)
+        }
 }

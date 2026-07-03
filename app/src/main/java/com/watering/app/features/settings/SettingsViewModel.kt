@@ -36,6 +36,13 @@ sealed interface WeightGoalUiState {
     data class Recommended(val cups: Int, val weightKg: Double) : WeightGoalUiState
 }
 
+sealed interface HydrationSyncUiState {
+    data object Idle : HydrationSyncUiState
+    data object NeedsPermission : HydrationSyncUiState
+    data class NotAvailable(val availability: HealthConnectAvailability) : HydrationSyncUiState
+    data object PermissionDenied : HydrationSyncUiState
+}
+
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -126,6 +133,40 @@ class SettingsViewModel @Inject constructor(
 
     fun dismissWeightGoalState() {
         _weightGoalUiState.value = WeightGoalUiState.Idle
+    }
+
+    private val _hydrationSyncUiState = MutableStateFlow<HydrationSyncUiState>(HydrationSyncUiState.Idle)
+    val hydrationSyncUiState: StateFlow<HydrationSyncUiState> = _hydrationSyncUiState.asStateFlow()
+
+    fun onHydrationSyncToggle(enabled: Boolean) {
+        if (!enabled) {
+            update { it.copy(healthConnectEnabled = false) }
+            return
+        }
+        viewModelScope.launch {
+            val availability = healthConnectService.availability
+            if (availability != HealthConnectAvailability.AVAILABLE) {
+                _hydrationSyncUiState.value = HydrationSyncUiState.NotAvailable(availability)
+                return@launch
+            }
+            if (healthConnectService.hasPermissions(HealthConnectService.HYDRATION_PERMISSIONS)) {
+                update { it.copy(healthConnectEnabled = true) }
+            } else {
+                _hydrationSyncUiState.value = HydrationSyncUiState.NeedsPermission
+            }
+        }
+    }
+
+    fun onHydrationPermissionResult(granted: Set<String>) {
+        if (granted.containsAll(HealthConnectService.HYDRATION_PERMISSIONS)) {
+            update { it.copy(healthConnectEnabled = true) }
+        } else {
+            _hydrationSyncUiState.value = HydrationSyncUiState.PermissionDenied
+        }
+    }
+
+    fun dismissHydrationSyncState() {
+        _hydrationSyncUiState.value = HydrationSyncUiState.Idle
     }
 
     private fun update(refreshWidget: Boolean = false, transform: (UserSettings) -> UserSettings) {

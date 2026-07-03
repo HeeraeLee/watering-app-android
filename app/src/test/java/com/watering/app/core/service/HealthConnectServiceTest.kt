@@ -32,8 +32,8 @@ class HealthConnectServiceTest {
     }
 
     @Test
-    fun HYDRATION_PERMISSIONS_읽기와쓰기권한을모두포함한다() {
-        assertEquals(2, HealthConnectService.HYDRATION_PERMISSIONS.size)
+    fun HYDRATION_PERMISSIONS_쓰기권한만포함한다() {
+        assertEquals(1, HealthConnectService.HYDRATION_PERMISSIONS.size)
     }
 
     @Test
