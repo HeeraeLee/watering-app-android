@@ -25,6 +25,7 @@ class BackupViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
+    private lateinit var context: Context
     private lateinit var currentUserFlow: MutableStateFlow<FirebaseUser?>
     private lateinit var authService: AuthService
     private lateinit var backupService: BackupService
@@ -37,6 +38,7 @@ class BackupViewModelTest {
 
     @Before
     fun setUp() {
+        context = mockk(relaxed = true)
         currentUserFlow = MutableStateFlow(null)
         authService = mockk {
             every { currentUser } returns currentUserFlow
@@ -47,7 +49,7 @@ class BackupViewModelTest {
 
     private fun createViewModel(initialUser: FirebaseUser? = null): BackupViewModel {
         currentUserFlow.value = initialUser
-        return BackupViewModel(authService, backupService)
+        return BackupViewModel(context, authService, backupService)
     }
 
     @Test

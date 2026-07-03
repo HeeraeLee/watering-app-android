@@ -33,6 +33,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
@@ -40,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.watering.app.R
 import com.watering.app.core.model.Achievement
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -128,7 +130,7 @@ fun AchievementDialog(
                         )
                         Spacer(Modifier.height(20.dp))
                         Text(
-                            text = achievement.title,
+                            text = stringResource(achievement.titleRes),
                             fontSize = 26.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF00B4D8),
@@ -137,7 +139,7 @@ fun AchievementDialog(
                         )
                         Spacer(Modifier.height(10.dp))
                         Text(
-                            text = achievement.message,
+                            text = stringResource(achievement.messageRes),
                             fontSize = 16.sp,
                             color = Color.White.copy(alpha = 0.7f),
                             textAlign = TextAlign.Center,
@@ -145,7 +147,7 @@ fun AchievementDialog(
                         )
                         Spacer(Modifier.height(32.dp))
                         Text(
-                            text = "탭해서 닫기",
+                            text = stringResource(R.string.achievement_dismiss_hint),
                             fontSize = 13.sp,
                             color = Color.White.copy(alpha = 0.3f),
                             modifier = Modifier

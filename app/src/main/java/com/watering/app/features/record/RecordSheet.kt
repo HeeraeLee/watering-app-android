@@ -19,11 +19,13 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.watering.app.R
 import com.watering.app.core.model.DrinkType
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -48,13 +50,13 @@ fun RecordSheet(
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             Text(
-                text = "음료 기록",
+                text = stringResource(R.string.record_sheet_title),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
 
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text("음료 종류", style = MaterialTheme.typography.labelLarge,
+                Text(stringResource(R.string.record_drink_type_label), style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
                 DrinkTypeSelector(
                     selected = uiState.selectedDrinkType,
@@ -63,7 +65,7 @@ fun RecordSheet(
             }
 
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text("양", style = MaterialTheme.typography.labelLarge,
+                Text(stringResource(R.string.record_amount_label), style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
                 AmountSelector(
                     presets = viewModel.presetAmounts,
@@ -87,7 +89,12 @@ fun RecordSheet(
                     .height(52.dp)
             ) {
                 Text(
-                    text = "${uiState.selectedDrinkType.emoji} ${uiState.selectedDrinkType.displayName} ${uiState.selectedAmount}ml 기록하기",
+                    text = stringResource(
+                        R.string.record_button,
+                        uiState.selectedDrinkType.emoji,
+                        stringResource(uiState.selectedDrinkType.displayNameRes),
+                        uiState.selectedAmount
+                    ),
                     fontWeight = FontWeight.SemiBold
                 )
             }
@@ -110,7 +117,7 @@ private fun DrinkTypeSelector(
             FilterChip(
                 selected = type == selected,
                 onClick = { onSelect(type) },
-                label = { Text("${type.emoji} ${type.displayName}") }
+                label = { Text("${type.emoji} ${stringResource(type.displayNameRes)}") }
             )
         }
     }
@@ -142,7 +149,7 @@ private fun AmountSelector(
         FilterChip(
             selected = isCustom,
             onClick = onToggleCustom,
-            label = { Text("직접 입력") }
+            label = { Text(stringResource(R.string.record_custom_input)) }
         )
     }
 
@@ -150,7 +157,7 @@ private fun AmountSelector(
         OutlinedTextField(
             value = customText,
             onValueChange = onCustomTextChange,
-            label = { Text("직접 입력") },
+            label = { Text(stringResource(R.string.record_custom_input)) },
             suffix = { Text("ml") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             singleLine = true,

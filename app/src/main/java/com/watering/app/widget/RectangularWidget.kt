@@ -66,10 +66,10 @@ private fun RectangularWidgetContent(state: WidgetState) {
     val rate = state.achievementRate.coerceIn(0.0, 1.0).toFloat()
     val barWidth = (size.width - 32.dp) * rate
     val motivationText = when {
-        isAchieved                   -> "목표 달성! 🎉"
-        state.achievementRate >= 0.7 -> "거의 다 왔어요!"
-        state.achievementRate >= 0.3 -> "잘 하고 있어요"
-        else                         -> "물 마실 시간이에요 💧"
+        isAchieved                   -> context.getString(R.string.label_goal_achieved_banner)
+        state.achievementRate >= 0.7 -> context.getString(R.string.widget_motivation_almost_there)
+        state.achievementRate >= 0.3 -> context.getString(R.string.widget_motivation_keep_going)
+        else                         -> context.getString(R.string.widget_motivation_time_to_drink)
     }
 
     val bgColor = if (isDark) DarkBg else Color.White
@@ -100,7 +100,7 @@ private fun RectangularWidgetContent(state: WidgetState) {
                 )
                 Spacer(GlanceModifier.width(4.dp))
                 Text(
-                    text = "워터링",
+                    text = context.getString(R.string.widget_app_label),
                     style = TextStyle(color = ColorProvider(accent), fontSize = 11.sp)
                 )
             }
@@ -119,7 +119,7 @@ private fun RectangularWidgetContent(state: WidgetState) {
                 )
                 Spacer(GlanceModifier.width(5.dp))
                 Text(
-                    text = "/ ${state.goal} 잔",
+                    text = context.getString(R.string.glasses_with_slash, state.goal),
                     style = TextStyle(color = ColorProvider(secondaryText), fontSize = 14.sp)
                 )
                 Spacer(GlanceModifier.defaultWeight())

@@ -13,13 +13,160 @@
     <string name="notification_achievement_title">🎉 목표 달성!</string>
     <string name="notification_achievement_body">오늘 하루 수분 섭취 목표를 달성했어요. 대단해요!</string>
 
-    <!-- 음료 종류 -->
+    <!-- 음료 종류 (DrinkType.displayNameRes) -->
     <string name="drink_water">물</string>
     <string name="drink_coffee">커피</string>
     <string name="drink_tea">차</string>
     <string name="drink_juice">주스</string>
     <string name="drink_milk">우유</string>
     <string name="drink_other">기타</string>
+
+    <!-- 여러 화면에서 공유하는 문구 -->
+    <string name="content_description_back">뒤로</string>
+    <string name="label_current_streak">현재 연속</string>
+    <string name="label_longest_streak">최장 연속</string>
+    <string name="label_goal_achieved_banner">목표 달성! 🎉</string>
+    <string name="label_daily_goal">하루 목표</string>
+    <string name="label_cup_size">컵 크기</string>
+    <string name="content_description_goal_decrease">목표 감소</string>
+    <string name="content_description_goal_increase">목표 증가</string>
+    <string name="glasses_with_slash">/ %1$d잔</string>
+    <string name="glasses_count">%1$d잔</string>
+    <string name="streak_days_value">%1$d일</string>
+    <string name="feature_streak_protection_title">연속 기록 보호</string>
+    <string name="feature_streak_protection_description">한 달에 하루 놓쳐도 연속 기록이 유지돼요</string>
+
+    <!-- 성취 다이얼로그 (Achievement.titleRes / messageRes) -->
+    <string name="achievement_first_sip_title">시작의 한 모금</string>
+    <string name="achievement_first_sip_message">오늘의 첫 물을 마셨어요!</string>
+    <string name="achievement_half_way_title">반환점 돌파!</string>
+    <string name="achievement_half_way_message">목표의 절반을 채웠어요</string>
+    <string name="achievement_goal_achieved_title">오늘 하루 완벽했어요</string>
+    <string name="achievement_goal_achieved_message">오늘 목표를 달성했어요!</string>
+    <string name="achievement_streak_3_title">3일 연속 달성!</string>
+    <string name="achievement_streak_3_message">3일 연속으로 목표를 달성했어요</string>
+    <string name="achievement_streak_7_title">일주일 챔피언</string>
+    <string name="achievement_streak_7_message">7일 연속으로 목표를 달성했어요</string>
+    <string name="achievement_streak_30_title">한 달 레전드</string>
+    <string name="achievement_streak_30_message">30일 연속으로 목표를 달성했어요</string>
+    <string name="achievement_dismiss_hint">탭해서 닫기</string>
+
+    <!-- 홈 화면 -->
+    <string name="home_title">오늘</string>
+    <string name="home_drink_water_button">물 마셨어요 💧</string>
+    <string name="home_select_other_drink">다른 음료 선택</string>
+    <string name="home_today_record">오늘 기록</string>
+    <string name="home_undo_last">마지막 취소</string>
+    <string name="home_empty_record">아직 기록이 없어요.\n물을 마시고 기록해 보세요!</string>
+    <string name="home_snackbar_undo_action">취소</string>
+    <string name="home_snackbar_water_recorded">💧 +%1$dml 기록됐어요</string>
+    <string name="home_snackbar_drink_recorded">%1$s %2$s +%3$dml 기록됐어요</string>
+
+    <!-- 음료 기록 바텀시트 -->
+    <string name="record_sheet_title">음료 기록</string>
+    <string name="record_drink_type_label">음료 종류</string>
+    <string name="record_amount_label">양</string>
+    <string name="record_button">%1$s %2$s %3$dml 기록하기</string>
+    <string name="record_custom_input">직접 입력</string>
+
+    <!-- 온보딩 -->
+    <string name="onboarding_next">다음</string>
+    <string name="onboarding_start">시작하기 🚀</string>
+    <string name="onboarding_welcome_title">워터링에\n오신 것을 환영해요!</string>
+    <string name="onboarding_welcome_subtitle">잠금화면에서 한 번의 탭으로\n물 마시기를 기록하세요.</string>
+    <string name="onboarding_feature_widget">잠금화면 위젯으로 빠른 기록</string>
+    <string name="onboarding_feature_notification">맞춤형 수분 섭취 알림</string>
+    <string name="onboarding_feature_streak">연속 기록으로 동기부여</string>
+    <string name="onboarding_goal_title">목표를 설정해요</string>
+    <string name="onboarding_goal_subtitle">하루에 몇 잔을 마실지 정해보세요.</string>
+    <string name="onboarding_daily_total">하루 총 %1$dml 목표</string>
+    <string name="onboarding_notification_title">알림을 설정해요</string>
+    <string name="onboarding_notification_subtitle">수분 섭취를 잊지 않도록\n알려드릴게요.</string>
+    <string name="onboarding_notification_hint">알림 간격은 설정에서 언제든지 변경할 수 있어요.</string>
+
+    <!-- 통계 화면 -->
+    <string name="stats_title">통계</string>
+    <string name="stats_this_week_record">이번 주 기록</string>
+    <string name="stats_weekly_avg">주간 평균</string>
+    <string name="stats_weekly_avg_value">%1$.1f잔</string>
+    <string name="stats_goal_days">달성한 날</string>
+    <string name="stats_goal_days_value">%1$d / 7일</string>
+    <string name="stats_weekly_total">이번 주 총량</string>
+    <string name="stats_weekly_total_value">%1$d잔</string>
+    <string name="stats_streak_section">연속 기록</string>
+    <string name="stats_goal_line">목표: %1$d잔</string>
+    <string-array name="weekday_labels_short">
+        <item>일</item>
+        <item>월</item>
+        <item>화</item>
+        <item>수</item>
+        <item>목</item>
+        <item>금</item>
+        <item>토</item>
+    </string-array>
+
+    <!-- 프리미엄 화면 -->
+    <string name="premium_error_title">오류</string>
+    <string name="premium_error_confirm">확인</string>
+    <string name="premium_top_bar_title">프리미엄</string>
+    <string name="premium_already_active">이미 프리미엄을 이용 중이에요</string>
+    <string name="premium_header_title">워터링 프리미엄</string>
+    <string name="premium_header_subtitle">건강한 수분 섭취 습관을\n더 깊이 있게 관리해보세요</string>
+    <string name="premium_plan_monthly">월간</string>
+    <string name="premium_plan_yearly">연간</string>
+    <string name="premium_plan_lifetime">평생</string>
+    <string name="premium_badge_free_trial">7일 무료체험</string>
+    <string name="premium_badge_yearly_discount">47% 할인</string>
+    <string name="premium_badge_lifetime_best">최고 혜택</string>
+    <string name="premium_trial_price_line">%1$d일 무료체험 후 %2$s</string>
+    <string name="premium_suffix_monthly"> / 월</string>
+    <string name="premium_suffix_yearly"> / 년</string>
+    <string name="premium_suffix_lifetime"> (일회성)</string>
+    <string name="premium_loading">불러오는 중…</string>
+    <string name="premium_start_button">프리미엄 시작하기</string>
+    <string name="premium_restore_button">구매 복원</string>
+    <string name="premium_legal_text">결제는 Google Play 계정을 통해 청구돼요.\n구독은 만료 24시간 전 자동 갱신되며,\nGoogle Play 앱 &gt; 구독에서 언제든 해지할 수 있어요.</string>
+
+    <!-- 설정 화면 -->
+    <string name="settings_title">설정</string>
+    <string name="settings_restore_confirm_title">복원하시겠어요?</string>
+    <string name="settings_restore_confirm_body">기기에 저장된 현재 기록이 클라우드 백업 내용으로 덮어써집니다.\n이 작업은 되돌릴 수 없습니다.</string>
+    <string name="settings_restore_confirm_button">복원</string>
+    <string name="settings_dialog_cancel">취소</string>
+    <string name="settings_reset_confirm_title">모든 기록 초기화</string>
+    <string name="settings_reset_confirm_body">오늘까지의 모든 물 마시기 기록이 삭제됩니다.\n이 작업은 되돌릴 수 없습니다.</string>
+    <string name="settings_reset_confirm_button">초기화</string>
+    <string name="settings_reset_button">모든 기록 초기화</string>
+    <string name="settings_section_recording">기록 설정</string>
+    <string name="settings_section_notification">알림 설정</string>
+    <string name="settings_section_backup">백업 및 복원</string>
+    <string name="settings_notification_switch_title">물 마시기 알림</string>
+    <string name="settings_notification_switch_subtitle">정해진 간격마다 물 마시기를 알려드려요</string>
+    <string name="settings_notification_start">알림 시작</string>
+    <string name="settings_notification_end">알림 종료</string>
+    <string name="settings_premium_active">프리미엄 이용 중</string>
+    <string name="settings_premium_upgrade">프리미엄으로 업그레이드</string>
+    <string name="settings_notification_permission_title">알림 권한이 필요해요</string>
+    <string name="settings_notification_permission_body">설정 &gt; 앱 &gt; 알림에서 허용해주세요</string>
+    <string name="settings_notification_permission_open">설정 열기</string>
+    <string name="settings_backup_signed_in_default">로그인됨</string>
+    <string name="settings_backup_last_backup">마지막 백업: %1$s</string>
+    <string name="settings_backup_none">백업 기록 없음</string>
+    <string name="settings_backup_signed_out_body">구글 계정으로 로그인하면 기록을 클라우드에 백업할 수 있어요</string>
+    <string name="settings_backup_signed_out_hint">백업은 실시간 동기화가 아니에요. 여러 기기를 쓰신다면 최신 기기에서 백업해주세요</string>
+    <string name="settings_backup_sign_out">로그아웃</string>
+    <string name="settings_backup_sign_in">구글로 로그인</string>
+    <string name="settings_backup_now">지금 백업하기</string>
+    <string name="settings_backup_restore">복원하기</string>
+    <string name="settings_interval_label">알림 간격</string>
+    <string name="settings_interval_30min">30분</string>
+    <string name="settings_interval_1hour">1시간</string>
+    <string name="settings_interval_2hour">2시간</string>
+    <string name="settings_interval_3hour">3시간</string>
+    <string name="settings_interval_4hour">4시간</string>
+    <string name="settings_hour_decrease_content_description">1시간 감소</string>
+    <string name="settings_hour_increase_content_description">1시간 증가</string>
+    <string name="settings_feedback_email_subject">워터링 의견</string>
 
     <!-- 앱 정보 -->
     <string name="settings_app_info">앱 정보</string>
@@ -28,8 +175,20 @@
     <string name="settings_send_feedback">의견 보내기</string>
     <string name="support_email" translatable="false">wateringapp.help@gmail.com</string>
 
+    <!-- 결제 -->
+    <string name="billing_error_product_unavailable">상품 정보를 불러오지 못했습니다.</string>
+
+    <!-- 백업/복원 오류 -->
+    <string name="backup_error_sign_in_failed">로그인에 실패했어요. 다시 시도해주세요</string>
+    <string name="backup_error_network">네트워크 연결을 확인해주세요</string>
+    <string name="backup_error_restore_failed">복원에 실패했어요. 네트워크 연결을 확인해주세요</string>
+
     <!-- 위젯 -->
     <string name="widget_circular_description">워터링 원형 위젯</string>
     <string name="widget_rectangular_description">워터링 직사각형 위젯</string>
     <string name="widget_narrow_description">워터링 좁은 위젯</string>
+    <string name="widget_app_label">워터링</string>
+    <string name="widget_motivation_almost_there">거의 다 왔어요!</string>
+    <string name="widget_motivation_keep_going">잘 하고 있어요</string>
+    <string name="widget_motivation_time_to_drink">물 마실 시간이에요 💧</string>
 </resources>

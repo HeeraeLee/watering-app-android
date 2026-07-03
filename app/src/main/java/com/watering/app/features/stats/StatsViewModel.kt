@@ -1,11 +1,14 @@
 package com.watering.app.features.stats
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.watering.app.R
 import com.watering.app.core.data.SettingsRepository
 import com.watering.app.core.data.WaterRepository
 import com.watering.app.core.model.DayRecord
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -33,6 +36,7 @@ data class StatsUiState(
 
 @HiltViewModel
 class StatsViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val waterRepository: WaterRepository,
     private val settingsRepository: SettingsRepository
 ) : ViewModel() {
@@ -44,7 +48,7 @@ class StatsViewModel @Inject constructor(
         settingsRepository.userSettings
     ) { history, today, streak, settings ->
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-        val dayLabels = listOf("일", "월", "화", "수", "목", "금", "토")
+        val dayLabels = context.resources.getStringArray(R.array.weekday_labels_short)
         val todayDate = LocalDate.now()
 
         val week = (6 downTo 0).map { offset ->

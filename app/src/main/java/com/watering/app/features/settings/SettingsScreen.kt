@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -105,19 +106,19 @@ fun SettingsScreen(
     if (showRestoreDialog) {
         AlertDialog(
             onDismissRequest = { showRestoreDialog = false },
-            title = { Text("복원하시겠어요?") },
-            text = { Text("기기에 저장된 현재 기록이 클라우드 백업 내용으로 덮어써집니다.\n이 작업은 되돌릴 수 없습니다.") },
+            title = { Text(stringResource(R.string.settings_restore_confirm_title)) },
+            text = { Text(stringResource(R.string.settings_restore_confirm_body)) },
             confirmButton = {
                 TextButton(onClick = {
                     backupViewModel.restore()
                     showRestoreDialog = false
                 }) {
-                    Text("복원", color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(R.string.settings_restore_confirm_button), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showRestoreDialog = false }) {
-                    Text("취소")
+                    Text(stringResource(R.string.settings_dialog_cancel))
                 }
             }
         )
@@ -126,19 +127,19 @@ fun SettingsScreen(
     if (showResetDialog) {
         AlertDialog(
             onDismissRequest = { showResetDialog = false },
-            title = { Text("모든 기록 초기화") },
-            text = { Text("오늘까지의 모든 물 마시기 기록이 삭제됩니다.\n이 작업은 되돌릴 수 없습니다.") },
+            title = { Text(stringResource(R.string.settings_reset_confirm_title)) },
+            text = { Text(stringResource(R.string.settings_reset_confirm_body)) },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.resetAllData()
                     showResetDialog = false
                 }) {
-                    Text("초기화", color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(R.string.settings_reset_confirm_button), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showResetDialog = false }) {
-                    Text("취소")
+                    Text(stringResource(R.string.settings_dialog_cancel))
                 }
             }
         )
@@ -147,10 +148,10 @@ fun SettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("설정") },
+                title = { Text(stringResource(R.string.settings_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "뒤로")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.content_description_back))
                     }
                 }
             )
@@ -170,7 +171,7 @@ fun SettingsScreen(
             }
             item { SectionDivider() }
 
-            item { SectionHeader("기록 설정") }
+            item { SectionHeader(stringResource(R.string.settings_section_recording)) }
 
             item {
                 DailyGoalSetting(
@@ -189,7 +190,7 @@ fun SettingsScreen(
             }
 
             item { SectionDivider() }
-            item { SectionHeader("알림 설정") }
+            item { SectionHeader(stringResource(R.string.settings_section_notification)) }
 
             if (settings.notificationEnabled && !notificationPermissionGranted) {
                 item {
@@ -210,8 +211,8 @@ fun SettingsScreen(
 
             item {
                 SettingSwitchRow(
-                    title = "물 마시기 알림",
-                    subtitle = "정해진 간격마다 물 마시기를 알려드려요",
+                    title = stringResource(R.string.settings_notification_switch_title),
+                    subtitle = stringResource(R.string.settings_notification_switch_subtitle),
                     checked = settings.notificationEnabled,
                     onCheckedChange = viewModel::updateNotificationEnabled
                 )
@@ -225,7 +226,7 @@ fun SettingsScreen(
                             onIntervalChange = viewModel::updateNotificationInterval
                         )
                         TimeAdjusterRow(
-                            label = "알림 시작",
+                            label = stringResource(R.string.settings_notification_start),
                             hour = settings.notificationStart,
                             onHourChange = { h ->
                                 if (h < settings.notificationEnd) viewModel.updateNotificationStart(h)
@@ -233,7 +234,7 @@ fun SettingsScreen(
                             range = 0..21
                         )
                         TimeAdjusterRow(
-                            label = "알림 종료",
+                            label = stringResource(R.string.settings_notification_end),
                             hour = settings.notificationEnd,
                             onHourChange = { h ->
                                 if (h > settings.notificationStart) viewModel.updateNotificationEnd(h)
@@ -245,7 +246,7 @@ fun SettingsScreen(
             }
 
             item { SectionDivider() }
-            item { SectionHeader("백업 및 복원") }
+            item { SectionHeader(stringResource(R.string.settings_section_backup)) }
 
             item {
                 BackupSection(
@@ -279,8 +280,9 @@ fun SettingsScreen(
             }
 
             item {
+                val feedbackSubject = stringResource(R.string.settings_feedback_email_subject)
                 TextButton(
-                    onClick = { context.sendSupportEmail(subject = "워터링 의견") },
+                    onClick = { context.sendSupportEmail(subject = feedbackSubject) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 8.dp, vertical = 4.dp)
@@ -302,7 +304,7 @@ fun SettingsScreen(
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                 ) {
                     Text(
-                        "모든 기록 초기화",
+                        stringResource(R.string.settings_reset_button),
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodyLarge
                     )
@@ -331,12 +333,12 @@ private fun PremiumSection(isPremium: Boolean, onClick: () -> Unit) {
         Spacer(Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                if (isPremium) "프리미엄 이용 중" else "프리미엄으로 업그레이드",
+                if (isPremium) stringResource(R.string.settings_premium_active) else stringResource(R.string.settings_premium_upgrade),
                 style = MaterialTheme.typography.bodyLarge
             )
             if (!isPremium) {
                 Text(
-                    "한 달에 하루 놓쳐도 연속 기록이 유지돼요",
+                    stringResource(R.string.feature_streak_protection_description),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -360,18 +362,18 @@ private fun NotificationPermissionBanner(onOpenSettings: () -> Unit) {
         Spacer(Modifier.width(10.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                "알림 권한이 필요해요",
+                stringResource(R.string.settings_notification_permission_title),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-                "설정 > 앱 > 알림에서 허용해주세요",
+                stringResource(R.string.settings_notification_permission_body),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
         TextButton(onClick = onOpenSettings) {
-            Text("설정 열기", color = warningColor)
+            Text(stringResource(R.string.settings_notification_permission_open), color = warningColor)
         }
     }
 }
@@ -405,33 +407,36 @@ private fun BackupSection(
             Column(modifier = Modifier.weight(1f)) {
                 if (currentUser != null) {
                     Text(
-                        currentUser.email ?: "로그인됨",
+                        currentUser.email ?: stringResource(R.string.settings_backup_signed_in_default),
                         style = MaterialTheme.typography.bodyMedium
                     )
                     Text(
                         text = when (backupUiState) {
-                            is BackupUiState.Success -> "마지막 백업: ${formatBackupTimestamp(backupUiState.timestampMillis)}"
-                            else -> "백업 기록 없음"
+                            is BackupUiState.Success -> stringResource(
+                                R.string.settings_backup_last_backup,
+                                formatBackupTimestamp(backupUiState.timestampMillis)
+                            )
+                            else -> stringResource(R.string.settings_backup_none)
                         },
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 } else {
                     Text(
-                        "구글 계정으로 로그인하면 기록을 클라우드에 백업할 수 있어요",
+                        stringResource(R.string.settings_backup_signed_out_body),
                         style = MaterialTheme.typography.bodyMedium
                     )
                     Text(
-                        "백업은 실시간 동기화가 아니에요. 여러 기기를 쓰신다면 최신 기기에서 백업해주세요",
+                        stringResource(R.string.settings_backup_signed_out_hint),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
             if (currentUser != null) {
-                TextButton(onClick = onSignOut) { Text("로그아웃") }
+                TextButton(onClick = onSignOut) { Text(stringResource(R.string.settings_backup_sign_out)) }
             } else {
-                TextButton(onClick = onSignIn) { Text("구글로 로그인") }
+                TextButton(onClick = onSignIn) { Text(stringResource(R.string.settings_backup_sign_in)) }
             }
         }
 
@@ -446,14 +451,14 @@ private fun BackupSection(
                     enabled = !isLoading,
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text("지금 백업하기")
+                    Text(stringResource(R.string.settings_backup_now))
                 }
                 OutlinedButton(
                     onClick = onRestoreClick,
                     enabled = !isLoading,
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text("복원하기")
+                    Text(stringResource(R.string.settings_backup_restore))
                 }
             }
         }
@@ -500,28 +505,29 @@ private fun DailyGoalSetting(goal: Int, onGoalChange: (Int) -> Unit) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text("하루 목표", style = MaterialTheme.typography.titleMedium)
+        Text(stringResource(R.string.label_daily_goal), style = MaterialTheme.typography.titleMedium)
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(
                 onClick = { onGoalChange(goal - 1) },
                 enabled = goal > 1,
                 modifier = Modifier.size(48.dp)
             ) {
-                Icon(Icons.Default.Remove, contentDescription = "목표 감소")
+                Icon(Icons.Default.Remove, contentDescription = stringResource(R.string.content_description_goal_decrease))
             }
             Text(
-                text = "${goal}잔",
+                text = stringResource(R.string.glasses_count, goal),
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.primary,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.width(80.dp)
+                maxLines = 1,
+                modifier = Modifier.widthIn(min = 80.dp)
             )
             IconButton(
                 onClick = { onGoalChange(goal + 1) },
                 enabled = goal < 20,
                 modifier = Modifier.size(48.dp)
             ) {
-                Icon(Icons.Default.Add, contentDescription = "목표 증가")
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.content_description_goal_increase))
             }
         }
     }
@@ -533,7 +539,7 @@ private fun CupSizeSetting(cupSize: Int, onCupSizeChange: (Int) -> Unit) {
     val cupSizes = listOf(150, 200, 250, 300, 350, 500)
 
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-        Text("컵 크기", style = MaterialTheme.typography.bodyLarge)
+        Text(stringResource(R.string.label_cup_size), style = MaterialTheme.typography.bodyLarge)
         Spacer(Modifier.height(8.dp))
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             cupSizes.forEach { size ->
@@ -577,10 +583,16 @@ private fun SettingSwitchRow(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun IntervalSetting(interval: Int, onIntervalChange: (Int) -> Unit) {
-    val intervals = listOf(30 to "30분", 60 to "1시간", 120 to "2시간", 180 to "3시간", 240 to "4시간")
+    val intervals = listOf(
+        30 to stringResource(R.string.settings_interval_30min),
+        60 to stringResource(R.string.settings_interval_1hour),
+        120 to stringResource(R.string.settings_interval_2hour),
+        180 to stringResource(R.string.settings_interval_3hour),
+        240 to stringResource(R.string.settings_interval_4hour)
+    )
 
     Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-        Text("알림 간격", style = MaterialTheme.typography.bodyLarge)
+        Text(stringResource(R.string.settings_interval_label), style = MaterialTheme.typography.bodyLarge)
         Spacer(Modifier.height(8.dp))
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             intervals.forEach { (minutes, label) ->
@@ -614,7 +626,7 @@ private fun TimeAdjusterRow(
                 onClick = { onHourChange(hour - 1) },
                 enabled = hour > range.first
             ) {
-                Icon(Icons.Default.Remove, contentDescription = "1시간 감소")
+                Icon(Icons.Default.Remove, contentDescription = stringResource(R.string.settings_hour_decrease_content_description))
             }
             Text(
                 text = "%02d:00".format(hour),
@@ -626,7 +638,7 @@ private fun TimeAdjusterRow(
                 onClick = { onHourChange(hour + 1) },
                 enabled = hour < range.last
             ) {
-                Icon(Icons.Default.Add, contentDescription = "1시간 증가")
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.settings_hour_increase_content_description))
             }
         }
     }

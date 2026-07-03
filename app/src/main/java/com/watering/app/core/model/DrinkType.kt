@@ -1,15 +1,17 @@
 package com.watering.app.core.model
 
+import androidx.annotation.StringRes
+import com.watering.app.R
 import kotlinx.serialization.Serializable
 
 @Serializable
-enum class DrinkType(val labelResKey: String, val hydrationRate: Double) {
-    WATER("drink_water", 1.0),
-    COFFEE("drink_coffee", 0.7),
-    TEA("drink_tea", 0.9),
-    JUICE("drink_juice", 0.85),
-    MILK("drink_milk", 0.88),
-    OTHER("drink_other", 0.8);
+enum class DrinkType(@StringRes val displayNameRes: Int, val hydrationRate: Double) {
+    WATER(R.string.drink_water, 1.0),
+    COFFEE(R.string.drink_coffee, 0.7),
+    TEA(R.string.drink_tea, 0.9),
+    JUICE(R.string.drink_juice, 0.85),
+    MILK(R.string.drink_milk, 0.88),
+    OTHER(R.string.drink_other, 0.8);
 
     val emoji: String get() = when (this) {
         WATER -> "💧"
@@ -18,14 +20,5 @@ enum class DrinkType(val labelResKey: String, val hydrationRate: Double) {
         JUICE -> "🧃"
         MILK -> "🥛"
         OTHER -> "🫗"
-    }
-
-    val displayName: String get() = when (this) {
-        WATER -> "물"
-        COFFEE -> "커피"
-        TEA -> "차"
-        JUICE -> "주스"
-        MILK -> "우유"
-        OTHER -> "기타"
     }
 }

@@ -1,6 +1,8 @@
 package com.watering.app.features.stats
 
+import android.content.Context
 import app.cash.turbine.test
+import com.watering.app.R
 import com.watering.app.core.data.SettingsRepository
 import com.watering.app.core.data.WaterRepository
 import com.watering.app.core.model.DayRecord
@@ -49,7 +51,11 @@ class StatsViewModelTest {
         val settingsRepository = mockk<SettingsRepository> {
             every { userSettings } returns MutableStateFlow(settings)
         }
-        return StatsViewModel(waterRepository, settingsRepository)
+        val context = mockk<Context>(relaxed = true) {
+            every { resources.getStringArray(R.array.weekday_labels_short) } returns
+                arrayOf("일", "월", "화", "수", "목", "금", "토")
+        }
+        return StatsViewModel(context, waterRepository, settingsRepository)
     }
 
     @Test

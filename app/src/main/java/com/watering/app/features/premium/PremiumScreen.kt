@@ -45,21 +45,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.annotation.StringRes
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.billingclient.api.BillingClient
 import com.android.billingclient.api.ProductDetails
+import com.watering.app.R
 import com.watering.app.core.service.BillingService
 import com.watering.app.core.service.freeTrialDays
 import com.watering.app.core.service.trialOfferOrDefault
 
-private data class PremiumFeature(val icon: String, val title: String, val description: String)
+private data class PremiumFeature(val icon: String, @StringRes val titleRes: Int, @StringRes val descriptionRes: Int)
 
 // 실제 구현된 프리미엄 혜택만 노출 — 미구현 기능을 광고하면 스토어 정책·환불 리스크가 있음
 // (30일/연간 통계, 수분 섭취율 분석, CSV 내보내기, 미세먼지·폭염 알림은 구현 후 추가할 것)
 private val PREMIUM_FEATURES = listOf(
-    PremiumFeature("🛡️", "연속 기록 보호", "한 달에 하루 놓쳐도 연속 기록이 유지돼요")
+    PremiumFeature("🛡️", R.string.feature_streak_protection_title, R.string.feature_streak_protection_description)
 )
 
 private fun Context.findActivity(): Activity? = when (this) {
@@ -68,14 +71,16 @@ private fun Context.findActivity(): Activity? = when (this) {
     else -> null
 }
 
-private data class PlanPricing(val freeTrialDays: Int?, val priceLine: String)
+private data class PlanPricing(val freeTrialDays: Int?, val price: String, val suffix: String)
 
-// 오퍼 조회를 한 번만 수행해 배지(무료체험 일수)와 가격 문구를 함께 계산한다
+// 오퍼 조회를 한 번만 수행해 배지(무료체험 일수)와 가격 문구를 함께 계산한다. 텍스트 조립은
+// stringResource가 필요해 Composable 호출부(priceLineText)에서 수행한다.
 private fun ProductDetails.pricing(suffix: String): PlanPricing {
     if (productType != BillingClient.ProductType.SUBS) {
         return PlanPricing(
             freeTrialDays = null,
-            priceLine = oneTimePurchaseOfferDetails?.formattedPrice.orEmpty() + suffix
+            price = oneTimePurchaseOfferDetails?.formattedPrice.orEmpty(),
+            suffix = suffix
         )
     }
     val offer = trialOfferOrDefault()
@@ -83,9 +88,16 @@ private fun ProductDetails.pricing(suffix: String): PlanPricing {
         ?: offer?.pricingPhases?.pricingPhaseList?.firstOrNull()
     val price = paidPhase?.formattedPrice.orEmpty()
     val trialDays = offer?.freeTrialDays()?.takeIf { it > 0 }
-    val priceLine = if (trialDays != null) "${trialDays}일 무료체험 후 $price$suffix" else price + suffix
-    return PlanPricing(trialDays, priceLine)
+    return PlanPricing(trialDays, price, suffix)
 }
+
+@Composable
+private fun PlanPricing.priceLineText(): String =
+    if (freeTrialDays != null) {
+        stringResource(R.string.premium_trial_price_line, freeTrialDays, price + suffix)
+    } else {
+        price + suffix
+    }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -104,10 +116,10 @@ fun PremiumScreen(
     errorMessage?.let { message ->
         AlertDialog(
             onDismissRequest = viewModel::clearError,
-            title = { Text("오류") },
+            title = { Text(stringResource(R.string.premium_error_title)) },
             text = { Text(message) },
             confirmButton = {
-                TextButton(onClick = viewModel::clearError) { Text("확인") }
+                TextButton(onClick = viewModel::clearError) { Text(stringResource(R.string.premium_error_confirm)) }
             }
         )
     }
@@ -115,10 +127,10 @@ fun PremiumScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("프리미엄") },
+                title = { Text(stringResource(R.string.premium_top_bar_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "뒤로")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.content_description_back))
                     }
                 }
             )
@@ -137,7 +149,7 @@ fun PremiumScreen(
                         modifier = Modifier.size(56.dp)
                     )
                     Spacer(Modifier.height(12.dp))
-                    Text("이미 프리미엄을 이용 중이에요", style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.premium_already_active), style = MaterialTheme.typography.titleMedium)
                 }
             }
             return@Scaffold
@@ -186,10 +198,10 @@ private fun HeaderSection() {
             modifier = Modifier.size(48.dp)
         )
         Spacer(Modifier.height(12.dp))
-        Text("워터링 프리미엄", style = MaterialTheme.typography.titleLarge)
+        Text(stringResource(R.string.premium_header_title), style = MaterialTheme.typography.titleLarge)
         Spacer(Modifier.height(4.dp))
         Text(
-            "건강한 수분 섭취 습관을\n더 깊이 있게 관리해보세요",
+            stringResource(R.string.premium_header_subtitle),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -215,9 +227,9 @@ private fun FeatureSection() {
             ) {
                 Text(feature.icon, style = MaterialTheme.typography.titleMedium, modifier = Modifier.width(32.dp))
                 Column {
-                    Text(feature.title, style = MaterialTheme.typography.bodyLarge)
+                    Text(stringResource(feature.titleRes), style = MaterialTheme.typography.bodyLarge)
                     Text(
-                        feature.description,
+                        stringResource(feature.descriptionRes),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -241,28 +253,30 @@ private fun PlanSection(
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         val monthlyProduct = products.firstOrNull { it.productId == BillingService.MONTHLY_ID }
-        val monthlyPricing = monthlyProduct?.pricing(" / 월")
+        val monthlyPricing = monthlyProduct?.pricing(stringResource(R.string.premium_suffix_monthly))
         PlanCard(
             id = BillingService.MONTHLY_ID,
-            title = "월간",
-            badge = if (monthlyPricing?.freeTrialDays != null) "7일 무료체험" else null,
-            priceLine = monthlyPricing?.priceLine,
+            title = stringResource(R.string.premium_plan_monthly),
+            badge = if (monthlyPricing?.freeTrialDays != null) stringResource(R.string.premium_badge_free_trial) else null,
+            priceLine = monthlyPricing?.priceLineText(),
             isSelected = selectedPlanId == BillingService.MONTHLY_ID,
             onSelect = onSelect
         )
         PlanCard(
             id = BillingService.YEARLY_ID,
-            title = "연간",
-            badge = "47% 할인",
-            priceLine = products.firstOrNull { it.productId == BillingService.YEARLY_ID }?.pricing(" / 년")?.priceLine,
+            title = stringResource(R.string.premium_plan_yearly),
+            badge = stringResource(R.string.premium_badge_yearly_discount),
+            priceLine = products.firstOrNull { it.productId == BillingService.YEARLY_ID }
+                ?.pricing(stringResource(R.string.premium_suffix_yearly))?.priceLineText(),
             isSelected = selectedPlanId == BillingService.YEARLY_ID,
             onSelect = onSelect
         )
         PlanCard(
             id = BillingService.LIFETIME_ID,
-            title = "평생",
-            badge = "최고 혜택",
-            priceLine = products.firstOrNull { it.productId == BillingService.LIFETIME_ID }?.pricing(" (일회성)")?.priceLine,
+            title = stringResource(R.string.premium_plan_lifetime),
+            badge = stringResource(R.string.premium_badge_lifetime_best),
+            priceLine = products.firstOrNull { it.productId == BillingService.LIFETIME_ID }
+                ?.pricing(stringResource(R.string.premium_suffix_lifetime))?.priceLineText(),
             isSelected = selectedPlanId == BillingService.LIFETIME_ID,
             onSelect = onSelect
         )
@@ -307,7 +321,7 @@ private fun PlanCard(
                 }
             }
             Text(
-                text = priceLine ?: "불러오는 중…",
+                text = priceLine ?: stringResource(R.string.premium_loading),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -342,12 +356,12 @@ private fun PurchaseSection(
             if (isPurchasing) {
                 CircularProgressIndicator(modifier = Modifier.size(20.dp), color = MaterialTheme.colorScheme.onPrimary)
             } else {
-                Text("프리미엄 시작하기")
+                Text(stringResource(R.string.premium_start_button))
             }
         }
         Spacer(Modifier.height(8.dp))
         TextButton(onClick = onRestore) {
-            Text("구매 복원", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(stringResource(R.string.premium_restore_button), color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
@@ -361,7 +375,7 @@ private fun LegalSection() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            "결제는 Google Play 계정을 통해 청구돼요.\n구독은 만료 24시간 전 자동 갱신되며,\nGoogle Play 앱 > 구독에서 언제든 해지할 수 있어요.",
+            stringResource(R.string.premium_legal_text),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center

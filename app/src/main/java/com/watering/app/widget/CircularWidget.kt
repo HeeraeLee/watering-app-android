@@ -96,7 +96,7 @@ private fun CircularWidgetContent(state: WidgetState) {
                 )
             )
             Text(
-                text = "/ ${state.goal}잔",
+                text = context.getString(R.string.glasses_with_slash, state.goal),
                 style = TextStyle(
                     color = ColorProvider(subTextColor),
                     fontSize = 13.sp

@@ -1,7 +1,9 @@
 package com.watering.app.features.home
 
 import android.app.Activity
+import android.content.Context
 import app.cash.turbine.test
+import com.watering.app.R
 import com.watering.app.core.data.SettingsRepository
 import com.watering.app.core.data.WaterRepository
 import com.watering.app.core.model.Achievement
@@ -30,6 +32,7 @@ class HomeViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
+    private lateinit var context: Context
     private lateinit var waterService: WaterService
     private lateinit var waterRepository: WaterRepository
     private lateinit var settingsRepository: SettingsRepository
@@ -42,6 +45,13 @@ class HomeViewModelTest {
     private val settings = UserSettings(dailyGoal = 8, cupSize = 200, isPremium = false)
 
     private fun createViewModel(): HomeViewModel {
+        context = mockk {
+            every { getString(R.string.home_snackbar_water_recorded, 200) } returns "💧 +200ml 기록됐어요"
+            every { getString(DrinkType.COFFEE.displayNameRes) } returns "커피"
+            every {
+                getString(R.string.home_snackbar_drink_recorded, "☕", "커피", 350)
+            } returns "☕ 커피 +350ml 기록됐어요"
+        }
         waterService = mockk(relaxed = true)
         waterRepository = mockk {
             every { todayRecord } returns MutableStateFlow(record)
@@ -53,7 +63,7 @@ class HomeViewModelTest {
         achievementChecker = mockk()
         reviewService = mockk(relaxed = true)
         analyticsService = mockk(relaxed = true)
-        return HomeViewModel(waterService, waterRepository, settingsRepository, achievementChecker, reviewService, analyticsService)
+        return HomeViewModel(context, waterService, waterRepository, settingsRepository, achievementChecker, reviewService, analyticsService)
     }
 
     @Test

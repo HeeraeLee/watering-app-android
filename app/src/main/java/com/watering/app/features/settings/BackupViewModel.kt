@@ -4,9 +4,11 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseUser
+import com.watering.app.R
 import com.watering.app.core.service.AuthService
 import com.watering.app.core.service.BackupService
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,6 +24,7 @@ sealed interface BackupUiState {
 
 @HiltViewModel
 class BackupViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val authService: AuthService,
     private val backupService: BackupService
 ) : ViewModel() {
@@ -47,7 +50,7 @@ class BackupViewModel @Inject constructor(
         viewModelScope.launch {
             authService.signIn(activityContext)
                 .onSuccess { refreshLastBackupTimestamp() }
-                .onFailure { _backupUiState.value = BackupUiState.Error("로그인에 실패했어요. 다시 시도해주세요") }
+                .onFailure { _backupUiState.value = BackupUiState.Error(context.getString(R.string.backup_error_sign_in_failed)) }
         }
     }
 
@@ -62,7 +65,7 @@ class BackupViewModel @Inject constructor(
         viewModelScope.launch {
             backupService.backup(uid)
                 .onSuccess { _backupUiState.value = BackupUiState.Success(it) }
-                .onFailure { _backupUiState.value = BackupUiState.Error("네트워크 연결을 확인해주세요") }
+                .onFailure { _backupUiState.value = BackupUiState.Error(context.getString(R.string.backup_error_network)) }
         }
     }
 
@@ -72,7 +75,7 @@ class BackupViewModel @Inject constructor(
         viewModelScope.launch {
             backupService.restore(uid)
                 .onSuccess { refreshLastBackupTimestamp() }
-                .onFailure { _backupUiState.value = BackupUiState.Error("복원에 실패했어요. 네트워크 연결을 확인해주세요") }
+                .onFailure { _backupUiState.value = BackupUiState.Error(context.getString(R.string.backup_error_restore_failed)) }
         }
     }
 }

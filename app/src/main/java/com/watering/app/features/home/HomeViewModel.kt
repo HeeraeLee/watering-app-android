@@ -1,8 +1,10 @@
 package com.watering.app.features.home
 
 import android.app.Activity
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.watering.app.R
 import com.watering.app.core.data.SettingsRepository
 import com.watering.app.core.data.WaterRepository
 import com.watering.app.core.model.Achievement
@@ -15,6 +17,7 @@ import com.watering.app.core.service.AnalyticsService
 import com.watering.app.core.service.ReviewService
 import com.watering.app.core.service.WaterService
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -32,6 +35,7 @@ data class HomeUiState(
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val waterService: WaterService,
     private val waterRepository: WaterRepository,
     private val settingsRepository: SettingsRepository,
@@ -68,7 +72,7 @@ class HomeViewModel @Inject constructor(
                 goal = current.settings.dailyGoal
             )
             val streak = waterService.updateStreak(updated, current.streak, current.settings.isPremium)
-            _snackbarMessage.value = "💧 +${current.settings.cupSize}ml 기록됐어요"
+            _snackbarMessage.value = context.getString(R.string.home_snackbar_water_recorded, current.settings.cupSize)
             analyticsService.logRecordAdd(current.settings.cupSize, drinkType.name, source = "home")
             achievementChecker.check(prev, updated, streak)?.let { _pendingAchievement.value = it }
         }
@@ -84,7 +88,12 @@ class HomeViewModel @Inject constructor(
                 goal = current.settings.dailyGoal
             )
             val streak = waterService.updateStreak(updated, current.streak, current.settings.isPremium)
-            _snackbarMessage.value = "${drinkType.emoji} ${drinkType.displayName} +${amount}ml 기록됐어요"
+            _snackbarMessage.value = context.getString(
+                R.string.home_snackbar_drink_recorded,
+                drinkType.emoji,
+                context.getString(drinkType.displayNameRes),
+                amount
+            )
             analyticsService.logRecordAdd(amount, drinkType.name, source = "home")
             achievementChecker.check(prev, updated, streak)?.let { _pendingAchievement.value = it }
         }

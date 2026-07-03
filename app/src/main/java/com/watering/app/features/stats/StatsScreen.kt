@@ -33,12 +33,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.watering.app.R
 
 private val AquaColor = Color(0xFF00B4D8)
 private val GreenColor = Color(0xFF34C759)
@@ -55,11 +57,11 @@ fun StatsScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text("통계", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.stats_title), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "뒤로")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.content_description_back))
                     }
                 }
             )
@@ -74,7 +76,7 @@ fun StatsScreen(
 
             // 이번 주 바 차트
             item {
-                SectionCard(title = "이번 주 기록") {
+                SectionCard(title = stringResource(R.string.stats_this_week_record)) {
                     WeekBarChart(stats = uiState.weekStats)
                 }
             }
@@ -86,18 +88,18 @@ fun StatsScreen(
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     SummaryChip(
-                        label = "주간 평균",
-                        value = "%.1f잔".format(uiState.weeklyAvg),
+                        label = stringResource(R.string.stats_weekly_avg),
+                        value = stringResource(R.string.stats_weekly_avg_value, uiState.weeklyAvg),
                         modifier = Modifier.weight(1f)
                     )
                     SummaryChip(
-                        label = "달성한 날",
-                        value = "${uiState.goalDays} / 7일",
+                        label = stringResource(R.string.stats_goal_days),
+                        value = stringResource(R.string.stats_goal_days_value, uiState.goalDays),
                         modifier = Modifier.weight(1f)
                     )
                     SummaryChip(
-                        label = "이번 주 총량",
-                        value = "${uiState.weeklyTotal}잔",
+                        label = stringResource(R.string.stats_weekly_total),
+                        value = stringResource(R.string.stats_weekly_total_value, uiState.weeklyTotal),
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -105,21 +107,21 @@ fun StatsScreen(
 
             // 연속 기록
             item {
-                SectionCard(title = "연속 기록") {
+                SectionCard(title = stringResource(R.string.stats_streak_section)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         StreakStatCard(
                             emoji = "🔥",
-                            label = "현재 연속",
-                            value = "${uiState.currentStreak}일",
+                            label = stringResource(R.string.label_current_streak),
+                            value = stringResource(R.string.streak_days_value, uiState.currentStreak),
                             modifier = Modifier.weight(1f)
                         )
                         StreakStatCard(
                             emoji = "🏆",
-                            label = "최장 연속",
-                            value = "${uiState.longestStreak}일",
+                            label = stringResource(R.string.label_longest_streak),
+                            value = stringResource(R.string.streak_days_value, uiState.longestStreak),
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -249,7 +251,7 @@ private fun WeekBarChart(stats: List<DayStat>) {
 
     Spacer(Modifier.height(4.dp))
     Text(
-        text = "목표: ${stats.firstOrNull()?.goal ?: 0}잔",
+        text = stringResource(R.string.stats_goal_line, stats.firstOrNull()?.goal ?: 0),
         style = MaterialTheme.typography.labelSmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier.fillMaxWidth(),

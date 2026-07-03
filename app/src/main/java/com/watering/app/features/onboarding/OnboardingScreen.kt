@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -41,11 +42,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.watering.app.R
 
 @Composable
 fun OnboardingScreen(
@@ -118,7 +121,7 @@ fun OnboardingScreen(
                 .height(56.dp)
         ) {
             Text(
-                text = if (page < 2) "다음" else "시작하기 🚀",
+                text = if (page < 2) stringResource(R.string.onboarding_next) else stringResource(R.string.onboarding_start),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.SemiBold
             )
@@ -158,7 +161,7 @@ private fun WelcomePage() {
         Spacer(Modifier.height(24.dp))
 
         Text(
-            text = "워터링에\n오신 것을 환영해요!",
+            text = stringResource(R.string.onboarding_welcome_title),
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
@@ -168,7 +171,7 @@ private fun WelcomePage() {
         Spacer(Modifier.height(12.dp))
 
         Text(
-            text = "잠금화면에서 한 번의 탭으로\n물 마시기를 기록하세요.",
+            text = stringResource(R.string.onboarding_welcome_subtitle),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
@@ -179,17 +182,17 @@ private fun WelcomePage() {
 
         FeatureRow(
             icon = Icons.Default.TouchApp,
-            text = "잠금화면 위젯으로 빠른 기록"
+            text = stringResource(R.string.onboarding_feature_widget)
         )
         Spacer(Modifier.height(16.dp))
         FeatureRow(
             icon = Icons.Default.NotificationsActive,
-            text = "맞춤형 수분 섭취 알림"
+            text = stringResource(R.string.onboarding_feature_notification)
         )
         Spacer(Modifier.height(16.dp))
         FeatureRow(
             icon = Icons.Default.Star,
-            text = "연속 기록으로 동기부여"
+            text = stringResource(R.string.onboarding_feature_streak)
         )
     }
 }
@@ -234,7 +237,7 @@ private fun GoalPage(
         modifier = Modifier.fillMaxWidth()
     ) {
         Text(
-            text = "목표를 설정해요",
+            text = stringResource(R.string.onboarding_goal_title),
             fontSize = 26.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
@@ -243,7 +246,7 @@ private fun GoalPage(
         Spacer(Modifier.height(8.dp))
 
         Text(
-            text = "하루에 몇 잔을 마실지 정해보세요.",
+            text = stringResource(R.string.onboarding_goal_subtitle),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
@@ -253,7 +256,7 @@ private fun GoalPage(
 
         // 하루 목표 +/- 선택
         Text(
-            text = "하루 목표",
+            text = stringResource(R.string.label_daily_goal),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.primary
         )
@@ -266,21 +269,22 @@ private fun GoalPage(
                 enabled = goal > 1,
                 modifier = Modifier.size(48.dp)
             ) {
-                Icon(Icons.Default.Remove, contentDescription = "목표 감소")
+                Icon(Icons.Default.Remove, contentDescription = stringResource(R.string.content_description_goal_decrease))
             }
             Text(
-                text = "${goal}잔",
+                text = stringResource(R.string.glasses_count, goal),
                 style = MaterialTheme.typography.headlineLarge,
                 color = MaterialTheme.colorScheme.primary,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.width(96.dp)
+                maxLines = 1,
+                modifier = Modifier.widthIn(min = 96.dp)
             )
             IconButton(
                 onClick = { onGoalChange(goal + 1) },
                 enabled = goal < 20,
                 modifier = Modifier.size(48.dp)
             ) {
-                Icon(Icons.Default.Add, contentDescription = "목표 증가")
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.content_description_goal_increase))
             }
         }
 
@@ -288,7 +292,7 @@ private fun GoalPage(
 
         // 컵 크기 선택
         Text(
-            text = "컵 크기",
+            text = stringResource(R.string.label_cup_size),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.fillMaxWidth()
@@ -313,7 +317,7 @@ private fun GoalPage(
         Spacer(Modifier.height(16.dp))
 
         Text(
-            text = "하루 총 ${goal * cupSize}ml 목표",
+            text = stringResource(R.string.onboarding_daily_total, goal * cupSize),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -344,7 +348,7 @@ private fun NotificationPage() {
         Spacer(Modifier.height(32.dp))
 
         Text(
-            text = "알림을 설정해요",
+            text = stringResource(R.string.onboarding_notification_title),
             fontSize = 26.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
@@ -353,7 +357,7 @@ private fun NotificationPage() {
         Spacer(Modifier.height(12.dp))
 
         Text(
-            text = "수분 섭취를 잊지 않도록\n알려드릴게요.",
+            text = stringResource(R.string.onboarding_notification_subtitle),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
@@ -363,7 +367,7 @@ private fun NotificationPage() {
         Spacer(Modifier.height(12.dp))
 
         Text(
-            text = "알림 간격은 설정에서 언제든지 변경할 수 있어요.",
+            text = stringResource(R.string.onboarding_notification_hint),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center

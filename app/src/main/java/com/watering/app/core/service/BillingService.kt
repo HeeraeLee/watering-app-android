@@ -16,6 +16,7 @@ import com.android.billingclient.api.QueryProductDetailsParams
 import com.android.billingclient.api.QueryPurchasesParams
 import com.android.billingclient.api.queryProductDetails
 import com.android.billingclient.api.queryPurchasesAsync
+import com.watering.app.R
 import com.watering.app.core.data.SettingsRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
@@ -157,7 +158,7 @@ class BillingService @Inject constructor(
         val paramsList = if (productDetails.productType == BillingClient.ProductType.SUBS) {
             // 무료체험 오퍼가 있으면 우선 선택 — Play는 가입 이력상 자격 없는 유저에게는 애초에 내려주지 않는다
             val offerToken = productDetails.trialOfferOrDefault()?.offerToken ?: run {
-                _errorMessage.value = "상품 정보를 불러오지 못했습니다."
+                _errorMessage.value = context.getString(R.string.billing_error_product_unavailable)
                 return
             }
             listOf(

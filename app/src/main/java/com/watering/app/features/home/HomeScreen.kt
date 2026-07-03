@@ -57,8 +57,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.watering.app.core.model.DrinkType
+import com.watering.app.R
 import com.watering.app.core.model.WaterEntry
 import com.watering.app.features.record.RecordSheet
 
@@ -91,9 +92,10 @@ fun HomeScreen(
         if (quickRecord) viewModel.addWater()
     }
 
+    val undoActionLabel = stringResource(R.string.home_snackbar_undo_action)
     LaunchedEffect(snackbarMessage) {
         snackbarMessage?.let { msg ->
-            val result = snackbarHostState.showSnackbar(message = msg, actionLabel = "취소")
+            val result = snackbarHostState.showSnackbar(message = msg, actionLabel = undoActionLabel)
             if (result == SnackbarResult.ActionPerformed) viewModel.undoLastEntry()
             viewModel.clearSnackbar()
         }
@@ -104,17 +106,17 @@ fun HomeScreen(
             TopAppBar(
                 title = {
                     Text(
-                        "오늘",
+                        stringResource(R.string.home_title),
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
                     )
                 },
                 actions = {
                     IconButton(onClick = onNavigateToStats) {
-                        Icon(Icons.Default.BarChart, contentDescription = "통계")
+                        Icon(Icons.Default.BarChart, contentDescription = stringResource(R.string.stats_title))
                     }
                     IconButton(onClick = onNavigateToSettings) {
-                        Icon(Icons.Default.Settings, contentDescription = "설정")
+                        Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.settings_title))
                     }
                 }
             )
@@ -145,7 +147,7 @@ fun HomeScreen(
                     modifier = Modifier.fillMaxWidth().height(56.dp),
                     shape = RoundedCornerShape(16.dp)
                 ) {
-                    Text("물 마셨어요 💧", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(R.string.home_drink_water_button), fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
                 }
                 Spacer(Modifier.height(8.dp))
                 OutlinedButton(
@@ -153,7 +155,7 @@ fun HomeScreen(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp)
                 ) {
-                    Text("다른 음료 선택")
+                    Text(stringResource(R.string.home_select_other_drink))
                 }
                 Spacer(Modifier.height(20.dp))
             }
@@ -165,14 +167,14 @@ fun HomeScreen(
                 ) {
                     StreakCard(
                         emoji = "🔥",
-                        label = "현재 연속",
-                        value = "${uiState.streak.currentStreak}일",
+                        label = stringResource(R.string.label_current_streak),
+                        value = stringResource(R.string.streak_days_value, uiState.streak.currentStreak),
                         modifier = Modifier.weight(1f)
                     )
                     StreakCard(
                         emoji = "🏆",
-                        label = "최장 연속",
-                        value = "${uiState.streak.longestStreak}일",
+                        label = stringResource(R.string.label_longest_streak),
+                        value = stringResource(R.string.streak_days_value, uiState.streak.longestStreak),
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -185,10 +187,10 @@ fun HomeScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("오늘 기록", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(R.string.home_today_record), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                     if (uiState.record.entries.isNotEmpty()) {
                         Text(
-                            "마지막 취소",
+                            stringResource(R.string.home_undo_last),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.error,
                             modifier = Modifier
@@ -213,7 +215,7 @@ fun HomeScreen(
                             Text("💧", fontSize = 40.sp)
                             Spacer(Modifier.height(12.dp))
                             Text(
-                                "아직 기록이 없어요.\n물을 마시고 기록해 보세요!",
+                                stringResource(R.string.home_empty_record),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 textAlign = TextAlign.Center
@@ -282,14 +284,14 @@ private fun AchievementRing(current: Int, goal: Int, rate: Double, isAchieved: B
                 color = ringColor
             )
             Text(
-                text = "/ ${goal}잔",
+                text = stringResource(R.string.glasses_with_slash, goal),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             if (isAchieved) {
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = "목표 달성! 🎉",
+                    text = stringResource(R.string.label_goal_achieved_banner),
                     style = MaterialTheme.typography.labelMedium,
                     color = GreenColor,
                     fontWeight = FontWeight.SemiBold
@@ -326,22 +328,8 @@ private fun StreakCard(emoji: String, label: String, value: String, modifier: Mo
 
 @Composable
 private fun WaterEntryRow(entry: WaterEntry) {
-    val emoji = when (entry.drinkType) {
-        DrinkType.WATER -> "💧"
-        DrinkType.COFFEE -> "☕"
-        DrinkType.TEA -> "🍵"
-        DrinkType.JUICE -> "🧃"
-        DrinkType.MILK -> "🥛"
-        DrinkType.OTHER -> "🫗"
-    }
-    val drinkName = when (entry.drinkType) {
-        DrinkType.WATER -> "물"
-        DrinkType.COFFEE -> "커피"
-        DrinkType.TEA -> "차"
-        DrinkType.JUICE -> "주스"
-        DrinkType.MILK -> "우유"
-        DrinkType.OTHER -> "기타"
-    }
+    val emoji = entry.drinkType.emoji
+    val drinkName = stringResource(entry.drinkType.displayNameRes)
     val time = java.time.Instant.ofEpochMilli(entry.timestampMillis)
         .atZone(java.time.ZoneId.systemDefault())
         .toLocalTime()
