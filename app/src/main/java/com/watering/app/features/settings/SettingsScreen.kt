@@ -7,8 +7,10 @@ import android.os.Build
 import android.provider.Settings
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -23,12 +25,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.CloudDone
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.NotificationsOff
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.WorkspacePremium
@@ -54,6 +58,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -65,6 +70,7 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.firebase.auth.FirebaseUser
 import com.watering.app.R
+import com.watering.app.core.model.WidgetTheme
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -167,6 +173,17 @@ fun SettingsScreen(
                 PremiumSection(
                     isPremium = settings.isPremium,
                     onClick = onNavigateToPremium
+                )
+            }
+            item { SectionDivider() }
+
+            item { SectionHeader(stringResource(R.string.settings_section_widget_theme)) }
+            item {
+                WidgetThemeSetting(
+                    isPremium = settings.isPremium,
+                    selectedTheme = settings.widgetTheme,
+                    onSelectTheme = viewModel::updateWidgetTheme,
+                    onLockedClick = onNavigateToPremium
                 )
             }
             item { SectionDivider() }
@@ -343,6 +360,54 @@ private fun PremiumSection(isPremium: Boolean, onClick: () -> Unit) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun WidgetThemeSetting(
+    isPremium: Boolean,
+    selectedTheme: WidgetTheme,
+    onSelectTheme: (WidgetTheme) -> Unit,
+    onLockedClick: () -> Unit
+) {
+    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            WidgetTheme.entries.forEach { theme ->
+                val isSelected = isPremium && theme == selectedTheme
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(theme.accentColor.copy(alpha = if (isPremium) 1f else 0.35f))
+                        .border(
+                            width = if (isSelected) 3.dp else 0.dp,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            shape = CircleShape
+                        )
+                        .clickable {
+                            if (isPremium) onSelectTheme(theme) else onLockedClick()
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (!isPremium) {
+                        Icon(
+                            Icons.Filled.Lock,
+                            contentDescription = stringResource(theme.displayNameRes),
+                            tint = Color.White,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+            }
+        }
+        if (!isPremium) {
+            Spacer(Modifier.height(8.dp))
+            Text(
+                stringResource(R.string.settings_widget_theme_locked_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }

@@ -191,4 +191,13 @@
     <string name="widget_motivation_almost_there">거의 다 왔어요!</string>
     <string name="widget_motivation_keep_going">잘 하고 있어요</string>
     <string name="widget_motivation_time_to_drink">물 마실 시간이에요 💧</string>
+
+    <!-- 위젯 프리미엄 테마 -->
+    <string name="widget_theme_default">기본</string>
+    <string name="widget_theme_sunset">선셋</string>
+    <string name="widget_theme_mono">모노</string>
+    <string name="widget_theme_neon">네온</string>
+    <string name="settings_section_widget_theme">위젯 테마</string>
+    <string name="settings_widget_theme_locked_hint">프리미엄에서 잠금 해제</string>
+    <string name="feature_widget_theme_description">잠금화면 위젯을 원하는 색상 테마로 꾸며보세요</string>
 </resources>

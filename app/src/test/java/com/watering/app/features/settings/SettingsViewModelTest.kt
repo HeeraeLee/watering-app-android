@@ -4,6 +4,7 @@ import android.content.Context
 import app.cash.turbine.test
 import com.watering.app.core.data.SettingsRepository
 import com.watering.app.core.model.UserSettings
+import com.watering.app.core.model.WidgetTheme
 import com.watering.app.core.service.NotificationService
 import com.watering.app.core.service.WaterService
 import com.watering.app.testutil.MainDispatcherRule
@@ -123,6 +124,22 @@ class SettingsViewModelTest {
 
         verify { notificationService.scheduleReminders(any()) }
         verify(exactly = 0) { notificationService.cancelReminders() }
+    }
+
+    @Test
+    fun updateWidgetTheme_설정을저장하고위젯을갱신한다() = runTest(mainDispatcherRule.testDispatcher) {
+        val viewModel = createViewModel(UserSettings(widgetTheme = WidgetTheme.DEFAULT))
+        val slot = slot<UserSettings>()
+        coEvery { settingsRepository.updateSettings(capture(slot)) } returns Unit
+
+        viewModel.settings.test {
+            awaitItem()
+            viewModel.updateWidgetTheme(WidgetTheme.SUNSET)
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        assertEquals(WidgetTheme.SUNSET, slot.captured.widgetTheme)
+        coVerify { widgetUpdater.updateAll() }
     }
 
     @Test

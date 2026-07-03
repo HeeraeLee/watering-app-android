@@ -38,10 +38,9 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.watering.app.R
+import com.watering.app.core.model.WidgetTheme
 
 private val DarkBg = Color(0xEE0D1B2A)
-private val AquaColor = Color(0xFF00B4D8)
-private val GreenColor = Color(0xFF34C759)
 
 class RectangularWidget : GlanceAppWidget() {
     override val sizeMode = SizeMode.Exact
@@ -62,7 +61,7 @@ private fun RectangularWidgetContent(state: WidgetState) {
     val isDark = (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
             Configuration.UI_MODE_NIGHT_YES
     val isAchieved = state.achievementRate >= 1.0
-    val accent = if (isAchieved) GreenColor else AquaColor
+    val accent = if (isAchieved) WidgetTheme.ACHIEVED_COLOR else state.theme.accentColor
     val rate = state.achievementRate.coerceIn(0.0, 1.0).toFloat()
     val barWidth = (size.width - 32.dp) * rate
     val motivationText = when {

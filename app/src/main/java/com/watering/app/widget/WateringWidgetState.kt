@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.glance.currentState
 import com.watering.app.core.data.SettingsRepository
 import com.watering.app.core.data.WaterRepository
+import com.watering.app.core.model.WidgetTheme
 import com.watering.app.core.service.AnalyticsService
 import com.watering.app.core.service.WaterService
 import dagger.hilt.EntryPoint
@@ -19,7 +20,8 @@ import kotlinx.coroutines.flow.first
 data class WidgetState(
     val totalCount: Int = 0,
     val goal: Int = 8,
-    val achievementRate: Double = 0.0
+    val achievementRate: Double = 0.0,
+    val theme: WidgetTheme = WidgetTheme.DEFAULT
 )
 
 // Glance는 세션이 재사용될 때 provideGlance()를 다시 호출하지 않으므로,
@@ -53,10 +55,13 @@ suspend fun loadWidgetState(context: Context): WidgetState {
         val record = entryPoint.waterRepository().todayRecord.first()
         val settings = entryPoint.settingsRepository().userSettings.first()
         val goal = settings.dailyGoal.coerceAtLeast(1)
+        // 구독이 만료돼도 선택했던 테마는 저장된 채로 두고 위젯만 기본 테마로 되돌린다 (재구독 시 즉시 복원)
+        val theme = if (settings.isPremium) settings.widgetTheme else WidgetTheme.DEFAULT
         WidgetState(
             totalCount = record.totalCount,
             goal = goal,
-            achievementRate = record.totalCount.toDouble() / goal
+            achievementRate = record.totalCount.toDouble() / goal,
+            theme = theme
         )
     } catch (e: Exception) {
         WidgetState()

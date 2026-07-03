@@ -37,6 +37,7 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.watering.app.R
+import com.watering.app.core.model.WidgetTheme
 
 class CircularWidget : GlanceAppWidget() {
     override val sizeMode = SizeMode.Exact
@@ -57,7 +58,7 @@ private fun CircularWidgetContent(state: WidgetState) {
     val isDark = (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
             Configuration.UI_MODE_NIGHT_YES
     val isAchieved = state.achievementRate >= 1.0
-    val accent = if (isAchieved) Color(0xFF34C759) else Color(0xFF00B4D8)
+    val accent = if (isAchieved) WidgetTheme.ACHIEVED_COLOR else state.theme.accentColor
     val rate = state.achievementRate.coerceIn(0.0, 1.0).toFloat()
     val barWidth = (size.width - 28.dp) * rate
 

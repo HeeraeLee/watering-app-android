@@ -15,5 +15,6 @@ data class UserSettings(
     val healthConnectEnabled: Boolean = false,
     val isPremium: Boolean = false,
     val isOnboardingDone: Boolean = false,
-    val reviewRequested: Boolean = false  // 인앱 리뷰 요청 1회 제한용
+    val reviewRequested: Boolean = false,  // 인앱 리뷰 요청 1회 제한용
+    val widgetTheme: WidgetTheme = WidgetTheme.DEFAULT
 )

@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.watering.app.core.data.SettingsRepository
 import com.watering.app.core.model.UserSettings
+import com.watering.app.core.model.WidgetTheme
 import com.watering.app.core.service.NotificationService
 import com.watering.app.core.service.WaterService
 import com.watering.app.widget.WateringWidgetUpdater
@@ -56,6 +57,7 @@ class SettingsViewModel @Inject constructor(
     fun updateNotificationInterval(minutes: Int) = update { it.copy(notificationInterval = minutes) }
     fun updateNotificationStart(hour: Int) = update { it.copy(notificationStart = hour) }
     fun updateNotificationEnd(hour: Int) = update { it.copy(notificationEnd = hour) }
+    fun updateWidgetTheme(theme: WidgetTheme) = update(refreshWidget = true) { it.copy(widgetTheme = theme) }
 
     fun resetAllData() {
         viewModelScope.launch { waterService.clearAllData() }

@@ -189,4 +189,13 @@
     <string name="widget_motivation_almost_there">Almost there!</string>
     <string name="widget_motivation_keep_going">Keep it up</string>
     <string name="widget_motivation_time_to_drink">Time to drink some water 💧</string>
+
+    <!-- Widget premium themes -->
+    <string name="widget_theme_default">Default</string>
+    <string name="widget_theme_sunset">Sunset</string>
+    <string name="widget_theme_mono">Mono</string>
+    <string name="widget_theme_neon">Neon</string>
+    <string name="settings_section_widget_theme">Widget Theme</string>
+    <string name="settings_widget_theme_locked_hint">Unlock with Premium</string>
+    <string name="feature_widget_theme_description">Customize your lock screen widget with your favorite color theme</string>
 </resources>

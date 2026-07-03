@@ -37,6 +37,7 @@ import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.watering.app.R
+import com.watering.app.core.model.WidgetTheme
 
 // 잔수·퍼센트 텍스트를 고정 폭으로 둬야 barTotal 추정(size.width - 고정폭)이 자릿수와 무관하게 항상 정확하다
 // (실측 176dp 기준, 막대가 너무 얇아지지 않도록 최소 여백으로 타이트하게 설정)
@@ -62,7 +63,7 @@ private fun NarrowWidgetContent(state: WidgetState) {
     val isDark = (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
             Configuration.UI_MODE_NIGHT_YES
     val isAchieved = state.achievementRate >= 1.0
-    val accent = if (isAchieved) Color(0xFF34C759) else Color(0xFF00B4D8)
+    val accent = if (isAchieved) WidgetTheme.ACHIEVED_COLOR else state.theme.accentColor
     val rate = state.achievementRate.coerceIn(0.0, 1.0).toFloat()
     // 아이콘(16) + 여백(6+6+6) + 잔수 텍스트(46) + 퍼센트 텍스트(32) + 좌우 패딩(28) = 140dp
     // (막대 요청에 따라 여백을 8/10/8→6/6/6으로 줄여 막대 실제 공간을 확보 — 텍스트 폭은 그대로라 잘림 위험 없음)
