@@ -64,7 +64,8 @@ private data class PremiumFeature(val icon: String, @StringRes val titleRes: Int
 private val PREMIUM_FEATURES = listOf(
     PremiumFeature("🛡️", R.string.feature_streak_protection_title, R.string.feature_streak_protection_description),
     PremiumFeature("🎨", R.string.settings_section_widget_theme, R.string.feature_widget_theme_description),
-    PremiumFeature("📊", R.string.smart_stats_title, R.string.feature_smart_stats_description)
+    PremiumFeature("📊", R.string.smart_stats_title, R.string.feature_smart_stats_description),
+    PremiumFeature("🎯", R.string.feature_smart_goal_title, R.string.feature_smart_goal_description)
 )
 
 private fun Context.findActivity(): Activity? = when (this) {

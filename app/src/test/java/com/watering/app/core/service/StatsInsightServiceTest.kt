@@ -162,4 +162,36 @@ class StatsInsightServiceTest {
 
         assertEquals(0, result)
     }
+
+    @Test
+    fun recommendedGoalCups_체중과컵크기로목표를계산한다() {
+        // 60kg * 33ml = 1980ml, / 200ml = 9.9 -> 반올림 10잔
+        val result = StatsInsightService.recommendedGoalCups(weightKg = 60.0, cupSizeMl = 200)
+
+        assertEquals(10, result)
+    }
+
+    @Test
+    fun recommendedGoalCups_컵크기가다르면결과도달라진다() {
+        // 60kg * 33ml = 1980ml, / 300ml = 6.6 -> 반올림 7잔
+        val result = StatsInsightService.recommendedGoalCups(weightKg = 60.0, cupSizeMl = 300)
+
+        assertEquals(7, result)
+    }
+
+    @Test
+    fun recommendedGoalCups_최소1잔으로클램프된다() {
+        // 1kg * 33ml = 33ml, / 200ml = 0.165 -> 반올림 0 -> 최소 1로 클램프
+        val result = StatsInsightService.recommendedGoalCups(weightKg = 1.0, cupSizeMl = 200)
+
+        assertEquals(1, result)
+    }
+
+    @Test
+    fun recommendedGoalCups_최대20잔으로클램프된다() {
+        // 200kg * 33ml = 6600ml, / 150ml = 44 -> 최대 20으로 클램프
+        val result = StatsInsightService.recommendedGoalCups(weightKg = 200.0, cupSizeMl = 150)
+
+        assertEquals(20, result)
+    }
 }

@@ -22,7 +22,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         // Health Connect가 권한 요청 화면에 표시할 개인정보처리방침을 요구할 때 시스템이 보내는 인텐트
-        if (intent?.action == "androidx.health.connect.action.SHOW_PERMISSIONS_RATIONALE") {
+        if (intent?.action == "android.intent.action.VIEW_PERMISSION_USAGE") {
             startActivity(
                 Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.privacy_policy_url)))
             )

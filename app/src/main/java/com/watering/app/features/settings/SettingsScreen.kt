@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -33,6 +34,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.MonitorWeight
 import androidx.compose.material.icons.filled.NotificationsOff
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.WorkspacePremium
@@ -52,6 +54,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -71,6 +74,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.firebase.auth.FirebaseUser
 import com.watering.app.R
 import com.watering.app.core.model.WidgetTheme
+import com.watering.app.core.service.HealthConnectService
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -99,10 +103,23 @@ fun SettingsScreen(
     val notificationPermissionGranted by viewModel.notificationPermissionGranted.collectAsStateWithLifecycle()
     val currentUser by backupViewModel.currentUser.collectAsStateWithLifecycle()
     val backupUiState by backupViewModel.backupUiState.collectAsStateWithLifecycle()
+    val weightGoalUiState by viewModel.weightGoalUiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val privacyPolicyUrl = stringResource(R.string.privacy_policy_url)
     var showResetDialog by remember { mutableStateOf(false) }
     var showRestoreDialog by remember { mutableStateOf(false) }
+
+    val weightPermissionLauncher = rememberLauncherForActivityResult(
+        contract = viewModel.healthConnectPermissionContract()
+    ) { granted ->
+        viewModel.onWeightPermissionResult(granted)
+    }
+
+    LaunchedEffect(weightGoalUiState) {
+        if (weightGoalUiState is WeightGoalUiState.NeedsPermission) {
+            weightPermissionLauncher.launch(HealthConnectService.WEIGHT_PERMISSIONS)
+        }
+    }
 
     // 시스템 알림 설정 화면을 다녀온 뒤에도 최신 권한 상태를 반영
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
@@ -150,6 +167,12 @@ fun SettingsScreen(
             }
         )
     }
+
+    WeightGoalDialogs(
+        uiState = weightGoalUiState,
+        onDismiss = viewModel::dismissWeightGoalState,
+        onApply = viewModel::applyRecommendedGoal
+    )
 
     Scaffold(
         topBar = {
@@ -203,6 +226,16 @@ fun SettingsScreen(
                 CupSizeSetting(
                     cupSize = settings.cupSize,
                     onCupSizeChange = viewModel::updateCupSize
+                )
+            }
+
+            item { Spacer(Modifier.height(8.dp)) }
+
+            item {
+                WeightGoalRow(
+                    isPremium = settings.isPremium,
+                    onClick = viewModel::requestWeightBasedGoal,
+                    onLockedClick = onNavigateToPremium
                 )
             }
 
@@ -615,6 +648,118 @@ private fun CupSizeSetting(cupSize: Int, onCupSizeChange: (Int) -> Unit) {
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun WeightGoalRow(isPremium: Boolean, onClick: () -> Unit, onLockedClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { if (isPremium) onClick() else onLockedClick() }
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(Icons.Filled.MonitorWeight, contentDescription = null)
+        Spacer(Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(stringResource(R.string.settings_weight_goal_title), style = MaterialTheme.typography.bodyLarge)
+            Text(
+                stringResource(
+                    if (isPremium) R.string.settings_weight_goal_subtitle else R.string.settings_weight_goal_locked_hint
+                ),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        if (!isPremium) {
+            Icon(
+                Icons.Filled.Lock,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun WeightGoalDialogs(
+    uiState: WeightGoalUiState,
+    onDismiss: () -> Unit,
+    onApply: (Int) -> Unit
+) {
+    val context = LocalContext.current
+
+    when (uiState) {
+        is WeightGoalUiState.Idle, is WeightGoalUiState.Loading, is WeightGoalUiState.NeedsPermission -> Unit
+
+        is WeightGoalUiState.NotAvailable -> AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { Text(stringResource(R.string.settings_weight_goal_not_available_title)) },
+            text = { Text(stringResource(R.string.settings_weight_goal_not_available_body)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    val intent = Intent(
+                        Intent.ACTION_VIEW,
+                        Uri.parse("market://details?id=com.google.android.apps.healthdata")
+                    )
+                    if (intent.resolveActivity(context.packageManager) != null) {
+                        context.startActivity(intent)
+                    }
+                    onDismiss()
+                }) {
+                    Text(stringResource(R.string.settings_weight_goal_open_play_store))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismiss) {
+                    Text(stringResource(R.string.settings_dialog_cancel))
+                }
+            }
+        )
+
+        is WeightGoalUiState.NoWeightData -> AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { Text(stringResource(R.string.settings_weight_goal_no_data_title)) },
+            text = { Text(stringResource(R.string.settings_weight_goal_no_data_body)) },
+            confirmButton = {
+                TextButton(onClick = onDismiss) {
+                    Text(stringResource(R.string.settings_weight_goal_dialog_ok))
+                }
+            }
+        )
+
+        is WeightGoalUiState.PermissionDenied -> AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { Text(stringResource(R.string.settings_weight_goal_permission_denied_title)) },
+            text = { Text(stringResource(R.string.settings_weight_goal_permission_denied_body)) },
+            confirmButton = {
+                TextButton(onClick = onDismiss) {
+                    Text(stringResource(R.string.settings_weight_goal_dialog_ok))
+                }
+            }
+        )
+
+        is WeightGoalUiState.Recommended -> AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { Text(stringResource(R.string.settings_weight_goal_confirm_title)) },
+            text = {
+                Text(
+                    stringResource(R.string.settings_weight_goal_confirm_body, uiState.weightKg, uiState.cups)
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = { onApply(uiState.cups) }) {
+                    Text(stringResource(R.string.settings_weight_goal_confirm_apply))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismiss) {
+                    Text(stringResource(R.string.settings_dialog_cancel))
+                }
+            }
+        )
     }
 }
 

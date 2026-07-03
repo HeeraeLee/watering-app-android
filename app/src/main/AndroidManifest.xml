@@ -46,9 +46,13 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:scheme="watering" android:host="quick-record" />
             </intent-filter>
-            <!-- Health Connect 권한 설명(rationale) 화면 요청 처리 -->
+            <!-- Health Connect 권한 설명(rationale) 화면 요청 처리 — Health Connect 컨트롤러 앱은
+                 이 정확한 action+category 조합(VIEW_PERMISSION_USAGE / HEALTH_PERMISSIONS)으로만
+                 rationale 지원 여부를 판단한다(androidx 문서의 SHOW_PERMISSIONS_RATIONALE는 이
+                 시스템 버전에 해당하지 않음 — HealthPermissionReader.getRationaleIntent 디컴파일로 확인) -->
             <intent-filter>
-                <action android:name="androidx.health.connect.action.SHOW_PERMISSIONS_RATIONALE" />
+                <action android:name="android.intent.action.VIEW_PERMISSION_USAGE" />
+                <category android:name="android.intent.category.HEALTH_PERMISSIONS" />
             </intent-filter>
         </activity>
 

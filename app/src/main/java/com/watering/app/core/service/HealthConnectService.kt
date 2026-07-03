@@ -7,12 +7,14 @@ import androidx.health.connect.client.PermissionController
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.HydrationRecord
 import androidx.health.connect.client.records.WeightRecord
+import androidx.health.connect.client.request.ReadRecordsRequest
+import androidx.health.connect.client.time.TimeRangeFilter
 import dagger.hilt.android.qualifiers.ApplicationContext
+import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
 
-// Phase 3(체중 읽기 → 목표 추천), Phase 4(물 마시기 기록 자동 저장)가 공유하는 Health Connect 연동
-// 기반 레이어. 이 서비스 자체는 어떤 화면에서도 아직 호출되지 않는다 (인프라만 구축하는 단계).
+// Phase 4(물 마시기 기록 자동 저장)가 공유하는 Health Connect 연동 기반 레이어.
 @Singleton
 class HealthConnectService @Inject constructor(
     @ApplicationContext private val context: Context
@@ -24,7 +26,6 @@ class HealthConnectService @Inject constructor(
             HealthPermission.getWritePermission(HydrationRecord::class)
         )
 
-        // Phase 3(스마트 목표 추천)에서 사용 예정 — 지금은 상수만 정의
         val WEIGHT_PERMISSIONS: Set<String> = setOf(
             HealthPermission.getReadPermission(WeightRecord::class)
         )
@@ -49,6 +50,19 @@ class HealthConnectService @Inject constructor(
 
     fun permissionRequestContract(): ActivityResultContract<Set<String>, Set<String>> =
         PermissionController.createRequestPermissionResultContract()
+
+    // 가장 최근에 기록된 체중 1건만 필요 — 스마트 목표 추천은 현재 체중 기준으로만 계산
+    suspend fun readLatestWeightKg(): Double? {
+        val response = client?.readRecords(
+            ReadRecordsRequest(
+                recordType = WeightRecord::class,
+                timeRangeFilter = TimeRangeFilter.before(Instant.now()),
+                ascendingOrder = false,
+                pageSize = 1
+            )
+        ) ?: return null
+        return response.records.firstOrNull()?.weight?.inKilograms
+    }
 }
 
 enum class HealthConnectAvailability {

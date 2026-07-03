@@ -61,4 +61,11 @@ object StatsInsightService {
     // 영향을 주지 않기 위함.
     fun calculateHydrationVolumeMl(entries: List<WaterEntry>): Int =
         entries.sumOf { it.amount * it.drinkType.hydrationRate }.roundToInt()
+
+    private const val ML_PER_KG = 33.0  // 일반적인 권장량(체중 1kg당 30~35ml) 중간값
+    private const val MIN_GOAL_CUPS = 1
+    private const val MAX_GOAL_CUPS = 20  // SettingsScreen 목표 잔 수 증감 버튼과 동일한 허용 범위
+
+    fun recommendedGoalCups(weightKg: Double, cupSizeMl: Int): Int =
+        (weightKg * ML_PER_KG / cupSizeMl).roundToInt().coerceIn(MIN_GOAL_CUPS, MAX_GOAL_CUPS)
 }

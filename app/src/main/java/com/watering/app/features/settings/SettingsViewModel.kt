@@ -10,7 +10,10 @@ import androidx.lifecycle.viewModelScope
 import com.watering.app.core.data.SettingsRepository
 import com.watering.app.core.model.UserSettings
 import com.watering.app.core.model.WidgetTheme
+import com.watering.app.core.service.HealthConnectAvailability
+import com.watering.app.core.service.HealthConnectService
 import com.watering.app.core.service.NotificationService
+import com.watering.app.core.service.StatsInsightService
 import com.watering.app.core.service.WaterService
 import com.watering.app.widget.WateringWidgetUpdater
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,13 +26,24 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+sealed interface WeightGoalUiState {
+    data object Idle : WeightGoalUiState
+    data object Loading : WeightGoalUiState
+    data object NeedsPermission : WeightGoalUiState
+    data object PermissionDenied : WeightGoalUiState
+    data class NotAvailable(val availability: HealthConnectAvailability) : WeightGoalUiState
+    data object NoWeightData : WeightGoalUiState
+    data class Recommended(val cups: Int, val weightKg: Double) : WeightGoalUiState
+}
+
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val settingsRepository: SettingsRepository,
     private val notificationService: NotificationService,
     private val waterService: WaterService,
-    private val widgetUpdater: WateringWidgetUpdater
+    private val widgetUpdater: WateringWidgetUpdater,
+    private val healthConnectService: HealthConnectService
 ) : ViewModel() {
 
     val settings: StateFlow<UserSettings> = settingsRepository.userSettings
@@ -61,6 +75,57 @@ class SettingsViewModel @Inject constructor(
 
     fun resetAllData() {
         viewModelScope.launch { waterService.clearAllData() }
+    }
+
+    private val _weightGoalUiState = MutableStateFlow<WeightGoalUiState>(WeightGoalUiState.Idle)
+    val weightGoalUiState: StateFlow<WeightGoalUiState> = _weightGoalUiState.asStateFlow()
+
+    fun healthConnectPermissionContract() = healthConnectService.permissionRequestContract()
+
+    fun requestWeightBasedGoal() {
+        viewModelScope.launch {
+            _weightGoalUiState.value = WeightGoalUiState.Loading
+            val availability = healthConnectService.availability
+            if (availability != HealthConnectAvailability.AVAILABLE) {
+                _weightGoalUiState.value = WeightGoalUiState.NotAvailable(availability)
+                return@launch
+            }
+            if (!healthConnectService.hasPermissions(HealthConnectService.WEIGHT_PERMISSIONS)) {
+                _weightGoalUiState.value = WeightGoalUiState.NeedsPermission
+                return@launch
+            }
+            readWeightAndRecommend()
+        }
+    }
+
+    fun onWeightPermissionResult(granted: Set<String>) {
+        if (!granted.containsAll(HealthConnectService.WEIGHT_PERMISSIONS)) {
+            _weightGoalUiState.value = WeightGoalUiState.PermissionDenied
+            return
+        }
+        viewModelScope.launch {
+            _weightGoalUiState.value = WeightGoalUiState.Loading
+            readWeightAndRecommend()
+        }
+    }
+
+    private suspend fun readWeightAndRecommend() {
+        val weightKg = healthConnectService.readLatestWeightKg()
+        _weightGoalUiState.value = if (weightKg == null) {
+            WeightGoalUiState.NoWeightData
+        } else {
+            val cups = StatsInsightService.recommendedGoalCups(weightKg, settings.value.cupSize)
+            WeightGoalUiState.Recommended(cups, weightKg)
+        }
+    }
+
+    fun applyRecommendedGoal(cups: Int) {
+        updateDailyGoal(cups)
+        _weightGoalUiState.value = WeightGoalUiState.Idle
+    }
+
+    fun dismissWeightGoalState() {
+        _weightGoalUiState.value = WeightGoalUiState.Idle
     }
 
     private fun update(refreshWidget: Boolean = false, transform: (UserSettings) -> UserSettings) {

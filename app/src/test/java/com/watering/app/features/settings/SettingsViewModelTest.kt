@@ -5,6 +5,8 @@ import app.cash.turbine.test
 import com.watering.app.core.data.SettingsRepository
 import com.watering.app.core.model.UserSettings
 import com.watering.app.core.model.WidgetTheme
+import com.watering.app.core.service.HealthConnectAvailability
+import com.watering.app.core.service.HealthConnectService
 import com.watering.app.core.service.NotificationService
 import com.watering.app.core.service.WaterService
 import com.watering.app.testutil.MainDispatcherRule
@@ -32,6 +34,7 @@ class SettingsViewModelTest {
     private lateinit var notificationService: NotificationService
     private lateinit var waterService: WaterService
     private lateinit var widgetUpdater: WateringWidgetUpdater
+    private lateinit var healthConnectService: HealthConnectService
 
     private fun createViewModel(initialSettings: UserSettings = UserSettings()): SettingsViewModel {
         context = mockk(relaxed = true)
@@ -42,7 +45,17 @@ class SettingsViewModelTest {
         notificationService = mockk(relaxed = true)
         waterService = mockk(relaxed = true)
         widgetUpdater = mockk(relaxed = true)
-        return SettingsViewModel(context, settingsRepository, notificationService, waterService, widgetUpdater)
+        healthConnectService = mockk {
+            every { availability } returns HealthConnectAvailability.AVAILABLE
+        }
+        return SettingsViewModel(
+            context,
+            settingsRepository,
+            notificationService,
+            waterService,
+            widgetUpdater,
+            healthConnectService
+        )
     }
 
     @Test
@@ -151,4 +164,89 @@ class SettingsViewModelTest {
 
         coVerify { waterService.clearAllData() }
     }
+
+    @Test
+    fun requestWeightBasedGoal_SDK사용불가면NotAvailable상태가된다() = runTest(mainDispatcherRule.testDispatcher) {
+        val viewModel = createViewModel()
+        every { healthConnectService.availability } returns HealthConnectAvailability.NOT_INSTALLED
+
+        viewModel.requestWeightBasedGoal()
+
+        assertEquals(
+            WeightGoalUiState.NotAvailable(HealthConnectAvailability.NOT_INSTALLED),
+            viewModel.weightGoalUiState.value
+        )
+    }
+
+    @Test
+    fun requestWeightBasedGoal_권한없으면NeedsPermission상태가된다() = runTest(mainDispatcherRule.testDispatcher) {
+        val viewModel = createViewModel()
+        coEvery { healthConnectService.hasPermissions(HealthConnectService.WEIGHT_PERMISSIONS) } returns false
+
+        viewModel.requestWeightBasedGoal()
+
+        assertEquals(WeightGoalUiState.NeedsPermission, viewModel.weightGoalUiState.value)
+    }
+
+    @Test
+    fun requestWeightBasedGoal_권한있고체중데이터있으면Recommended상태가된다() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val viewModel = createViewModel(UserSettings(cupSize = 200))
+            coEvery { healthConnectService.hasPermissions(HealthConnectService.WEIGHT_PERMISSIONS) } returns true
+            coEvery { healthConnectService.readLatestWeightKg() } returns 60.0
+
+            viewModel.requestWeightBasedGoal()
+
+            assertEquals(WeightGoalUiState.Recommended(10, 60.0), viewModel.weightGoalUiState.value)
+        }
+
+    @Test
+    fun requestWeightBasedGoal_체중데이터없으면NoWeightData상태가된다() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val viewModel = createViewModel()
+            coEvery { healthConnectService.hasPermissions(HealthConnectService.WEIGHT_PERMISSIONS) } returns true
+            coEvery { healthConnectService.readLatestWeightKg() } returns null
+
+            viewModel.requestWeightBasedGoal()
+
+            assertEquals(WeightGoalUiState.NoWeightData, viewModel.weightGoalUiState.value)
+        }
+
+    @Test
+    fun onWeightPermissionResult_권한거부되면PermissionDenied상태가된다() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val viewModel = createViewModel()
+
+            viewModel.onWeightPermissionResult(emptySet())
+
+            assertEquals(WeightGoalUiState.PermissionDenied, viewModel.weightGoalUiState.value)
+        }
+
+    @Test
+    fun onWeightPermissionResult_권한허용되면체중을읽어Recommended상태가된다() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val viewModel = createViewModel(UserSettings(cupSize = 200))
+            coEvery { healthConnectService.readLatestWeightKg() } returns 60.0
+
+            viewModel.onWeightPermissionResult(HealthConnectService.WEIGHT_PERMISSIONS)
+
+            assertEquals(WeightGoalUiState.Recommended(10, 60.0), viewModel.weightGoalUiState.value)
+        }
+
+    @Test
+    fun applyRecommendedGoal_목표를저장하고상태를Idle로되돌린다() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val viewModel = createViewModel(UserSettings(dailyGoal = 8))
+            val slot = slot<UserSettings>()
+            coEvery { settingsRepository.updateSettings(capture(slot)) } returns Unit
+
+            viewModel.settings.test {
+                awaitItem()
+                viewModel.applyRecommendedGoal(10)
+                cancelAndIgnoreRemainingEvents()
+            }
+
+            assertEquals(10, slot.captured.dailyGoal)
+            assertEquals(WeightGoalUiState.Idle, viewModel.weightGoalUiState.value)
+        }
 }
