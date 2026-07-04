@@ -9,6 +9,7 @@ import androidx.glance.currentState
 import com.watering.app.core.data.SettingsRepository
 import com.watering.app.core.data.WaterRepository
 import com.watering.app.core.model.WidgetTheme
+import com.watering.app.core.service.AchievementChecker
 import com.watering.app.core.service.AnalyticsService
 import com.watering.app.core.service.WaterService
 import dagger.hilt.EntryPoint
@@ -44,6 +45,7 @@ interface WidgetEntryPoint {
     fun settingsRepository(): SettingsRepository
     fun waterService(): WaterService
     fun analyticsService(): AnalyticsService
+    fun achievementChecker(): AchievementChecker
 }
 
 suspend fun loadWidgetState(context: Context): WidgetState {

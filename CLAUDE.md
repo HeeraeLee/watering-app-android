@@ -417,6 +417,33 @@ Google Play Developer 계정 ($25 일회성)
 ./gradlew bundleRelease
 ```
 
+### 실기기(USB) 테스트
+
+에뮬레이터는 유닛 테스트에는 불필요하며, 실기기 연결 시 로컬 RAM 부담이 훨씬 적습니다. 위젯(Glance) 동작처럼 눈으로 직접 확인해야 하는 검증은 실기기 연결을 우선합니다.
+
+```
+1. 폰: 설정 > 휴대폰 정보 > 빌드 번호 7번 탭 → 개발자 옵션 활성화
+2. 폰: 개발자 옵션 > USB 디버깅 켜기
+3. 데이터 케이블로 PC와 연결 → "USB 디버깅 허용" 팝업에서 "이 컴퓨터에서 항상 허용" 후 허용
+4. adb devices 로 인식 확인 (상태가 device 여야 정상)
+5. ./gradlew installDebug 로 설치 (패키지: com.watering.app.debug)
+```
+
+```bash
+adb devices                # 기기 인식 확인
+./gradlew installDebug     # 디버그 APK 설치
+adb logcat -c              # 로그캣 버퍼 초기화 후 테스트 시작
+```
+
+**로그캣 노이즈 필터링** — 삼성 런처(HoneySpace)·WindowManager·SurfaceFlinger 등 시스템 로그가 압도적으로 많으므로, 반드시 걸러서 봅니다:
+
+```bash
+adb logcat | grep -iE "com\.watering\.app" \
+  | grep -viE "surfaceflinger|windowmanager|honeyspace|insets|corebackpreview|surfacecomposerclient|inputdispatcher|imetracker|activitytaskmanager|sgm:|pageboost|freecess|appsfilter|shellstartingwindow|appiconsolution|secnotificationblockmanager|permissionhelper|notificationbackend|hbd |navigationbar|mdnie|changetransitioncontroller|windowmanagershell|systemkeymanager|vri\[|appwidgethost\(|appwidgetserviceimpl|appwidgetmanager\(|activitymanager\( |mars:activetrafficfilter"
+```
+
+이 필터를 거친 뒤에도 남는 `System.err`, `FATAL EXCEPTION`, `AndroidRuntime`, `WM-WorkerWrapper`(WorkManager/Glance `SessionWorker`), `Error inflating AppWidget` 같은 로그는 실제 버그일 가능성이 높으므로 주의 깊게 확인합니다.
+
 ### 배포 프로세스
 
 ```

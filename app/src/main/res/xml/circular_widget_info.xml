@@ -5,6 +5,7 @@
     android:targetCellWidth="1"
     android:targetCellHeight="1"
     android:updatePeriodMillis="1800000"
+    android:initialLayout="@layout/glance_default_loading_layout"
     android:description="@string/widget_circular_description"
     android:widgetCategory="home_screen|keyguard"
     android:widgetFeatures="reconfigurable|configuration_optional" />

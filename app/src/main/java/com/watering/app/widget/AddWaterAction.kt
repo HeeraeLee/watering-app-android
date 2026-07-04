@@ -25,15 +25,18 @@ class AddWaterAction : ActionCallback {
             val settingsRepository = entryPoint.settingsRepository()
             val waterService = entryPoint.waterService()
             val analyticsService = entryPoint.analyticsService()
+            val achievementChecker = entryPoint.achievementChecker()
 
             val settings = settingsRepository.userSettings.first()
+            val prev = waterRepository.todayRecord.first()
             val updated = waterService.addWater(
                 amount = settings.cupSize,
                 drinkType = DrinkType.WATER,
                 goal = settings.dailyGoal
             )
-            waterService.updateStreak(updated, waterRepository.streakInfo.first(), settings.isPremium)
+            val streak = waterService.updateStreak(updated, waterRepository.streakInfo.first(), settings.isPremium)
             analyticsService.logRecordAdd(settings.cupSize, DrinkType.WATER.name, source = "widget")
+            achievementChecker.check(prev, updated, streak, settings.isPremium)
             Log.d("WateringWidget", "after: ${updated.totalCount}/${updated.goal}")
         } catch (e: Exception) {
             Log.e("WateringWidget", "AddWaterAction failed", e)
