@@ -86,6 +86,99 @@ class AchievementCheckerTest {
     }
 
     @Test
+    fun check_목표달성하고streak가60이상이고프리미엄이면_STREAK_60반환() = runTest {
+        val prev = record(7, goal = 8)
+        val next = record(8, goal = 8)
+
+        val result = checker.check(prev, next, StreakInfo(currentStreak = 60), isPremium = true)
+
+        assertEquals(Achievement.STREAK_60, result)
+    }
+
+    @Test
+    fun check_목표달성하고streak가100이상이고프리미엄이면_STREAK_100반환() = runTest {
+        val prev = record(7, goal = 8)
+        val next = record(8, goal = 8)
+
+        val result = checker.check(prev, next, StreakInfo(currentStreak = 100), isPremium = true)
+
+        assertEquals(Achievement.STREAK_100, result)
+    }
+
+    @Test
+    fun check_목표달성하고streak가365이상이고프리미엄이면_STREAK_365반환() = runTest {
+        val prev = record(7, goal = 8)
+        val next = record(8, goal = 8)
+
+        val result = checker.check(prev, next, StreakInfo(currentStreak = 365), isPremium = true)
+
+        assertEquals(Achievement.STREAK_365, result)
+    }
+
+    @Test
+    fun check_streak가60이상이어도프리미엄아니면_STREAK_30으로제한된다() = runTest {
+        val prev = record(7, goal = 8)
+        val next = record(8, goal = 8)
+
+        val result = checker.check(prev, next, StreakInfo(currentStreak = 60))
+
+        assertEquals(Achievement.STREAK_30, result)
+    }
+
+    @Test
+    fun check_streak가100이상이어도프리미엄아니면_STREAK_30으로제한된다() = runTest {
+        val prev = record(7, goal = 8)
+        val next = record(8, goal = 8)
+
+        val result = checker.check(prev, next, StreakInfo(currentStreak = 100))
+
+        assertEquals(Achievement.STREAK_30, result)
+    }
+
+    @Test
+    fun check_streak가365이상이어도프리미엄아니면_STREAK_30으로제한된다() = runTest {
+        val prev = record(7, goal = 8)
+        val next = record(8, goal = 8)
+
+        val result = checker.check(prev, next, StreakInfo(currentStreak = 365))
+
+        assertEquals(Achievement.STREAK_30, result)
+    }
+
+    @Test
+    fun check_STREAK_60이미획득했으면_GOAL_ACHIEVED로대체된다() = runTest {
+        val prev = record(7, goal = 8)
+        val next = record(8, goal = 8)
+        coEvery { dataStore.isAlreadyEarned("2026-07-02", Achievement.STREAK_60) } returns true
+
+        val result = checker.check(prev, next, StreakInfo(currentStreak = 60), isPremium = true)
+
+        assertEquals(Achievement.GOAL_ACHIEVED, result)
+    }
+
+    @Test
+    fun check_STREAK_100이미획득했으면_GOAL_ACHIEVED로대체된다() = runTest {
+        val prev = record(7, goal = 8)
+        val next = record(8, goal = 8)
+        coEvery { dataStore.isAlreadyEarned("2026-07-02", Achievement.STREAK_100) } returns true
+
+        val result = checker.check(prev, next, StreakInfo(currentStreak = 100), isPremium = true)
+
+        assertEquals(Achievement.GOAL_ACHIEVED, result)
+    }
+
+    @Test
+    fun check_STREAK_365이미획득했으면_GOAL_ACHIEVED로대체된다() = runTest {
+        val prev = record(7, goal = 8)
+        val next = record(8, goal = 8)
+        coEvery { dataStore.isAlreadyEarned("2026-07-02", Achievement.STREAK_365) } returns true
+
+        val result = checker.check(prev, next, StreakInfo(currentStreak = 365), isPremium = true)
+
+        assertEquals(Achievement.GOAL_ACHIEVED, result)
+    }
+
+    @Test
     fun check_streak타이틀이미획득했으면_GOAL_ACHIEVED로대체된다() = runTest {
         val prev = record(7, goal = 8)
         val next = record(8, goal = 8)

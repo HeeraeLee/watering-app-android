@@ -74,7 +74,7 @@ class HomeViewModel @Inject constructor(
             val streak = waterService.updateStreak(updated, current.streak, current.settings.isPremium)
             _snackbarMessage.value = context.getString(R.string.home_snackbar_water_recorded, current.settings.cupSize)
             analyticsService.logRecordAdd(current.settings.cupSize, drinkType.name, source = "home")
-            achievementChecker.check(prev, updated, streak)?.let { _pendingAchievement.value = it }
+            achievementChecker.check(prev, updated, streak, current.settings.isPremium)?.let { _pendingAchievement.value = it }
         }
     }
 
@@ -95,7 +95,7 @@ class HomeViewModel @Inject constructor(
                 amount
             )
             analyticsService.logRecordAdd(amount, drinkType.name, source = "home")
-            achievementChecker.check(prev, updated, streak)?.let { _pendingAchievement.value = it }
+            achievementChecker.check(prev, updated, streak, current.settings.isPremium)?.let { _pendingAchievement.value = it }
         }
     }
 

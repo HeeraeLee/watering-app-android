@@ -16,7 +16,8 @@ class AchievementChecker @Inject constructor(
     suspend fun check(
         prev: DayRecord,
         next: DayRecord,
-        streak: StreakInfo
+        streak: StreakInfo,
+        isPremium: Boolean = false
     ): Achievement? {
         val dateKey = next.dateKey
 
@@ -27,8 +28,11 @@ class AchievementChecker @Inject constructor(
 
         // 목표 달성 (이번 잔으로 달성)
         if (!prev.isAchieved && next.isAchieved) {
-            // 연속 기록 기반 타이틀 우선 (더 특별함)
+            // 연속 기록 기반 타이틀 우선 (더 특별함). 60/100/365일은 프리미엄 전용
             val streakAchievement = when {
+                isPremium && streak.currentStreak >= 365 -> Achievement.STREAK_365
+                isPremium && streak.currentStreak >= 100 -> Achievement.STREAK_100
+                isPremium && streak.currentStreak >= 60  -> Achievement.STREAK_60
                 streak.currentStreak >= 30 -> Achievement.STREAK_30
                 streak.currentStreak >= 7  -> Achievement.STREAK_7
                 streak.currentStreak >= 3  -> Achievement.STREAK_3

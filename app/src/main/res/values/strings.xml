@@ -34,7 +34,7 @@
     <string name="glasses_count">%1$d잔</string>
     <string name="streak_days_value">%1$d일</string>
     <string name="feature_streak_protection_title">연속 기록 보호</string>
-    <string name="feature_streak_protection_description">한 달에 하루 놓쳐도 연속 기록이 유지돼요</string>
+    <string name="feature_streak_protection_description">한 달에 하루 놓쳐도 연속 기록이 유지되고, 60·100·365일 전용 마일스톤 타이틀도 잠금 해제돼요</string>
 
     <!-- 성취 다이얼로그 (Achievement.titleRes / messageRes) -->
     <string name="achievement_first_sip_title">시작의 한 모금</string>
@@ -49,6 +49,12 @@
     <string name="achievement_streak_7_message">7일 연속으로 목표를 달성했어요</string>
     <string name="achievement_streak_30_title">한 달 레전드</string>
     <string name="achievement_streak_30_message">30일 연속으로 목표를 달성했어요</string>
+    <string name="achievement_streak_60_title">두 달의 기적</string>
+    <string name="achievement_streak_60_message">60일 연속으로 목표를 달성했어요</string>
+    <string name="achievement_streak_100_title">백일의 전설</string>
+    <string name="achievement_streak_100_message">100일 연속으로 목표를 달성했어요</string>
+    <string name="achievement_streak_365_title">1년의 레전드</string>
+    <string name="achievement_streak_365_message">365일 연속으로 목표를 달성했어요</string>
     <string name="achievement_dismiss_hint">탭해서 닫기</string>
 
     <!-- 홈 화면 -->
