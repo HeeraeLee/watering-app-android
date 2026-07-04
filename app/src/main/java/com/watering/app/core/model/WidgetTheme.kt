@@ -13,7 +13,8 @@ enum class WidgetTheme(@StringRes val displayNameRes: Int, val accentColor: Colo
     NEON(R.string.widget_theme_neon, Color(0xFFFF2D95));
 
     companion object {
-        // 목표 달성 색상은 테마와 무관하게 항상 고정 — "성공=그린" 신호 일관성 유지
-        val ACHIEVED_COLOR = Color(0xFF34C759)
+        // 목표 달성 색상은 테마와 무관하게 항상 고정 — 앱 쪽 Theme.kt와 동일한 골드로 통일
+        // (그린 → 골드, 2026-07-04 사용자 피드백 반영)
+        val ACHIEVED_COLOR = Color(0xFFF5C860)
     }
 }
