@@ -26,7 +26,7 @@ private val DarkColorScheme = darkColorScheme(
     onPrimary = Color(0xFF003544),
     primaryContainer = Color(0xFF004F62),
     onPrimaryContainer = Color(0xFFCAF0F8),
-    secondary = Color(0xFF74C69D),
+    secondary = Color(0xFFF5C860), // 라이트 모드와 동일한 골드로 통일 (그린 잔존 버그 수정)
     tertiary = Color(0xFFFFB74D)
 )
 

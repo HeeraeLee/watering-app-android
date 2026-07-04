@@ -57,14 +57,19 @@ class WaterRepositoryTest {
     }
 
     @Test
-    fun updateStreak_기록날짜가오늘이아니면_기존streak그대로반환() = runTest {
-        val pastRecord = achievedRecord(dateKey = yesterdayKey)
-        val current = StreakInfo(currentStreak = 5)
+    fun updateStreak_시스템날짜가아닌record자체의dateKey를기준으로계산한다() = runTest {
+        // record.dateKey가 어제(yesterdayKey)여도, 그 날짜를 기준으로 "어제"에 해당하는
+        // twoDaysAgoKey에 달성했으면 streak가 이어져야 함 — LocalDate.now()(시스템 시각)를 쓰면
+        // 자정 경계에서 이 레코드를 거부하거나 잘못된 날짜로 비교하는 버그가 재발함(v0.24.1과
+        // 동일한 버그 패턴, WaterRepository에도 남아있던 것을 발견해 수정)
+        val recordFromYesterday = achievedRecord(dateKey = yesterdayKey)
+        val current = StreakInfo(currentStreak = 5, longestStreak = 5, lastAchievedDateKey = twoDaysAgoKey)
 
-        val result = repository.updateStreak(pastRecord, current, isPremium = false)
+        val result = repository.updateStreak(recordFromYesterday, current, isPremium = false)
 
-        assertSame(current, result)
-        coVerify(exactly = 0) { dataStore.saveStreakInfo(any()) }
+        assertEquals(6, result.currentStreak)
+        assertEquals(yesterdayKey, result.lastAchievedDateKey)
+        coVerify { dataStore.saveStreakInfo(result) }
     }
 
     @Test

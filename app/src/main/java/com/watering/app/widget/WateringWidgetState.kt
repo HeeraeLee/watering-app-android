@@ -48,6 +48,12 @@ interface WidgetEntryPoint {
     fun achievementChecker(): AchievementChecker
 }
 
+// 위젯 데이터 로드 실패 시 이 프로세스에서 마지막으로 성공한 상태로 대체하기 위한 캐시
+// (CLAUDE.md 정책: "위젯 데이터 로드 실패 시 마지막 성공 데이터를 fallback으로 표시")
+private object WidgetStateCache {
+    @Volatile var lastKnownGood: WidgetState? = null
+}
+
 suspend fun loadWidgetState(context: Context): WidgetState {
     return try {
         val entryPoint = EntryPointAccessors.fromApplication(
@@ -64,8 +70,8 @@ suspend fun loadWidgetState(context: Context): WidgetState {
             goal = goal,
             achievementRate = record.totalCount.toDouble() / goal,
             theme = theme
-        )
+        ).also { WidgetStateCache.lastKnownGood = it }
     } catch (e: Exception) {
-        WidgetState()
+        WidgetStateCache.lastKnownGood ?: WidgetState()
     }
 }

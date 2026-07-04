@@ -64,38 +64,46 @@ class HomeViewModel @Inject constructor(
 
     fun addWater(drinkType: DrinkType = DrinkType.WATER) {
         viewModelScope.launch {
-            val current = uiState.value
-            val prev = current.record
-            val updated = waterService.addWater(
-                amount = current.settings.cupSize,
-                drinkType = drinkType,
-                goal = current.settings.dailyGoal
-            )
-            val streak = waterService.updateStreak(updated, current.streak, current.settings.isPremium)
-            _snackbarMessage.value = context.getString(R.string.home_snackbar_water_recorded, current.settings.cupSize)
-            analyticsService.logRecordAdd(current.settings.cupSize, drinkType.name, source = "home")
-            achievementChecker.check(prev, updated, streak, current.settings.isPremium)?.let { _pendingAchievement.value = it }
+            try {
+                val current = uiState.value
+                val prev = current.record
+                val updated = waterService.addWater(
+                    amount = current.settings.cupSize,
+                    drinkType = drinkType,
+                    goal = current.settings.dailyGoal
+                )
+                val streak = waterService.updateStreak(updated, current.streak, current.settings.isPremium)
+                _snackbarMessage.value = context.getString(R.string.home_snackbar_water_recorded, current.settings.cupSize)
+                analyticsService.logRecordAdd(current.settings.cupSize, drinkType.name, source = "home")
+                achievementChecker.check(prev, updated, streak, current.settings.isPremium)?.let { _pendingAchievement.value = it }
+            } catch (e: Exception) {
+                _snackbarMessage.value = context.getString(R.string.home_snackbar_record_failed)
+            }
         }
     }
 
     fun addWaterCustom(amount: Int, drinkType: DrinkType) {
         viewModelScope.launch {
-            val current = uiState.value
-            val prev = current.record
-            val updated = waterService.addWater(
-                amount = amount,
-                drinkType = drinkType,
-                goal = current.settings.dailyGoal
-            )
-            val streak = waterService.updateStreak(updated, current.streak, current.settings.isPremium)
-            _snackbarMessage.value = context.getString(
-                R.string.home_snackbar_drink_recorded,
-                drinkType.emoji,
-                context.getString(drinkType.displayNameRes),
-                amount
-            )
-            analyticsService.logRecordAdd(amount, drinkType.name, source = "home")
-            achievementChecker.check(prev, updated, streak, current.settings.isPremium)?.let { _pendingAchievement.value = it }
+            try {
+                val current = uiState.value
+                val prev = current.record
+                val updated = waterService.addWater(
+                    amount = amount,
+                    drinkType = drinkType,
+                    goal = current.settings.dailyGoal
+                )
+                val streak = waterService.updateStreak(updated, current.streak, current.settings.isPremium)
+                _snackbarMessage.value = context.getString(
+                    R.string.home_snackbar_drink_recorded,
+                    drinkType.emoji,
+                    context.getString(drinkType.displayNameRes),
+                    amount
+                )
+                analyticsService.logRecordAdd(amount, drinkType.name, source = "home")
+                achievementChecker.check(prev, updated, streak, current.settings.isPremium)?.let { _pendingAchievement.value = it }
+            } catch (e: Exception) {
+                _snackbarMessage.value = context.getString(R.string.home_snackbar_record_failed)
+            }
         }
     }
 

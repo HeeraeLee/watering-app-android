@@ -215,7 +215,14 @@ class BillingService @Inject constructor(
             val params = AcknowledgePurchaseParams.newBuilder()
                 .setPurchaseToken(purchase.purchaseToken)
                 .build()
-            billingClient.acknowledgePurchase(params) { }
+            // 확인(acknowledge) 안 된 구매는 Google이 3일 내 자동 환불하므로, 실패를 조용히 넘기지
+            // 않고 로그로 남긴다 — 다음 queryPurchases() 호출 시 isAcknowledged가 여전히 false면
+            // 이 함수가 다시 시도한다
+            billingClient.acknowledgePurchase(params) { result ->
+                if (result.responseCode != BillingClient.BillingResponseCode.OK) {
+                    Log.e(TAG, "구매 확인(acknowledge) 실패: ${result.debugMessage}")
+                }
+            }
         }
     }
 }

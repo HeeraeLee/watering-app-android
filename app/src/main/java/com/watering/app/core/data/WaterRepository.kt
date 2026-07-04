@@ -31,10 +31,13 @@ class WaterRepository @Inject constructor(
 
     // 프리미엄 유저는 한 달에 하루, 정확히 하루를 놓쳤을 때만 연속 기록이 끊기지 않는다 (2일 이상 공백은 보호 대상 아님)
     suspend fun updateStreak(record: DayRecord, current: StreakInfo, isPremium: Boolean): StreakInfo {
-        val today = LocalDate.now()
-        val todayKey = today.format(formatter)
-        if (!record.isAchieved || record.dateKey != todayKey) return current
+        if (!record.isAchieved) return current
 
+        // 시스템 시각(LocalDate.now())이 아닌 레코드 자체의 날짜를 기준으로 계산 — 자정 경계에서
+        // 실제 현재 시각과 record.dateKey가 어긋나는 경우(코루틴 스케줄링 지연, 기기 슬립 등)에도
+        // 정확하게 동작하도록 함 (AchievementChecker의 동일 버그, v0.24.1과 같은 수정 패턴)
+        val todayKey = record.dateKey
+        val today = LocalDate.parse(todayKey, formatter)
         val yesterdayKey = today.minusDays(1).format(formatter)
         val twoDaysAgoKey = today.minusDays(2).format(formatter)
         val currentMonthKey = today.format(monthFormatter)

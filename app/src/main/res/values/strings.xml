@@ -67,6 +67,7 @@
     <string name="home_snackbar_undo_action">취소</string>
     <string name="home_snackbar_water_recorded">💧 +%1$dml 기록됐어요</string>
     <string name="home_snackbar_drink_recorded">%1$s %2$s +%3$dml 기록됐어요</string>
+    <string name="home_snackbar_record_failed">기록에 실패했어요. 다시 시도해주세요</string>
 
     <!-- 음료 기록 바텀시트 -->
     <string name="record_sheet_title">음료 기록</string>
