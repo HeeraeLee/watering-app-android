@@ -40,9 +40,9 @@ import com.watering.app.R
 import com.watering.app.core.model.WidgetTheme
 
 // 잔수·퍼센트 텍스트를 고정 폭으로 둬야 barTotal 추정(size.width - 고정폭)이 자릿수와 무관하게 항상 정확하다
-// (실측 176dp 기준, 막대가 너무 얇아지지 않도록 최소 여백으로 타이트하게 설정)
-private val CountTextWidth = 46.dp
-private val PercentTextWidth = 32.dp
+// (PercentTextWidth를 34dp로 줄였더니 "100%"가 줄바꿈돼서 38dp로 복원 — "100%" 4글자가 14sp에서 필요로 하는 최소 폭)
+private val CountTextWidth = 52.dp
+private val PercentTextWidth = 38.dp
 
 class NarrowWidget : GlanceAppWidget() {
     override val sizeMode = SizeMode.Exact
@@ -65,9 +65,8 @@ private fun NarrowWidgetContent(state: WidgetState) {
     val isAchieved = state.achievementRate >= 1.0
     val accent = if (isAchieved) WidgetTheme.ACHIEVED_COLOR else state.theme.accentColor
     val rate = state.achievementRate.coerceIn(0.0, 1.0).toFloat()
-    // 아이콘(16) + 여백(6+6+6) + 잔수 텍스트(46) + 퍼센트 텍스트(32) + 좌우 패딩(28) = 140dp
-    // (막대 요청에 따라 여백을 8/10/8→6/6/6으로 줄여 막대 실제 공간을 확보 — 텍스트 폭은 그대로라 잘림 위험 없음)
-    val barTotal = (size.width - 140.dp).coerceAtLeast(8.dp)
+    // 아이콘(16) + 여백(4+4+4) + 잔수 텍스트(52) + 퍼센트 텍스트(38) + 좌우 패딩(28) = 146dp
+    val barTotal = (size.width - 146.dp).coerceAtLeast(8.dp)
     val barFill = (barTotal * rate).coerceAtLeast(0.dp)
 
     val bgColor = if (isDark) Color(0xEE0D1B2A) else Color.White
@@ -89,17 +88,17 @@ private fun NarrowWidgetContent(state: WidgetState) {
             modifier = GlanceModifier.size(16.dp),
             colorFilter = ColorFilter.tint(ColorProvider(accent))
         )
-        Spacer(GlanceModifier.width(6.dp))
+        Spacer(GlanceModifier.width(4.dp))
         Text(
             text = "${state.totalCount} / ${state.goal}",
             modifier = GlanceModifier.width(CountTextWidth),
             style = TextStyle(
                 color = ColorProvider(textColor),
-                fontSize = 14.sp,
+                fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
             )
         )
-        Spacer(GlanceModifier.width(6.dp))
+        Spacer(GlanceModifier.width(4.dp))
         Box(
             modifier = GlanceModifier
                 .defaultWeight()
@@ -117,13 +116,13 @@ private fun NarrowWidgetContent(state: WidgetState) {
                 ) {}
             }
         }
-        Spacer(GlanceModifier.width(6.dp))
+        Spacer(GlanceModifier.width(4.dp))
         Text(
             text = "${(rate * 100).toInt()}%",
             modifier = GlanceModifier.width(PercentTextWidth),
             style = TextStyle(
                 color = ColorProvider(accent),
-                fontSize = 12.sp,
+                fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
                 textAlign = TextAlign.End
             )

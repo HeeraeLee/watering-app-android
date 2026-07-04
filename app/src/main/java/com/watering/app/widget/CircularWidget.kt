@@ -27,7 +27,6 @@ import androidx.glance.layout.Column
 import androidx.glance.layout.Spacer
 import androidx.glance.layout.fillMaxHeight
 import androidx.glance.layout.fillMaxSize
-import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
 import androidx.glance.layout.size
@@ -60,12 +59,12 @@ private fun CircularWidgetContent(state: WidgetState) {
     val isAchieved = state.achievementRate >= 1.0
     val accent = if (isAchieved) WidgetTheme.ACHIEVED_COLOR else state.theme.accentColor
     val rate = state.achievementRate.coerceIn(0.0, 1.0).toFloat()
-    val barWidth = (size.width - 28.dp) * rate
+    val trackWidth = (size.width - 20.dp) * 0.85f
+    val barWidth = trackWidth * rate
 
     // 다크: 아쿠아/그린 배경 + 흰 텍스트 / 라이트: 흰 배경 + 아쿠아/그린 텍스트
     val bgColor = if (isDark) accent else Color.White
     val textColor = if (isDark) Color.White else accent
-    val subTextColor = if (isDark) Color.White.copy(alpha = 0.75f) else Color(0xFF666666)
     val barTrackColor = if (isDark) Color.White.copy(alpha = 0.3f) else accent.copy(alpha = 0.15f)
     val barFillColor = if (isDark) Color.White else accent
 
@@ -77,36 +76,29 @@ private fun CircularWidgetContent(state: WidgetState) {
             .clickable(actionRunCallback<AddWaterAction>())
     ) {
         Column(
-            modifier = GlanceModifier.fillMaxSize().padding(14.dp),
+            modifier = GlanceModifier.fillMaxSize().padding(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
                 provider = ImageProvider(R.drawable.ic_water_drop),
                 contentDescription = null,
-                modifier = GlanceModifier.size(22.dp),
+                modifier = GlanceModifier.size(18.dp),
                 colorFilter = ColorFilter.tint(ColorProvider(textColor))
             )
-            Spacer(GlanceModifier.height(4.dp))
+            Spacer(GlanceModifier.height(2.dp))
             Text(
                 text = "${state.totalCount}",
                 style = TextStyle(
                     color = ColorProvider(textColor),
-                    fontSize = 40.sp,
+                    fontSize = 28.sp,
                     fontWeight = FontWeight.Bold
                 )
             )
-            Text(
-                text = context.getString(R.string.glasses_with_slash, state.goal),
-                style = TextStyle(
-                    color = ColorProvider(subTextColor),
-                    fontSize = 13.sp
-                )
-            )
-            Spacer(GlanceModifier.defaultWeight())
+            Spacer(GlanceModifier.height(6.dp))
             Box(
                 modifier = GlanceModifier
-                    .fillMaxWidth()
+                    .width(trackWidth)
                     .height(4.dp)
                     .cornerRadius(2.dp)
                     .background(ColorProvider(barTrackColor))
