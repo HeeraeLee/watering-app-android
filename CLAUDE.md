@@ -98,86 +98,10 @@ Material Design 3 가이드라인을 숙지하고 플랫폼 네이티브 UX를 �
 
 ## 프로젝트 구조
 
-```
-watering-app-android/
-├── app/
-│   ├── src/
-│   │   ├── main/
-│   │   │   ├── java/com/watering/app/
-│   │   │   │   ├── WateringApp.kt              # Application 클래스 (Hilt + HiltWorkerFactory)
-│   │   │   │   ├── MainActivity.kt
-│   │   │   │   ├── navigation/
-│   │   │   │   │   └── WateringNavGraph.kt
-│   │   │   │   ├── features/
-│   │   │   │   │   ├── home/
-│   │   │   │   │   │   ├── HomeScreen.kt
-│   │   │   │   │   │   └── HomeViewModel.kt
-│   │   │   │   │   ├── record/
-│   │   │   │   │   │   ├── RecordSheet.kt
-│   │   │   │   │   │   └── RecordViewModel.kt
-│   │   │   │   │   ├── stats/
-│   │   │   │   │   │   └── StatsScreen.kt
-│   │   │   │   │   ├── settings/
-│   │   │   │   │   │   ├── SettingsScreen.kt
-│   │   │   │   │   │   └── SettingsViewModel.kt
-│   │   │   │   │   ├── onboarding/
-│   │   │   │   │   │   ├── OnboardingScreen.kt
-│   │   │   │   │   │   └── OnboardingViewModel.kt
-│   │   │   │   │   └── premium/
-│   │   │   │   │       └── PremiumScreen.kt
-│   │   │   │   ├── core/
-│   │   │   │   │   ├── model/
-│   │   │   │   │   │   ├── WaterEntry.kt
-│   │   │   │   │   │   ├── DayRecord.kt
-│   │   │   │   │   │   ├── StreakInfo.kt
-│   │   │   │   │   │   ├── UserSettings.kt
-│   │   │   │   │   │   └── DrinkType.kt
-│   │   │   │   │   ├── data/
-│   │   │   │   │   │   ├── WaterRepository.kt
-│   │   │   │   │   │   └── SettingsRepository.kt
-│   │   │   │   │   ├── datastore/
-│   │   │   │   │   │   ├── WaterDataStore.kt
-│   │   │   │   │   │   └── SettingsDataStore.kt
-│   │   │   │   │   └── service/
-│   │   │   │   │       ├── WaterService.kt
-│   │   │   │   │       ├── NotificationService.kt
-│   │   │   │   │       ├── NotificationWorker.kt
-│   │   │   │   │       └── MidnightResetWorker.kt
-│   │   │   │   ├── widget/
-│   │   │   │   │   ├── WateringWidgetUpdater.kt
-│   │   │   │   │   ├── WateringWidgetState.kt
-│   │   │   │   │   ├── CircularWidget.kt
-│   │   │   │   │   ├── RectangularWidget.kt
-│   │   │   │   │   └── NarrowWidget.kt
-│   │   │   │   ├── di/
-│   │   │   │   │   ├── DataModule.kt
-│   │   │   │   │   └── ServiceModule.kt
-│   │   │   │   └── ui/theme/
-│   │   │   │       ├── Theme.kt
-│   │   │   │       └── Type.kt
-│   │   │   └── res/
-│   │   │       ├── drawable/
-│   │   │       │   ├── ic_water_drop.xml           # 위젯용 물방울 아이콘
-│   │   │       │   ├── ic_launcher_foreground.xml  # (미사용 — 보관용)
-│   │   │       │   ├── ic_launcher_background.xml  # (미사용 — 보관용)
-│   │   │       │   ├── ic_launcher_icon.png        # 사용자 제공 아이콘 원본
-│   │   │       │   └── splash_image.png            # 스플래시 전체화면 이미지
-│   │   │       ├── mipmap-{mdpi|hdpi|xhdpi|xxhdpi|xxxhdpi}/
-│   │   │       │   ├── ic_launcher.png             # 앱 아이콘 (밀도별)
-│   │   │       │   └── ic_launcher_round.png       # 앱 아이콘 원형 (밀도별)
-│   │   │       ├── values/
-│   │   │       │   ├── themes.xml
-│   │   │       │   └── strings.xml
-│   │   │       └── xml/
-│   │   │           ├── circular_widget_info.xml
-│   │   │           ├── rectangular_widget_info.xml
-│   │   │           └── narrow_widget_info.xml
-│   │   └── test/
-│   │       └── java/com/watering/app/
-└── docs/
-    ├── 기획서.md
-    └── 개발보고서.md
-```
+`app/src/main/java/com/watering/app/` 아래 `features/`(화면별 Screen+ViewModel), `core/`(model·data·datastore·service),
+`widget/`(Glance 위젯), `di/`(Hilt 모듈), `ui/theme/` 패키지로 구성. 코드가 계속 바뀌므로 정확한 최신 구조는
+파일 트리를 직접 확인할 것 (`Glob "app/src/main/java/com/watering/app/**/*.kt"` 등) — 이 문서에 트리를
+박아두지 않음. `docs/기획서.md`(기획)·`docs/개발보고서.md`(구현 이력) 참고.
 
 ---
 
@@ -254,56 +178,9 @@ class WaterDataStore @Inject constructor(
 
 ## 데이터 모델
 
-```kotlin
-// 실제 구현 기준. 변경 시 이 문서도 업데이트.
-
-@Serializable
-data class DayRecord(
-    val dateKey: String,               // "yyyy-MM-dd" 형식
-    val entries: List<WaterEntry> = emptyList(),
-    val goal: Int = 8                  // 목표 잔 수
-) {
-    val totalCount: Int get() = entries.size
-    val achievementRate: Double get() = if (goal == 0) 0.0 else totalCount.toDouble() / goal
-    val isAchieved: Boolean get() = totalCount >= goal
-}
-
-@Serializable
-data class WaterEntry(
-    val id: String = UUID.randomUUID().toString(),
-    val timestampMillis: Long,         // epoch millis
-    val amount: Int,                   // ml
-    val drinkType: DrinkType
-)
-
-enum class DrinkType {
-    WATER, COFFEE, JUICE, TEA, MILK, OTHER
-}
-
-@Serializable
-data class UserSettings(
-    val dailyGoal: Int = 8,
-    val cupSize: Int = 200,            // ml
-    val notificationEnabled: Boolean = true,
-    val notificationInterval: Int = 120,  // 분
-    val notificationStart: Int = 8,    // 시
-    val notificationEnd: Int = 22,     // 시
-    val dustAlertEnabled: Boolean = false,   // v2 계획
-    val heatAlertEnabled: Boolean = false,   // v2 계획
-    val healthConnectEnabled: Boolean = false, // P3
-    val isPremium: Boolean = false,
-    val isOnboardingDone: Boolean = false
-)
-
-@Serializable
-data class StreakInfo(
-    val currentStreak: Int = 0,
-    val longestStreak: Int = 0,
-    val lastAchievedDateKey: String = "",      // "yyyy-MM-dd"
-    val protectionUsedThisMonth: Boolean = false,
-    val protectionUsedMonthKey: String = ""    // "yyyy-MM"
-)
-```
+핵심 모델(`DayRecord`, `WaterEntry`, `DrinkType`, `UserSettings`, `StreakInfo`)은 전부
+`core/model/*.kt`에 `@Serializable` data class로 정의돼 있음. 필드가 바뀔 때마다 이 문서를 같이
+고치는 대신 **코드 자체를 정본으로 삼음** — 정확한 필드/기본값은 해당 파일을 직접 확인할 것.
 
 ---
 
