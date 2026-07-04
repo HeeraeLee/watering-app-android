@@ -169,6 +169,7 @@
     <string name="settings_weight_goal_open_play_store">Open Play Store</string>
     <string name="settings_weight_goal_no_data_title">No Weight Data</string>
     <string name="settings_weight_goal_no_data_body">There\'s no weight data recorded in Health Connect, so we can\'t calculate a recommendation.</string>
+    <string name="settings_weight_goal_open_health_connect">Add it in Health Connect</string>
     <string name="settings_weight_goal_permission_denied_title">Permission Needed</string>
     <string name="settings_weight_goal_permission_denied_body">Without weight-read permission we can\'t suggest a goal. This won\'t affect any other feature.</string>
     <string name="settings_weight_goal_confirm_title">Recommended Goal</string>

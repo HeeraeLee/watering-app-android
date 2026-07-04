@@ -835,6 +835,30 @@ private fun WeightGoalDialogs(
             title = { Text(stringResource(R.string.settings_weight_goal_no_data_title)) },
             text = { Text(stringResource(R.string.settings_weight_goal_no_data_body)) },
             confirmButton = {
+                TextButton(onClick = {
+                    // Health Connect 앱 자체엔 "체중 입력 화면으로 바로 이동"하는 공식 딥링크가 없어
+                    // (데이터 접근 전용 SDK), 설치돼 있으면 앱 홈 화면으로 이동시키고 없으면 기존
+                    // NotAvailable 분기와 동일하게 플레이스토어로 안내한다
+                    val launchIntent = context.packageManager.getLaunchIntentForPackage(
+                        "com.google.android.apps.healthdata"
+                    )
+                    if (launchIntent != null) {
+                        context.startActivity(launchIntent)
+                    } else {
+                        val marketIntent = Intent(
+                            Intent.ACTION_VIEW,
+                            Uri.parse("market://details?id=com.google.android.apps.healthdata")
+                        )
+                        if (marketIntent.resolveActivity(context.packageManager) != null) {
+                            context.startActivity(marketIntent)
+                        }
+                    }
+                    onDismiss()
+                }) {
+                    Text(stringResource(R.string.settings_weight_goal_open_health_connect))
+                }
+            },
+            dismissButton = {
                 TextButton(onClick = onDismiss) {
                     Text(stringResource(R.string.settings_weight_goal_dialog_ok))
                 }

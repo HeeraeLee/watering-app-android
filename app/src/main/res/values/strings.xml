@@ -169,6 +169,7 @@
     <string name="settings_weight_goal_open_play_store">Play 스토어 열기</string>
     <string name="settings_weight_goal_no_data_title">체중 기록이 없어요</string>
     <string name="settings_weight_goal_no_data_body">Health Connect에 기록된 체중 데이터가 없어서 추천을 계산할 수 없어요.</string>
+    <string name="settings_weight_goal_open_health_connect">Health Connect에서 입력하기</string>
     <string name="settings_weight_goal_permission_denied_title">권한이 필요해요</string>
     <string name="settings_weight_goal_permission_denied_body">체중 읽기 권한을 허용하지 않으면 추천을 받을 수 없어요. 다른 기능에는 영향이 없어요.</string>
     <string name="settings_weight_goal_confirm_title">추천 목표</string>
