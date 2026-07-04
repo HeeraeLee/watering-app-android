@@ -237,10 +237,14 @@
     <string name="widget_motivation_time_to_drink">Time to drink some water 💧</string>
 
     <!-- Widget premium themes -->
-    <string name="widget_theme_default">Default</string>
-    <string name="widget_theme_sunset">Sunset</string>
-    <string name="widget_theme_mono">Mono</string>
-    <string name="widget_theme_neon">Neon</string>
+    <string name="widget_theme_aqua">Aqua</string>
+    <string name="widget_theme_mint">Mint</string>
+    <string name="widget_theme_lavender">Lavender</string>
+    <string name="widget_theme_coral">Coral</string>
+    <string name="widget_theme_rose_pink">Rose Pink</string>
+    <string name="widget_theme_sky_blue">Sky Blue</string>
+    <string name="widget_theme_butter_yellow">Butter Yellow</string>
+    <string name="widget_theme_gray_mono">Gray Mono</string>
     <string name="settings_section_widget_theme">Widget Theme</string>
     <string name="settings_widget_theme_locked_hint">Unlock with Premium</string>
     <string name="feature_widget_theme_description">Customize your lock screen widget with your favorite color theme</string>

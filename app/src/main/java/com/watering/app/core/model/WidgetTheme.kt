@@ -7,10 +7,14 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 enum class WidgetTheme(@StringRes val displayNameRes: Int, val accentColor: Color) {
-    DEFAULT(R.string.widget_theme_default, Color(0xFF00B4D8)),
-    SUNSET(R.string.widget_theme_sunset, Color(0xFFFF7A59)),
-    MONO(R.string.widget_theme_mono, Color(0xFF37474F)),
-    NEON(R.string.widget_theme_neon, Color(0xFFFF2D95));
+    DEFAULT(R.string.widget_theme_aqua, Color(0xFF7DD8E8)),
+    MINT(R.string.widget_theme_mint, Color(0xFF8FE0C4)),
+    LAVENDER(R.string.widget_theme_lavender, Color(0xFFB8A8E8)),
+    CORAL(R.string.widget_theme_coral, Color(0xFFFFB08A)),
+    ROSE_PINK(R.string.widget_theme_rose_pink, Color(0xFFF5A8C0)),
+    SKY_BLUE(R.string.widget_theme_sky_blue, Color(0xFF8FBCE8)),
+    BUTTER_YELLOW(R.string.widget_theme_butter_yellow, Color(0xFFF5DA8A)),
+    GRAY_MONO(R.string.widget_theme_gray_mono, Color(0xFFB8C0C6));
 
     companion object {
         // 목표 달성 색상은 테마와 무관하게 항상 고정 — 앱 쪽 Theme.kt와 동일한 골드로 통일

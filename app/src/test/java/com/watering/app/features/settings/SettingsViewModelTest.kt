@@ -151,11 +151,11 @@ class SettingsViewModelTest {
 
         viewModel.settings.test {
             awaitItem()
-            viewModel.updateWidgetTheme(WidgetTheme.SUNSET)
+            viewModel.updateWidgetTheme(WidgetTheme.MINT)
             cancelAndIgnoreRemainingEvents()
         }
 
-        assertEquals(WidgetTheme.SUNSET, slot.captured.widgetTheme)
+        assertEquals(WidgetTheme.MINT, slot.captured.widgetTheme)
         coVerify { widgetUpdater.updateAll() }
     }
 

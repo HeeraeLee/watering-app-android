@@ -476,6 +476,7 @@ private fun PremiumSection(isPremium: Boolean, onClick: () -> Unit) {
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun WidgetThemeSetting(
     isPremium: Boolean,
@@ -484,7 +485,10 @@ private fun WidgetThemeSetting(
     onLockedClick: () -> Unit
 ) {
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
             WidgetTheme.entries.forEach { theme ->
                 val isSelected = isPremium && theme == selectedTheme
                 Box(

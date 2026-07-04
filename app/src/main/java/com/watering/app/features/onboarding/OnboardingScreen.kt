@@ -67,67 +67,75 @@ fun OnboardingScreen(
         onComplete()
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+    // Scaffold/Surface 없이 Column만 두면 색 미지정 Text가 테마와 무관하게 기본 검정으로
+    // 렌더링되는 Compose 기본 동작 때문에 다크 모드에서 글자가 안 보이는 문제가 있었음 —
+    // Surface로 감싸 LocalContentColor를 배경에 맞게 올바르게 전파시킨다
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
     ) {
-        Spacer(Modifier.height(64.dp))
-
-        // 페이지 인디케이터
-        PageIndicator(currentPage = page, totalPages = 3)
-
-        Spacer(Modifier.height(48.dp))
-
-        // 페이지 콘텐츠
-        Box(
+        Column(
             modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth(),
-            contentAlignment = Alignment.TopCenter
+                .fillMaxSize()
+                .padding(horizontal = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            when (page) {
-                0 -> WelcomePage()
-                1 -> GoalPage(
-                    goal = dailyGoal,
-                    cupSize = cupSize,
-                    onGoalChange = { dailyGoal = it },
-                    onCupSizeChange = { cupSize = it }
-                )
-                2 -> NotificationPage()
-            }
-        }
+            Spacer(Modifier.height(64.dp))
 
-        Spacer(Modifier.height(32.dp))
+            // 페이지 인디케이터
+            PageIndicator(currentPage = page, totalPages = 3)
 
-        // 다음 / 시작 버튼
-        Button(
-            onClick = {
-                if (page < 2) {
-                    page++
-                } else {
-                    // 알림 페이지에서 "시작하기" → 권한 요청 후 완료
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                    } else {
-                        viewModel.completeOnboarding(dailyGoal, cupSize, true)
-                        onComplete()
-                    }
+            Spacer(Modifier.height(48.dp))
+
+            // 페이지 콘텐츠
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.TopCenter
+            ) {
+                when (page) {
+                    0 -> WelcomePage()
+                    1 -> GoalPage(
+                        goal = dailyGoal,
+                        cupSize = cupSize,
+                        onGoalChange = { dailyGoal = it },
+                        onCupSizeChange = { cupSize = it }
+                    )
+                    2 -> NotificationPage()
                 }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp)
-        ) {
-            Text(
-                text = if (page < 2) stringResource(R.string.onboarding_next) else stringResource(R.string.onboarding_start),
-                fontSize = 18.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-        }
+            }
 
-        Spacer(Modifier.height(48.dp))
+            Spacer(Modifier.height(32.dp))
+
+            // 다음 / 시작 버튼
+            Button(
+                onClick = {
+                    if (page < 2) {
+                        page++
+                    } else {
+                        // 알림 페이지에서 "시작하기" → 권한 요청 후 완료
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        } else {
+                            viewModel.completeOnboarding(dailyGoal, cupSize, true)
+                            onComplete()
+                        }
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+            ) {
+                Text(
+                    text = if (page < 2) stringResource(R.string.onboarding_next) else stringResource(R.string.onboarding_start),
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+
+            Spacer(Modifier.height(48.dp))
+        }
     }
 }
 
