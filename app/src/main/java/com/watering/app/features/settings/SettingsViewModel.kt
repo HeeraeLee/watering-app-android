@@ -3,13 +3,16 @@ package com.watering.app.features.settings
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.watering.app.R
 import com.watering.app.core.data.SettingsRepository
 import com.watering.app.core.model.UserSettings
 import com.watering.app.core.model.WidgetTheme
+import com.watering.app.core.service.CsvExportService
 import com.watering.app.core.service.HealthConnectAvailability
 import com.watering.app.core.service.HealthConnectService
 import com.watering.app.core.service.NotificationService
@@ -43,6 +46,13 @@ sealed interface HydrationSyncUiState {
     data object PermissionDenied : HydrationSyncUiState
 }
 
+sealed interface CsvExportUiState {
+    data object Idle : CsvExportUiState
+    data object Loading : CsvExportUiState
+    data class Success(val uri: Uri) : CsvExportUiState
+    data class Error(val message: String) : CsvExportUiState
+}
+
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -50,7 +60,8 @@ class SettingsViewModel @Inject constructor(
     private val notificationService: NotificationService,
     private val waterService: WaterService,
     private val widgetUpdater: WateringWidgetUpdater,
-    private val healthConnectService: HealthConnectService
+    private val healthConnectService: HealthConnectService,
+    private val csvExportService: CsvExportService
 ) : ViewModel() {
 
     val settings: StateFlow<UserSettings> = settingsRepository.userSettings
@@ -167,6 +178,22 @@ class SettingsViewModel @Inject constructor(
 
     fun dismissHydrationSyncState() {
         _hydrationSyncUiState.value = HydrationSyncUiState.Idle
+    }
+
+    private val _csvExportUiState = MutableStateFlow<CsvExportUiState>(CsvExportUiState.Idle)
+    val csvExportUiState: StateFlow<CsvExportUiState> = _csvExportUiState.asStateFlow()
+
+    fun exportCsv() {
+        viewModelScope.launch {
+            _csvExportUiState.value = CsvExportUiState.Loading
+            csvExportService.exportToCsv()
+                .onSuccess { _csvExportUiState.value = CsvExportUiState.Success(it) }
+                .onFailure { _csvExportUiState.value = CsvExportUiState.Error(context.getString(R.string.settings_csv_export_error)) }
+        }
+    }
+
+    fun dismissCsvExportState() {
+        _csvExportUiState.value = CsvExportUiState.Idle
     }
 
     private fun update(refreshWidget: Boolean = false, transform: (UserSettings) -> UserSettings) {

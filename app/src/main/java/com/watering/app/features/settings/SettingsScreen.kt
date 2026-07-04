@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
@@ -33,6 +34,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.CloudDone
+import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MonitorWeight
 import androidx.compose.material.icons.filled.NotificationsOff
@@ -105,6 +107,7 @@ fun SettingsScreen(
     val backupUiState by backupViewModel.backupUiState.collectAsStateWithLifecycle()
     val weightGoalUiState by viewModel.weightGoalUiState.collectAsStateWithLifecycle()
     val hydrationSyncUiState by viewModel.hydrationSyncUiState.collectAsStateWithLifecycle()
+    val csvExportUiState by viewModel.csvExportUiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val privacyPolicyUrl = stringResource(R.string.privacy_policy_url)
     var showResetDialog by remember { mutableStateOf(false) }
@@ -131,6 +134,25 @@ fun SettingsScreen(
     LaunchedEffect(hydrationSyncUiState) {
         if (hydrationSyncUiState is HydrationSyncUiState.NeedsPermission) {
             hydrationPermissionLauncher.launch(HealthConnectService.HYDRATION_PERMISSIONS)
+        }
+    }
+
+    LaunchedEffect(csvExportUiState) {
+        when (val state = csvExportUiState) {
+            is CsvExportUiState.Success -> {
+                val intent = Intent(Intent.ACTION_SEND).apply {
+                    type = "text/csv"
+                    putExtra(Intent.EXTRA_STREAM, state.uri)
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                context.startActivity(Intent.createChooser(intent, null))
+                viewModel.dismissCsvExportState()
+            }
+            is CsvExportUiState.Error -> {
+                Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
+                viewModel.dismissCsvExportState()
+            }
+            else -> {}
         }
     }
 
@@ -253,6 +275,16 @@ fun SettingsScreen(
                 WeightGoalRow(
                     isPremium = settings.isPremium,
                     onClick = viewModel::requestWeightBasedGoal,
+                    onLockedClick = onNavigateToPremium
+                )
+            }
+
+            item { Spacer(Modifier.height(8.dp)) }
+
+            item {
+                CsvExportRow(
+                    isPremium = settings.isPremium,
+                    onClick = viewModel::exportCsv,
                     onLockedClick = onNavigateToPremium
                 )
             }
@@ -697,6 +729,38 @@ private fun WeightGoalRow(isPremium: Boolean, onClick: () -> Unit, onLockedClick
             Text(
                 stringResource(
                     if (isPremium) R.string.settings_weight_goal_subtitle else R.string.settings_weight_goal_locked_hint
+                ),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        if (!isPremium) {
+            Icon(
+                Icons.Filled.Lock,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun CsvExportRow(isPremium: Boolean, onClick: () -> Unit, onLockedClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { if (isPremium) onClick() else onLockedClick() }
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(Icons.Filled.FileDownload, contentDescription = null)
+        Spacer(Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(stringResource(R.string.settings_csv_export_title), style = MaterialTheme.typography.bodyLarge)
+            Text(
+                stringResource(
+                    if (isPremium) R.string.settings_csv_export_subtitle else R.string.settings_csv_export_locked_hint
                 ),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant

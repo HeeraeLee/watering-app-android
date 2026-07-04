@@ -5,6 +5,7 @@ import app.cash.turbine.test
 import com.watering.app.core.data.SettingsRepository
 import com.watering.app.core.model.UserSettings
 import com.watering.app.core.model.WidgetTheme
+import com.watering.app.core.service.CsvExportService
 import com.watering.app.core.service.HealthConnectAvailability
 import com.watering.app.core.service.HealthConnectService
 import com.watering.app.core.service.NotificationService
@@ -35,6 +36,7 @@ class SettingsViewModelTest {
     private lateinit var waterService: WaterService
     private lateinit var widgetUpdater: WateringWidgetUpdater
     private lateinit var healthConnectService: HealthConnectService
+    private lateinit var csvExportService: CsvExportService
 
     private fun createViewModel(initialSettings: UserSettings = UserSettings()): SettingsViewModel {
         context = mockk(relaxed = true)
@@ -48,13 +50,15 @@ class SettingsViewModelTest {
         healthConnectService = mockk {
             every { availability } returns HealthConnectAvailability.AVAILABLE
         }
+        csvExportService = mockk(relaxed = true)
         return SettingsViewModel(
             context,
             settingsRepository,
             notificationService,
             waterService,
             widgetUpdater,
-            healthConnectService
+            healthConnectService,
+            csvExportService
         )
     }
 

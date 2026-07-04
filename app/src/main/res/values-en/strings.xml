@@ -112,6 +112,8 @@
     <string name="feature_smart_stats_description">See your 30-day trend and time-of-day patterns</string>
     <string name="feature_smart_goal_title">Smart Goal Recommendation</string>
     <string name="feature_smart_goal_description">Get a daily goal tailored to you from your weight data</string>
+    <string name="feature_csv_export_title">Data Export</string>
+    <string name="feature_csv_export_description">Export your full history as a CSV file to view in Excel and more</string>
     <string-array name="weekday_labels_short">
         <item>Sun</item>
         <item>Mon</item>
@@ -157,6 +159,10 @@
     <string name="settings_weight_goal_title">Get a Weight-Based Goal</string>
     <string name="settings_weight_goal_subtitle">Calculate your daily goal from Health Connect weight data</string>
     <string name="settings_weight_goal_locked_hint">Unlock with Premium</string>
+    <string name="settings_csv_export_title">Export Records to CSV</string>
+    <string name="settings_csv_export_subtitle">Save and share your full drinking history as a CSV file</string>
+    <string name="settings_csv_export_locked_hint">Unlock with Premium</string>
+    <string name="settings_csv_export_error">Couldn\'t export CSV. Please try again</string>
     <string name="settings_weight_goal_not_available_title">Health Connect Required</string>
     <string name="settings_weight_goal_not_available_body">To get a weight-based recommendation, please install (or update) the Health Connect app.</string>
     <string name="settings_weight_goal_open_play_store">Open Play Store</string>
