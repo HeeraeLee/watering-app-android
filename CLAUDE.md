@@ -85,14 +85,15 @@ Material Design 3 가이드라인을 숙지하고 플랫폼 네이티브 UX를 �
 | 위젯 | Glance API (Jetpack Glance) |
 | 데이터 저장 | DataStore (Preferences DataStore) |
 | 알림 | WorkManager + NotificationManager |
-| 건강 연동 | Health Connect (P3 — 미구현) |
+| 건강 연동 | Health Connect (구현 완료 — 체중 기반 목표 추천 + 수분 기록 자동 저장) |
 | 날씨/대기질 | 기상청 + 에어코리아 API (v2 계획 — 미구현) |
-| 구독 결제 | Google Play Billing Library 7+ (P3 — 미구현) |
+| 구독 결제 | Google Play Billing Library 7+ (구현 완료 — Play Console 상품 실등록만 남음) |
 | DI | Hilt |
 | 비동기 | Coroutines + Flow |
 | 네비게이션 | Navigation Component (Compose) |
 | 테스트 | JUnit 4/5 + Espresso + Compose Test |
-| 서버 | 없음 (완전 로컬) |
+| 백업/인증 | Firebase Auth(Google 로그인) + Firestore(수동 백업/복원) — 선택 기능, 미로그인 시에도 전체 앱 로컬 동작 |
+| 서버 | 자체 서버 없음 (Firebase 매니지드 서비스만 선택적으로 사용) |
 
 ---
 
@@ -119,7 +120,7 @@ Material Design 3 가이드라인을 숙지하고 플랫폼 네이티브 UX를 �
 7. **메인 스레드 보호**: UI 업데이트는 반드시 `Dispatchers.Main`에서 수행합니다. 무거운 작업은 `Dispatchers.IO` 또는 `Dispatchers.Default`로 분리합니다.
 8. **DataStore 일관성**: 앱↔위젯 공유 데이터는 반드시 `WaterDataStore` / `SettingsDataStore` 레이어를 통해서만 접근합니다. 직접 DataStore 접근 금지.
 9. **위젯 갱신 최소화**: `GlanceAppWidgetManager.updateAll()`은 실제 데이터 변경 시에만 호출합니다. 불필요한 호출은 배터리를 소모합니다.
-10. **Material 3 준수**: 터치 타겟 최소 48×48dp, WindowInsets(Edge-to-Edge)를 항상 적용합니다. Dynamic Color는 사용하지 않고 앱 고유 색상(아쿠아 `#00B4D8`)을 유지합니다.
+10. **Material 3 준수**: 터치 타겟 최소 48×48dp, WindowInsets(Edge-to-Edge)를 항상 적용합니다. Dynamic Color는 사용하지 않고 앱 고유 파스텔 팔레트(`ui/theme/Theme.kt` 참고 — 값이 자주 바뀌므로 hex를 이 문서에 박아두지 않음)를 유지합니다.
 11. **API 레벨 분기**: Android 버전별 기능 차이(`Build.VERSION.SDK_INT`)를 명시적으로 처리합니다. 특히 알림 권한(API 33), 잠금화면 위젯(API 36) 분기.
 12. **리소스 누수 방지**: Coroutine은 `viewModelScope` 또는 `lifecycleScope`에서 실행합니다. 직접 `GlobalScope` 사용 금지.
 
@@ -273,7 +274,7 @@ AAA(Arrange-Act-Assert) 패턴, `함수명_상황_예상결과` 네이밍을 사
 Android Studio Hedgehog (2023.1.1) 이상
 JDK 17+  (Android Studio 번들 JBR 사용)
 Android SDK API 26~36
-compileSdk = 36, AGP 8.7.3 (AGP 8.9+ 필요한 라이브러리 rc 버전 사용 금지)
+compileSdk = 36, AGP 8.13.0 (정확한 버전은 gradle/libs.versions.toml 참고 — Health Connect 1.1.0 도입 시 8.7.3→8.13.0로 상향됨)
 Android Emulator 또는 실기기 (API 33+ 권장)
 Google Play Developer 계정 ($25 일회성)
 ```
