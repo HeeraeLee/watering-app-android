@@ -7,7 +7,8 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-private val WateringAqua = Color(0xFF00B4D8)
+// 파스텔 옵션 N 확정 적용 (#7CDAED 근처 변형 중 선택)
+private val WateringAqua = Color(0xFF5DCEE6)
 private val WateringAquaDark = Color(0xFF48CAE4)
 
 private val LightColorScheme = lightColorScheme(
@@ -15,9 +16,9 @@ private val LightColorScheme = lightColorScheme(
     onPrimary = Color.White,
     primaryContainer = Color(0xFFCAF0F8),
     onPrimaryContainer = Color(0xFF003544),
-    secondary = Color(0xFF52B788),
+    secondary = Color(0xFFF5C860), // 목표 달성 색상 옵션 P (골드) 테스트 중
     onSecondary = Color.White,
-    tertiary = Color(0xFFFF9800)
+    tertiary = Color(0xFFFFC078)
 )
 
 private val DarkColorScheme = darkColorScheme(

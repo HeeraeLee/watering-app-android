@@ -59,7 +59,7 @@
 
     <!-- Home screen -->
     <string name="home_title">Today</string>
-    <string name="home_drink_water_button">Drink water 💧</string>
+    <string name="home_drink_water_button">Drink water</string>
     <string name="home_select_other_drink">Other drink</string>
     <string name="home_today_record">Today\'s Log</string>
     <string name="home_undo_last">Undo last</string>

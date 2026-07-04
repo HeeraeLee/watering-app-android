@@ -27,7 +27,10 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -51,6 +54,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -60,11 +64,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.watering.app.R
+import com.watering.app.core.model.DrinkType
 import com.watering.app.core.model.WaterEntry
 import com.watering.app.features.record.RecordSheet
-
-private val AquaColor = Color(0xFF00B4D8)
-private val GreenColor = Color(0xFF34C759)
 
 private fun Context.findActivity(): Activity? = when (this) {
     is Activity -> this
@@ -148,6 +150,8 @@ fun HomeScreen(
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Text(stringResource(R.string.home_drink_water_button), fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+                    Spacer(Modifier.width(8.dp))
+                    Icon(Icons.Filled.WaterDrop, contentDescription = null, modifier = Modifier.size(20.dp))
                 }
                 Spacer(Modifier.height(8.dp))
                 OutlinedButton(
@@ -166,13 +170,15 @@ fun HomeScreen(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     StreakCard(
-                        emoji = "🔥",
+                        icon = Icons.Filled.LocalFireDepartment,
+                        tint = MaterialTheme.colorScheme.tertiary,
                         label = stringResource(R.string.label_current_streak),
                         value = stringResource(R.string.streak_days_value, uiState.streak.currentStreak),
                         modifier = Modifier.weight(1f)
                     )
                     StreakCard(
-                        emoji = "🏆",
+                        icon = Icons.Filled.EmojiEvents,
+                        tint = MaterialTheme.colorScheme.secondary,
                         label = stringResource(R.string.label_longest_streak),
                         value = stringResource(R.string.streak_days_value, uiState.streak.longestStreak),
                         modifier = Modifier.weight(1f)
@@ -212,7 +218,12 @@ fun HomeScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("💧", fontSize = 40.sp)
+                            Icon(
+                                Icons.Filled.WaterDrop,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(40.dp)
+                            )
                             Spacer(Modifier.height(12.dp))
                             Text(
                                 stringResource(R.string.home_empty_record),
@@ -249,7 +260,7 @@ fun HomeScreen(
 
 @Composable
 private fun AchievementRing(current: Int, goal: Int, rate: Double, isAchieved: Boolean) {
-    val ringColor = if (isAchieved) GreenColor else AquaColor
+    val ringColor = if (isAchieved) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary
     val animatedRate by animateFloatAsState(
         targetValue = rate.coerceIn(0.0, 1.0).toFloat(),
         animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
@@ -293,7 +304,7 @@ private fun AchievementRing(current: Int, goal: Int, rate: Double, isAchieved: B
                 Text(
                     text = stringResource(R.string.label_goal_achieved_banner),
                     style = MaterialTheme.typography.labelMedium,
-                    color = GreenColor,
+                    color = MaterialTheme.colorScheme.secondary,
                     fontWeight = FontWeight.SemiBold
                 )
             } else {
@@ -308,7 +319,13 @@ private fun AchievementRing(current: Int, goal: Int, rate: Double, isAchieved: B
 }
 
 @Composable
-private fun StreakCard(emoji: String, label: String, value: String, modifier: Modifier = Modifier) {
+private fun StreakCard(
+    icon: ImageVector,
+    tint: Color,
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier
+) {
     Surface(
         shape = RoundedCornerShape(16.dp),
         color = MaterialTheme.colorScheme.surfaceVariant,
@@ -318,7 +335,7 @@ private fun StreakCard(emoji: String, label: String, value: String, modifier: Mo
             modifier = Modifier.padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(emoji, fontSize = 24.sp)
+            Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(28.dp))
             Spacer(Modifier.height(4.dp))
             Text(value, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
             Text(label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -346,7 +363,16 @@ private fun WaterEntryRow(entry: WaterEntry) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(emoji, fontSize = 22.sp)
+                if (entry.drinkType == DrinkType.WATER) {
+                    Icon(
+                        Icons.Filled.WaterDrop,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(22.dp)
+                    )
+                } else {
+                    Text(emoji, fontSize = 22.sp)
+                }
                 Spacer(Modifier.width(12.dp))
                 Column {
                     Text(drinkName, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
