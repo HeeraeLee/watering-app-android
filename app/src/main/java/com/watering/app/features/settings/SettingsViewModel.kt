@@ -95,6 +95,9 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { waterService.clearAllData() }
     }
 
+    // 디버그 빌드 전용 — 실제 결제 없이 프리미엄 기능을 테스트하기 위한 토글 (release 빌드에는 노출 안 됨)
+    fun toggleDebugPremium() = update(refreshWidget = true) { it.copy(isPremium = !it.isPremium) }
+
     private val _weightGoalUiState = MutableStateFlow<WeightGoalUiState>(WeightGoalUiState.Idle)
     val weightGoalUiState: StateFlow<WeightGoalUiState> = _weightGoalUiState.asStateFlow()
 

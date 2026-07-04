@@ -422,6 +422,23 @@ fun SettingsScreen(
                     )
                 }
             }
+
+            // 디버그 빌드 전용 — 실제 결제 없이 프리미엄 기능 테스트용 토글 (release 빌드에는 노출 안 됨)
+            if (com.watering.app.BuildConfig.DEBUG) {
+                item {
+                    TextButton(
+                        onClick = { viewModel.toggleDebugPremium() },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            if (settings.isPremium) "[DEBUG] 프리미엄 끄기" else "[DEBUG] 프리미엄 켜기",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+                }
+            }
         }
     }
 }
