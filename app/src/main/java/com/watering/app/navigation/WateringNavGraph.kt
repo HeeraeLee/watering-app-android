@@ -30,7 +30,6 @@ sealed class Screen(val route: String) {
 
 @Composable
 fun WateringNavGraph(
-    quickRecord: Boolean = false,
     analyticsService: AnalyticsService,
     navController: NavHostController = rememberNavController()
 ) {
@@ -63,7 +62,6 @@ fun WateringNavGraph(
             val viewModel: HomeViewModel = hiltViewModel()
             HomeScreen(
                 viewModel = viewModel,
-                quickRecord = quickRecord,
                 onNavigateToStats = { navController.navigate(Screen.Stats.route) },
                 onNavigateToSettings = { navController.navigate(Screen.Settings.route) },
                 onNavigateToPremium = { navController.navigate(Screen.Premium.route) }

@@ -30,12 +30,9 @@ class MainActivity : ComponentActivity() {
             return
         }
 
-        val quickRecord = intent?.data?.scheme == "watering" &&
-                intent?.data?.host == "quick-record"
-
         setContent {
             WateringTheme {
-                WateringNavGraph(quickRecord = quickRecord, analyticsService = analyticsService)
+                WateringNavGraph(analyticsService = analyticsService)
             }
         }
     }

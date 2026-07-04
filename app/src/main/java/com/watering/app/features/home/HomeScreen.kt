@@ -78,7 +78,6 @@ private fun Context.findActivity(): Activity? = when (this) {
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
-    quickRecord: Boolean = false,
     onNavigateToStats: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToPremium: () -> Unit
@@ -89,10 +88,6 @@ fun HomeScreen(
     val activity = LocalContext.current.findActivity()
     val snackbarHostState = remember { SnackbarHostState() }
     var showRecordSheet by remember { mutableStateOf(false) }
-
-    LaunchedEffect(quickRecord) {
-        if (quickRecord) viewModel.addWater()
-    }
 
     val undoActionLabel = stringResource(R.string.home_snackbar_undo_action)
     LaunchedEffect(snackbarMessage) {

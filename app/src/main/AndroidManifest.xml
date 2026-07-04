@@ -39,12 +39,6 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <!-- 위젯 탭 딥링크 처리 -->
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:scheme="watering" android:host="quick-record" />
-            </intent-filter>
             <!-- Health Connect 권한 설명(rationale) 화면 요청 처리 — Health Connect 컨트롤러 앱은
                  이 정확한 action+category 조합(VIEW_PERMISSION_USAGE / HEALTH_PERMISSIONS)으로만
                  rationale 지원 여부를 판단한다(androidx 문서의 SHOW_PERMISSIONS_RATIONALE는 이
