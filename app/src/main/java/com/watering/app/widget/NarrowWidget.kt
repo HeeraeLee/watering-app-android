@@ -37,7 +37,6 @@ import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.watering.app.R
-import com.watering.app.core.model.WidgetTheme
 
 // 잔수·퍼센트 텍스트를 고정 폭으로 둬야 barTotal 추정(size.width - 고정폭)이 자릿수와 무관하게 항상 정확하다
 // (PercentTextWidth를 34dp로 줄였더니 "100%"가 줄바꿈돼서 38dp로 복원 — "100%" 4글자가 14sp에서 필요로 하는 최소 폭)
@@ -63,15 +62,17 @@ private fun NarrowWidgetContent(state: WidgetState) {
     val isDark = (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
             Configuration.UI_MODE_NIGHT_YES
     val isAchieved = state.achievementRate >= 1.0
-    val accent = if (isAchieved) WidgetTheme.ACHIEVED_COLOR else state.theme.accentColor
+    val accent = state.theme.accentColor
     val rate = state.achievementRate.coerceIn(0.0, 1.0).toFloat()
     // 아이콘(16) + 여백(4+4+4) + 잔수 텍스트(52) + 퍼센트 텍스트(38) + 좌우 패딩(28) = 146dp
     val barTotal = (size.width - 146.dp).coerceAtLeast(8.dp)
     val barFill = (barTotal * rate).coerceAtLeast(0.dp)
 
-    val bgColor = if (isDark) Color(0xEE0D1B2A) else Color.White
-    val textColor = if (isDark) Color.White else Color(0xFF0D1B2A)
-    val barTrack = if (isDark) Color.White.copy(alpha = 0.15f) else accent.copy(alpha = 0.12f)
+    // 목표 달성 시 다크모드 여부와 무관하게 테마 색 배경 + 흰 텍스트로 반전 — 다크모드의 기존(미달성) 스타일은 그대로 유지
+    val bgColor = if (isAchieved) accent else if (isDark) Color(0xEE0D1B2A) else Color.White
+    val textColor = if (isAchieved || isDark) Color.White else Color(0xFF0D1B2A)
+    val barTrack = if (isAchieved) Color.White.copy(alpha = 0.3f) else if (isDark) Color.White.copy(alpha = 0.15f) else accent.copy(alpha = 0.12f)
+    val foregroundAccent = if (isAchieved) Color.White else accent
 
     Row(
         modifier = GlanceModifier
@@ -86,7 +87,7 @@ private fun NarrowWidgetContent(state: WidgetState) {
             provider = ImageProvider(R.drawable.ic_water_drop),
             contentDescription = null,
             modifier = GlanceModifier.size(16.dp),
-            colorFilter = ColorFilter.tint(ColorProvider(accent))
+            colorFilter = ColorFilter.tint(ColorProvider(foregroundAccent))
         )
         Spacer(GlanceModifier.width(4.dp))
         Text(
@@ -112,7 +113,7 @@ private fun NarrowWidgetContent(state: WidgetState) {
                         .width(barFill)
                         .fillMaxHeight()
                         .cornerRadius(2.dp)
-                        .background(ColorProvider(accent))
+                        .background(ColorProvider(foregroundAccent))
                 ) {}
             }
         }
@@ -121,7 +122,7 @@ private fun NarrowWidgetContent(state: WidgetState) {
             text = "${(rate * 100).toInt()}%",
             modifier = GlanceModifier.width(PercentTextWidth),
             style = TextStyle(
-                color = ColorProvider(accent),
+                color = ColorProvider(foregroundAccent),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
                 textAlign = TextAlign.End

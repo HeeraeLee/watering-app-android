@@ -14,11 +14,5 @@ enum class WidgetTheme(@StringRes val displayNameRes: Int, val accentColor: Colo
     ROSE_PINK(R.string.widget_theme_rose_pink, Color(0xFFF5A8C0)),
     SKY_BLUE(R.string.widget_theme_sky_blue, Color(0xFF8FBCE8)),
     BUTTER_YELLOW(R.string.widget_theme_butter_yellow, Color(0xFFF5DA8A)),
-    GRAY_MONO(R.string.widget_theme_gray_mono, Color(0xFFB8C0C6));
-
-    companion object {
-        // 목표 달성 색상은 테마와 무관하게 항상 고정 — 앱 쪽 Theme.kt와 동일한 골드로 통일
-        // (그린 → 골드, 2026-07-04 사용자 피드백 반영)
-        val ACHIEVED_COLOR = Color(0xFFF5C860)
-    }
+    GRAY_MONO(R.string.widget_theme_gray_mono, Color(0xFFB8C0C6))
 }

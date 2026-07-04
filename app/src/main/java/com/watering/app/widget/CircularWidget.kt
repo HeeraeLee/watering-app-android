@@ -36,7 +36,6 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.watering.app.R
-import com.watering.app.core.model.WidgetTheme
 
 class CircularWidget : GlanceAppWidget() {
     override val sizeMode = SizeMode.Exact
@@ -57,16 +56,17 @@ private fun CircularWidgetContent(state: WidgetState) {
     val isDark = (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
             Configuration.UI_MODE_NIGHT_YES
     val isAchieved = state.achievementRate >= 1.0
-    val accent = if (isAchieved) WidgetTheme.ACHIEVED_COLOR else state.theme.accentColor
+    val accent = state.theme.accentColor
     val rate = state.achievementRate.coerceIn(0.0, 1.0).toFloat()
     val trackWidth = (size.width - 20.dp) * 0.85f
     val barWidth = trackWidth * rate
 
-    // 다크: 아쿠아/그린 배경 + 흰 텍스트 / 라이트: 흰 배경 + 아쿠아/그린 텍스트
-    val bgColor = if (isDark) accent else Color.White
-    val textColor = if (isDark) Color.White else accent
-    val barTrackColor = if (isDark) Color.White.copy(alpha = 0.3f) else accent.copy(alpha = 0.15f)
-    val barFillColor = if (isDark) Color.White else accent
+    // 다크 모드이거나 목표를 달성했을 때는 테마 색 배경 + 흰 텍스트로 반전, 그 외엔 흰 배경 + 테마 색 텍스트
+    val invert = isDark || isAchieved
+    val bgColor = if (invert) accent else Color.White
+    val textColor = if (invert) Color.White else accent
+    val barTrackColor = if (invert) Color.White.copy(alpha = 0.3f) else accent.copy(alpha = 0.15f)
+    val barFillColor = if (invert) Color.White else accent
 
     Box(
         modifier = GlanceModifier

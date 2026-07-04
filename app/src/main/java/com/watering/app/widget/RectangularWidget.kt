@@ -38,7 +38,6 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.watering.app.R
-import com.watering.app.core.model.WidgetTheme
 
 private val DarkBg = Color(0xEE0D1B2A)
 
@@ -61,7 +60,7 @@ private fun RectangularWidgetContent(state: WidgetState) {
     val isDark = (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
             Configuration.UI_MODE_NIGHT_YES
     val isAchieved = state.achievementRate >= 1.0
-    val accent = if (isAchieved) WidgetTheme.ACHIEVED_COLOR else state.theme.accentColor
+    val accent = state.theme.accentColor
     val rate = state.achievementRate.coerceIn(0.0, 1.0).toFloat()
     val barWidth = (size.width - 32.dp) * rate
     val motivationText = when {
@@ -71,10 +70,12 @@ private fun RectangularWidgetContent(state: WidgetState) {
         else                         -> context.getString(R.string.widget_motivation_time_to_drink)
     }
 
-    val bgColor = if (isDark) DarkBg else Color.White
-    val primaryText = if (isDark) Color.White else Color(0xFF0D1B2A)
-    val secondaryText = if (isDark) Color.White.copy(alpha = 0.5f) else Color(0xFF888888)
-    val barTrack = if (isDark) Color.White.copy(alpha = 0.15f) else accent.copy(alpha = 0.12f)
+    // 목표 달성 시 다크모드 여부와 무관하게 테마 색 배경 + 흰 텍스트로 반전 — 다크모드의 기존(미달성) 스타일은 그대로 유지
+    val bgColor = if (isAchieved) accent else if (isDark) DarkBg else Color.White
+    val primaryText = if (isAchieved || isDark) Color.White else Color(0xFF0D1B2A)
+    val secondaryText = if (isAchieved) Color.White.copy(alpha = 0.7f) else if (isDark) Color.White.copy(alpha = 0.5f) else Color(0xFF888888)
+    val barTrack = if (isAchieved) Color.White.copy(alpha = 0.3f) else if (isDark) Color.White.copy(alpha = 0.15f) else accent.copy(alpha = 0.12f)
+    val foregroundAccent = if (isAchieved) Color.White else accent
 
     Box(
         modifier = GlanceModifier
@@ -95,12 +96,12 @@ private fun RectangularWidgetContent(state: WidgetState) {
                     provider = ImageProvider(R.drawable.ic_water_drop),
                     contentDescription = null,
                     modifier = GlanceModifier.size(13.dp),
-                    colorFilter = ColorFilter.tint(ColorProvider(accent))
+                    colorFilter = ColorFilter.tint(ColorProvider(foregroundAccent))
                 )
                 Spacer(GlanceModifier.width(4.dp))
                 Text(
                     text = context.getString(R.string.widget_app_label),
-                    style = TextStyle(color = ColorProvider(accent), fontSize = 11.sp)
+                    style = TextStyle(color = ColorProvider(foregroundAccent), fontSize = 11.sp)
                 )
             }
             Spacer(GlanceModifier.height(6.dp))
@@ -125,7 +126,7 @@ private fun RectangularWidgetContent(state: WidgetState) {
                 Text(
                     text = "${(rate * 100).toInt()}%",
                     style = TextStyle(
-                        color = ColorProvider(accent),
+                        color = ColorProvider(foregroundAccent),
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -145,7 +146,7 @@ private fun RectangularWidgetContent(state: WidgetState) {
                             .width(barWidth)
                             .fillMaxHeight()
                             .cornerRadius(3.dp)
-                            .background(ColorProvider(accent))
+                            .background(ColorProvider(foregroundAccent))
                     ) {}
                 }
             }
