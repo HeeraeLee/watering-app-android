@@ -198,7 +198,9 @@
     <string name="settings_interval_label">Reminder Interval</string>
     <string name="settings_interval_30min">30 min</string>
     <string name="settings_interval_1hour">1 hr</string>
+    <string name="settings_interval_90min">1.5 hr</string>
     <string name="settings_interval_2hour">2 hr</string>
+    <string name="settings_interval_150min">2.5 hr</string>
     <string name="settings_interval_3hour">3 hr</string>
     <string name="settings_interval_4hour">4 hr</string>
     <string name="settings_hour_decrease_content_description">Decrease by 1 hour</string>

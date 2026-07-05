@@ -870,7 +870,9 @@ private fun IntervalSetting(interval: Int, onIntervalChange: (Int) -> Unit) {
     val intervals = listOf(
         30 to stringResource(R.string.settings_interval_30min),
         60 to stringResource(R.string.settings_interval_1hour),
+        90 to stringResource(R.string.settings_interval_90min),
         120 to stringResource(R.string.settings_interval_2hour),
+        150 to stringResource(R.string.settings_interval_150min),
         180 to stringResource(R.string.settings_interval_3hour),
         240 to stringResource(R.string.settings_interval_4hour)
     )

@@ -198,7 +198,9 @@
     <string name="settings_interval_label">알림 간격</string>
     <string name="settings_interval_30min">30분</string>
     <string name="settings_interval_1hour">1시간</string>
+    <string name="settings_interval_90min">1시간 30분</string>
     <string name="settings_interval_2hour">2시간</string>
+    <string name="settings_interval_150min">2시간 30분</string>
     <string name="settings_interval_3hour">3시간</string>
     <string name="settings_interval_4hour">4시간</string>
     <string name="settings_hour_decrease_content_description">1시간 감소</string>
