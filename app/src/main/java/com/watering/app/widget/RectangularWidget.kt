@@ -95,13 +95,13 @@ private fun RectangularWidgetContent(state: WidgetState) {
                 Image(
                     provider = ImageProvider(R.drawable.ic_water_drop),
                     contentDescription = null,
-                    modifier = GlanceModifier.size(13.dp),
+                    modifier = GlanceModifier.size(16.dp),
                     colorFilter = ColorFilter.tint(ColorProvider(foregroundAccent))
                 )
                 Spacer(GlanceModifier.width(4.dp))
                 Text(
                     text = context.getString(R.string.widget_app_label),
-                    style = TextStyle(color = ColorProvider(foregroundAccent), fontSize = 11.sp)
+                    style = TextStyle(color = ColorProvider(foregroundAccent), fontSize = 13.sp)
                 )
             }
             Spacer(GlanceModifier.height(6.dp))
@@ -153,7 +153,7 @@ private fun RectangularWidgetContent(state: WidgetState) {
             Spacer(GlanceModifier.height(8.dp))
             Text(
                 text = motivationText,
-                style = TextStyle(color = ColorProvider(secondaryText), fontSize = 11.sp)
+                style = TextStyle(color = ColorProvider(secondaryText), fontSize = 13.sp)
             )
         }
     }
