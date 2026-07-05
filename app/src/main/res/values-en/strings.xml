@@ -110,6 +110,10 @@
     <string name="smart_stats_insight_placeholder">Not enough data yet to find a pattern</string>
     <string name="smart_stats_insight_no_pattern">No particular time you tend to miss — you\'re staying consistent!</string>
     <string name="smart_stats_hydration_volume">Today\'s actual hydration: approx. %1$dml</string>
+    <string name="smart_stats_axis_today">Today</string>
+    <string name="smart_stats_legend_none">Not met</string>
+    <string name="smart_stats_legend_partial">Partially met</string>
+    <string name="smart_stats_legend_achieved">Achieved</string>
     <string name="feature_smart_stats_description">See your 30-day trend and time-of-day patterns</string>
     <string name="feature_csv_export_title">Data Export</string>
     <string name="feature_csv_export_description">Export your full history as a CSV file to view in Excel and more</string>

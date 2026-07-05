@@ -25,15 +25,22 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -43,6 +50,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.watering.app.R
 import com.watering.app.core.model.DailyAchievement
 import com.watering.app.core.service.TimeOfDayInsightResult
+import com.watering.app.ui.theme.AppBackgroundGradient
+import com.watering.app.ui.theme.AppCardBackgroundColor
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,41 +62,67 @@ fun SmartStatsScreen(
     viewModel: SmartStatsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    var selectedTab by remember { mutableStateOf(0) }
+    val tabTitles = listOf(
+        stringResource(R.string.smart_stats_month_trend_title),
+        stringResource(R.string.smart_stats_annual_title)
+    )
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(stringResource(R.string.smart_stats_title), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.content_description_back))
+    Box(modifier = Modifier.fillMaxSize().background(AppBackgroundGradient)) {
+        Scaffold(
+            containerColor = Color.Transparent,
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text(stringResource(R.string.smart_stats_title), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.content_description_back))
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                )
+            }
+        ) { padding ->
+            Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+                TabRow(
+                    selectedTabIndex = selectedTab,
+                    containerColor = Color.Transparent,
+                    contentColor = MaterialTheme.colorScheme.primary
+                ) {
+                    tabTitles.forEachIndexed { index, title ->
+                        Tab(
+                            selected = selectedTab == index,
+                            onClick = { selectedTab = index },
+                            text = { Text(title) }
+                        )
                     }
                 }
-            )
-        }
-    ) { padding ->
-        LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(padding),
-            contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 48.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            item { Spacer(Modifier.height(4.dp)) }
 
-            item {
-                SectionCard(title = stringResource(R.string.smart_stats_month_trend_title)) {
-                    MonthBarChart(stats = uiState.monthStats)
-                    Spacer(Modifier.height(16.dp))
-                    InsightCard(insight = uiState.insight)
-                    Spacer(Modifier.height(12.dp))
-                    HydrationVolumeCard(volumeMl = uiState.todayHydrationVolumeMl)
-                }
-            }
-
-            item {
-                SectionCard(title = stringResource(R.string.smart_stats_annual_title)) {
-                    AnnualHeatmap(days = uiState.annualDays)
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 16.dp, bottom = 48.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    when (selectedTab) {
+                        0 -> item {
+                            SectionCard(title = stringResource(R.string.smart_stats_month_trend_title)) {
+                                MonthBarChart(stats = uiState.monthStats)
+                                Spacer(Modifier.height(16.dp))
+                                InsightCard(insight = uiState.insight)
+                                Spacer(Modifier.height(12.dp))
+                                HydrationVolumeCard(volumeMl = uiState.todayHydrationVolumeMl)
+                            }
+                        }
+                        1 -> item {
+                            SectionCard(title = stringResource(R.string.smart_stats_annual_title)) {
+                                AnnualHeatmap(days = uiState.annualDays)
+                                Spacer(Modifier.height(12.dp))
+                                HeatmapLegend()
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -110,12 +147,24 @@ private fun MonthBarChart(stats: List<DayStat>) {
             entries = stats.map { day ->
                 BarChartEntry(key = day.dateKey, count = day.count, goal = day.goal, isToday = day.isToday)
             },
-            columnWidth = 12.dp,
-            barWidth = 8.dp,
-            barMaxHeight = 100.dp,
-            horizontalArrangement = Arrangement.spacedBy(3.dp),
+            columnWidth = 16.dp,
+            barWidth = 11.dp,
+            barMaxHeight = 130.dp,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier
         )
+    }
+
+    val formatter = DateTimeFormatter.ofPattern("M/d")
+    val startLabel = LocalDate.parse(stats.first().dateKey).format(formatter)
+    val todayLabel = stringResource(R.string.smart_stats_axis_today)
+    Spacer(Modifier.height(6.dp))
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(startLabel, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(todayLabel, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
     }
 }
 
@@ -123,7 +172,7 @@ private fun MonthBarChart(stats: List<DayStat>) {
 private fun InsightCard(insight: TimeOfDayInsightResult) {
     Surface(
         shape = RoundedCornerShape(14.dp),
-        color = MaterialTheme.colorScheme.surface,
+        color = AppCardBackgroundColor,
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
@@ -151,7 +200,7 @@ private fun InsightCard(insight: TimeOfDayInsightResult) {
 private fun HydrationVolumeCard(volumeMl: Int) {
     Surface(
         shape = RoundedCornerShape(14.dp),
-        color = MaterialTheme.colorScheme.surface,
+        color = AppCardBackgroundColor,
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
@@ -203,4 +252,41 @@ private fun AnnualHeatmap(days: List<DailyAchievement?>) {
             }
         }
     }
+}
+
+@Composable
+private fun HeatmapLegend() {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        LegendSwatch(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f))
+        Text(
+            stringResource(R.string.smart_stats_legend_none),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(Modifier.width(12.dp))
+        LegendSwatch(color = AquaColor.copy(alpha = 0.6f))
+        Text(
+            stringResource(R.string.smart_stats_legend_partial),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(Modifier.width(12.dp))
+        LegendSwatch(color = GreenColor)
+        Text(
+            stringResource(R.string.smart_stats_legend_achieved),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+private fun LegendSwatch(color: Color) {
+    Box(
+        modifier = Modifier
+            .size(10.dp)
+            .clip(RoundedCornerShape(3.dp))
+            .background(color)
+    )
+    Spacer(Modifier.width(4.dp))
 }
