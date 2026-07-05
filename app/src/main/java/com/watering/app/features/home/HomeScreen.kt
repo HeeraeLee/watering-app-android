@@ -311,7 +311,7 @@ private fun AchievementRing(current: Int, goal: Int, rate: Double, isAchieved: B
                 Spacer(Modifier.height(4.dp))
                 Text(
                     text = stringResource(R.string.label_goal_achieved_banner),
-                    style = MaterialTheme.typography.labelMedium,
+                    fontSize = 20.sp,
                     color = AchievedColor,
                     fontWeight = FontWeight.SemiBold
                 )
