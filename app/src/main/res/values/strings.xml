@@ -249,4 +249,6 @@
     <string name="widget_theme_gray_mono">그레이모노</string>
     <string name="settings_section_widget_theme">위젯 테마</string>
     <string name="feature_widget_theme_description">잠금화면 위젯을 원하는 색상 테마로 꾸며보세요</string>
+    <string name="settings_widget_theme_guide">선택한 색상이 위젯에 바로 적용돼요</string>
+    <string name="settings_widget_theme_preview_label">2×2 위젯 미리보기</string>
 </resources>
