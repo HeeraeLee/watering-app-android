@@ -184,6 +184,9 @@
     <string name="settings_hydration_sync_not_available_body">To turn on auto-save, please install (or update) the Health Connect app.</string>
     <string name="settings_hydration_sync_permission_denied_title">Permission Needed</string>
     <string name="settings_hydration_sync_permission_denied_body">Without Health Connect write permission, auto-save can\'t be turned on. This won\'t affect any other feature.</string>
+    <string name="settings_hydration_sync_other_app_title">Not showing up in other health apps?</string>
+    <string name="settings_hydration_sync_other_app_body">To see it in Samsung Health and similar apps, grant them Health Connect access separately in that app</string>
+    <string name="settings_hydration_sync_other_app_open">Open Health Connect Settings</string>
     <string name="settings_section_notification">Notifications</string>
     <string name="settings_section_backup">Backup &amp; Restore</string>
     <string name="settings_notification_switch_title">Water Reminders</string>

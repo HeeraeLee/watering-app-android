@@ -35,6 +35,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.FileDownload
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MonitorWeight
 import androidx.compose.material.icons.filled.NotificationsOff
@@ -301,6 +302,19 @@ fun SettingsScreen(
                 )
             }
 
+            if (settings.healthConnectEnabled) {
+                item {
+                    HealthConnectVisibilityHint(
+                        onOpenSettings = {
+                            val intent = Intent("android.health.connect.action.HEALTH_HOME_SETTINGS")
+                            if (intent.resolveActivity(context.packageManager) != null) {
+                                context.startActivity(intent)
+                            }
+                        }
+                    )
+                }
+            }
+
             item { SectionDivider() }
             item { SectionHeader(stringResource(R.string.settings_section_notification)) }
 
@@ -555,6 +569,37 @@ private fun NotificationPermissionBanner(onOpenSettings: () -> Unit) {
         }
         TextButton(onClick = onOpenSettings) {
             Text(stringResource(R.string.settings_notification_permission_open), color = warningColor)
+        }
+    }
+}
+
+@Composable
+private fun HealthConnectVisibilityHint(onOpenSettings: () -> Unit) {
+    val infoColor = MaterialTheme.colorScheme.primary
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .background(infoColor.copy(alpha = 0.1f), RoundedCornerShape(12.dp))
+            .padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(Icons.Filled.Info, contentDescription = null, tint = infoColor)
+        Spacer(Modifier.width(10.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                stringResource(R.string.settings_hydration_sync_other_app_title),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                stringResource(R.string.settings_hydration_sync_other_app_body),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        TextButton(onClick = onOpenSettings) {
+            Text(stringResource(R.string.settings_hydration_sync_other_app_open), color = infoColor)
         }
     }
 }
