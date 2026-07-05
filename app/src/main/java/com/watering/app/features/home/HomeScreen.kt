@@ -32,11 +32,11 @@ import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -159,10 +159,15 @@ fun HomeScreen(
                     Icon(Icons.Filled.WaterDrop, contentDescription = null, modifier = Modifier.size(20.dp))
                 }
                 Spacer(Modifier.height(8.dp))
-                OutlinedButton(
+                Button(
                     onClick = { showRecordSheet = true },
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp)
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.White,
+                        contentColor = MaterialTheme.colorScheme.primary
+                    ),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 3.dp)
                 ) {
                     Text(stringResource(R.string.home_select_other_drink))
                 }
