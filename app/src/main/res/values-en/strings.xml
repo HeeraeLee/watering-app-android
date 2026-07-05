@@ -164,6 +164,8 @@
     <string name="settings_weight_goal_input_label">Weight (kg)</string>
     <string name="settings_weight_goal_recommended">Recommended goal: %1$d glasses a day</string>
     <string name="settings_weight_goal_confirm_apply">Apply</string>
+    <string name="settings_weight_goal_applied_snackbar">Set your daily goal to %2$d glasses based on %1$skg</string>
+    <string name="settings_weight_goal_last_input">Last entry: %1$skg → %2$d glasses a day</string>
     <string name="settings_section_recording">Recording</string>
     <string name="settings_section_health">Health Sync</string>
     <string name="settings_hydration_sync_title">Auto-Save to Health Connect</string>

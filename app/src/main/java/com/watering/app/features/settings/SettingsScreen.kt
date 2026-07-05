@@ -52,6 +52,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -110,12 +112,22 @@ fun SettingsScreen(
     val currentUser by backupViewModel.currentUser.collectAsStateWithLifecycle()
     val backupUiState by backupViewModel.backupUiState.collectAsStateWithLifecycle()
     val weightGoalUiState by viewModel.weightGoalUiState.collectAsStateWithLifecycle()
+    val weightGoalSubtitle by viewModel.weightGoalSubtitle.collectAsStateWithLifecycle()
     val hydrationSyncUiState by viewModel.hydrationSyncUiState.collectAsStateWithLifecycle()
     val csvExportUiState by viewModel.csvExportUiState.collectAsStateWithLifecycle()
+    val snackbarMessage by viewModel.snackbarMessage.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
     val privacyPolicyUrl = stringResource(R.string.privacy_policy_url)
     var showResetDialog by remember { mutableStateOf(false) }
     var showRestoreDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(snackbarMessage) {
+        snackbarMessage?.let { msg ->
+            snackbarHostState.showSnackbar(message = msg)
+            viewModel.clearSnackbar()
+        }
+    }
 
     val hydrationPermissionLauncher = rememberLauncherForActivityResult(
         contract = viewModel.healthConnectPermissionContract()
@@ -220,7 +232,8 @@ fun SettingsScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         LazyColumn(
             modifier = Modifier
@@ -249,7 +262,7 @@ fun SettingsScreen(
             item { Spacer(Modifier.height(8.dp)) }
 
             item {
-                WeightGoalRow(onClick = viewModel::openWeightGoalDialog)
+                WeightGoalRow(subtitle = weightGoalSubtitle, onClick = viewModel::openWeightGoalDialog)
             }
 
             item { Spacer(Modifier.height(8.dp)) }
@@ -688,7 +701,7 @@ private fun CupSizeSetting(cupSize: Int, onCupSizeChange: (Int) -> Unit) {
 }
 
 @Composable
-private fun WeightGoalRow(onClick: () -> Unit) {
+private fun WeightGoalRow(subtitle: String, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -701,7 +714,7 @@ private fun WeightGoalRow(onClick: () -> Unit) {
         Column(modifier = Modifier.weight(1f)) {
             Text(stringResource(R.string.settings_weight_goal_title), style = MaterialTheme.typography.bodyLarge)
             Text(
-                stringResource(R.string.settings_weight_goal_subtitle),
+                subtitle,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

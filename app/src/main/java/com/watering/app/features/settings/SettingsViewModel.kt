@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -93,6 +94,30 @@ class SettingsViewModel @Inject constructor(
     private val _weightGoalUiState = MutableStateFlow<WeightGoalUiState>(WeightGoalUiState.Idle)
     val weightGoalUiState: StateFlow<WeightGoalUiState> = _weightGoalUiState.asStateFlow()
 
+    private val _snackbarMessage = MutableStateFlow<String?>(null)
+    val snackbarMessage: StateFlow<String?> = _snackbarMessage.asStateFlow()
+
+    fun clearSnackbar() {
+        _snackbarMessage.value = null
+    }
+
+    // 저장된 몸무게가 있으면 "마지막 입력: OOkg → 하루 N잔"으로, 없으면 기본 안내문을 보여준다
+    val weightGoalSubtitle: StateFlow<String> = settings
+        .map { s ->
+            val weightKg = s.weightKg
+            if (weightKg == null) {
+                context.getString(R.string.settings_weight_goal_subtitle)
+            } else {
+                val cups = StatsInsightService.recommendedGoalCups(weightKg, s.cupSize)
+                context.getString(R.string.settings_weight_goal_last_input, formatWeightInput(weightKg), cups)
+            }
+        }
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5_000),
+            context.getString(R.string.settings_weight_goal_subtitle)
+        )
+
     fun healthConnectPermissionContract() = healthConnectService.permissionRequestContract()
 
     // 저장된 몸무게가 있으면 입력값을 미리 채워서 열고, 없으면 빈 입력으로 연다
@@ -122,6 +147,11 @@ class SettingsViewModel @Inject constructor(
         val weightKg = state.weightInput.toDoubleOrNull() ?: return
         val cups = state.recommendedCups ?: return
         update(refreshWidget = true) { it.copy(weightKg = weightKg, dailyGoal = cups) }
+        _snackbarMessage.value = context.getString(
+            R.string.settings_weight_goal_applied_snackbar,
+            formatWeightInput(weightKg),
+            cups
+        )
         _weightGoalUiState.value = WeightGoalUiState.Idle
     }
 

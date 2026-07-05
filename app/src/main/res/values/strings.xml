@@ -164,6 +164,8 @@
     <string name="settings_weight_goal_input_label">몸무게 (kg)</string>
     <string name="settings_weight_goal_recommended">추천 목표: 하루 %1$d잔</string>
     <string name="settings_weight_goal_confirm_apply">적용</string>
+    <string name="settings_weight_goal_applied_snackbar">%1$skg 기준 하루 목표를 %2$d잔으로 설정했어요</string>
+    <string name="settings_weight_goal_last_input">마지막 입력: %1$skg → 하루 %2$d잔</string>
     <string name="settings_section_recording">기록 설정</string>
     <string name="settings_section_health">건강 연동</string>
     <string name="settings_hydration_sync_title">물 마시기 자동 저장</string>

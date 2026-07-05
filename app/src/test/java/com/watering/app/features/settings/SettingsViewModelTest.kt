@@ -2,6 +2,7 @@ package com.watering.app.features.settings
 
 import android.content.Context
 import app.cash.turbine.test
+import com.watering.app.R
 import com.watering.app.core.data.SettingsRepository
 import com.watering.app.core.model.UserSettings
 import com.watering.app.core.model.WidgetTheme
@@ -242,6 +243,50 @@ class SettingsViewModelTest {
             assertEquals(60.0, slot.captured.weightKg)
             assertEquals(10, slot.captured.dailyGoal)
             assertEquals(WeightGoalUiState.Idle, viewModel.weightGoalUiState.value)
+        }
+
+    @Test
+    fun applyWeightGoal_적용하면스낵바메시지를설정한다() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val viewModel = createViewModel(UserSettings(dailyGoal = 8, cupSize = 200))
+            every {
+                context.getString(R.string.settings_weight_goal_applied_snackbar, "60", 10)
+            } returns "60kg 기준 하루 목표를 10잔으로 설정했어요"
+
+            viewModel.settings.test {
+                awaitItem()
+                viewModel.onWeightInputChange("60")
+                viewModel.applyWeightGoal()
+                cancelAndIgnoreRemainingEvents()
+            }
+
+            assertEquals("60kg 기준 하루 목표를 10잔으로 설정했어요", viewModel.snackbarMessage.value)
+        }
+
+    @Test
+    fun weightGoalSubtitle_저장된몸무게있으면마지막입력을표시한다() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val viewModel = createViewModel(UserSettings(cupSize = 200, weightKg = 60.0))
+            every {
+                context.getString(R.string.settings_weight_goal_last_input, "60", 10)
+            } returns "마지막 입력: 60kg → 하루 10잔"
+
+            viewModel.weightGoalSubtitle.test {
+                assertEquals("마지막 입력: 60kg → 하루 10잔", awaitItem())
+            }
+        }
+
+    @Test
+    fun weightGoalSubtitle_저장된몸무게없으면기본안내문을표시한다() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val viewModel = createViewModel(UserSettings(weightKg = null))
+            every {
+                context.getString(R.string.settings_weight_goal_subtitle)
+            } returns "몸무게를 입력하면 하루 목표를 계산해드려요"
+
+            viewModel.weightGoalSubtitle.test {
+                assertEquals("몸무게를 입력하면 하루 목표를 계산해드려요", awaitItem())
+            }
         }
 
     @Test
