@@ -13,6 +13,9 @@ val AppBackgroundGradient = Brush.linearGradient(
     colors = listOf(Color(0xFFD3ECF3), Color(0xFFE1D7F0))
 )
 
+// 홈 화면의 연속 기록/기록 카드 등에 쓰던 연한 크림 배경 (웹 목업 비교 후 확정), 통계 화면 카드에도 공용
+val AppCardBackgroundColor = Color(0xFFFDFAF4)
+
 // 파스텔 옵션 N 확정 적용 (#7CDAED 근처 변형 중 선택)
 private val WateringAqua = Color(0xFF5DCEE6)
 private val WateringAquaDark = Color(0xFF48CAE4)

@@ -70,6 +70,7 @@ import com.watering.app.core.model.DrinkType
 import com.watering.app.core.model.WaterEntry
 import com.watering.app.features.record.RecordSheet
 import com.watering.app.ui.theme.AppBackgroundGradient
+import com.watering.app.ui.theme.AppCardBackgroundColor
 
 private fun Context.findActivity(): Activity? = when (this) {
     is Activity -> this
@@ -327,8 +328,6 @@ private fun AchievementRing(current: Int, goal: Int, rate: Double, isAchieved: B
     }
 }
 
-private val CardBackgroundColor = Color(0xFFFDFAF4)
-
 @Composable
 private fun StreakCard(
     icon: ImageVector,
@@ -339,7 +338,7 @@ private fun StreakCard(
 ) {
     Surface(
         shape = RoundedCornerShape(16.dp),
-        color = CardBackgroundColor,
+        color = AppCardBackgroundColor,
         modifier = modifier
     ) {
         Column(
@@ -365,7 +364,7 @@ private fun WaterEntryRow(entry: WaterEntry) {
 
     Surface(
         shape = RoundedCornerShape(12.dp),
-        color = CardBackgroundColor,
+        color = AppCardBackgroundColor,
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(

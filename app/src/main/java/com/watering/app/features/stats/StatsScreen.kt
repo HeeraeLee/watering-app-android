@@ -42,6 +42,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.watering.app.R
 import com.watering.app.ui.theme.AppBackgroundGradient
+import com.watering.app.ui.theme.AppCardBackgroundColor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -147,7 +148,7 @@ private fun SmartStatsCta(onNavigateToSmartStats: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onNavigateToSmartStats)
-            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(20.dp))
+            .background(AppCardBackgroundColor, RoundedCornerShape(20.dp))
             .padding(20.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -170,7 +171,7 @@ private fun SmartStatsCta(onNavigateToSmartStats: () -> Unit) {
 fun SectionCard(title: String, content: @Composable () -> Unit) {
     Surface(
         shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant,
+        color = AppCardBackgroundColor,
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
