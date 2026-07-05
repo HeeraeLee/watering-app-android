@@ -51,6 +51,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -68,6 +69,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -113,18 +116,6 @@ fun SettingsScreen(
     val privacyPolicyUrl = stringResource(R.string.privacy_policy_url)
     var showResetDialog by remember { mutableStateOf(false) }
     var showRestoreDialog by remember { mutableStateOf(false) }
-
-    val weightPermissionLauncher = rememberLauncherForActivityResult(
-        contract = viewModel.healthConnectPermissionContract()
-    ) { granted ->
-        viewModel.onWeightPermissionResult(granted)
-    }
-
-    LaunchedEffect(weightGoalUiState) {
-        if (weightGoalUiState is WeightGoalUiState.NeedsPermission) {
-            weightPermissionLauncher.launch(HealthConnectService.WEIGHT_PERMISSIONS)
-        }
-    }
 
     val hydrationPermissionLauncher = rememberLauncherForActivityResult(
         contract = viewModel.healthConnectPermissionContract()
@@ -206,8 +197,9 @@ fun SettingsScreen(
 
     WeightGoalDialogs(
         uiState = weightGoalUiState,
+        onWeightInputChange = viewModel::onWeightInputChange,
         onDismiss = viewModel::dismissWeightGoalState,
-        onApply = viewModel::applyRecommendedGoal
+        onApply = viewModel::applyWeightGoal
     )
 
     HydrationSyncDialogs(
@@ -273,11 +265,7 @@ fun SettingsScreen(
             item { Spacer(Modifier.height(8.dp)) }
 
             item {
-                WeightGoalRow(
-                    isPremium = settings.isPremium,
-                    onClick = viewModel::requestWeightBasedGoal,
-                    onLockedClick = onNavigateToPremium
-                )
+                WeightGoalRow(onClick = viewModel::openWeightGoalDialog)
             }
 
             item { Spacer(Modifier.height(8.dp)) }
@@ -780,11 +768,11 @@ private fun CupSizeSetting(cupSize: Int, onCupSizeChange: (Int) -> Unit) {
 }
 
 @Composable
-private fun WeightGoalRow(isPremium: Boolean, onClick: () -> Unit, onLockedClick: () -> Unit) {
+private fun WeightGoalRow(onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { if (isPremium) onClick() else onLockedClick() }
+            .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -793,19 +781,9 @@ private fun WeightGoalRow(isPremium: Boolean, onClick: () -> Unit, onLockedClick
         Column(modifier = Modifier.weight(1f)) {
             Text(stringResource(R.string.settings_weight_goal_title), style = MaterialTheme.typography.bodyLarge)
             Text(
-                stringResource(
-                    if (isPremium) R.string.settings_weight_goal_subtitle else R.string.settings_weight_goal_locked_hint
-                ),
+                stringResource(R.string.settings_weight_goal_subtitle),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-        if (!isPremium) {
-            Icon(
-                Icons.Filled.Lock,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(20.dp)
             )
         }
     }
@@ -846,105 +824,46 @@ private fun CsvExportRow(isPremium: Boolean, onClick: () -> Unit, onLockedClick:
 @Composable
 private fun WeightGoalDialogs(
     uiState: WeightGoalUiState,
+    onWeightInputChange: (String) -> Unit,
     onDismiss: () -> Unit,
-    onApply: (Int) -> Unit
+    onApply: () -> Unit
 ) {
-    val context = LocalContext.current
+    if (uiState !is WeightGoalUiState.Editing) return
 
-    when (uiState) {
-        is WeightGoalUiState.Idle, is WeightGoalUiState.Loading, is WeightGoalUiState.NeedsPermission -> Unit
-
-        is WeightGoalUiState.NotAvailable -> AlertDialog(
-            onDismissRequest = onDismiss,
-            title = { Text(stringResource(R.string.settings_weight_goal_not_available_title)) },
-            text = { Text(stringResource(R.string.settings_weight_goal_not_available_body)) },
-            confirmButton = {
-                TextButton(onClick = {
-                    val intent = Intent(
-                        Intent.ACTION_VIEW,
-                        Uri.parse("market://details?id=com.google.android.apps.healthdata")
-                    )
-                    if (intent.resolveActivity(context.packageManager) != null) {
-                        context.startActivity(intent)
-                    }
-                    onDismiss()
-                }) {
-                    Text(stringResource(R.string.settings_weight_goal_open_play_store))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = onDismiss) {
-                    Text(stringResource(R.string.settings_dialog_cancel))
-                }
-            }
-        )
-
-        is WeightGoalUiState.NoWeightData -> AlertDialog(
-            onDismissRequest = onDismiss,
-            title = { Text(stringResource(R.string.settings_weight_goal_no_data_title)) },
-            text = { Text(stringResource(R.string.settings_weight_goal_no_data_body)) },
-            confirmButton = {
-                TextButton(onClick = {
-                    // Health Connect 앱 자체엔 "체중 입력 화면으로 바로 이동"하는 공식 딥링크가 없어
-                    // (데이터 접근 전용 SDK), 설치돼 있으면 앱 홈 화면으로 이동시키고 없으면 기존
-                    // NotAvailable 분기와 동일하게 플레이스토어로 안내한다
-                    val launchIntent = context.packageManager.getLaunchIntentForPackage(
-                        "com.google.android.apps.healthdata"
-                    )
-                    if (launchIntent != null) {
-                        context.startActivity(launchIntent)
-                    } else {
-                        val marketIntent = Intent(
-                            Intent.ACTION_VIEW,
-                            Uri.parse("market://details?id=com.google.android.apps.healthdata")
-                        )
-                        if (marketIntent.resolveActivity(context.packageManager) != null) {
-                            context.startActivity(marketIntent)
-                        }
-                    }
-                    onDismiss()
-                }) {
-                    Text(stringResource(R.string.settings_weight_goal_open_health_connect))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = onDismiss) {
-                    Text(stringResource(R.string.settings_weight_goal_dialog_ok))
-                }
-            }
-        )
-
-        is WeightGoalUiState.PermissionDenied -> AlertDialog(
-            onDismissRequest = onDismiss,
-            title = { Text(stringResource(R.string.settings_weight_goal_permission_denied_title)) },
-            text = { Text(stringResource(R.string.settings_weight_goal_permission_denied_body)) },
-            confirmButton = {
-                TextButton(onClick = onDismiss) {
-                    Text(stringResource(R.string.settings_weight_goal_dialog_ok))
-                }
-            }
-        )
-
-        is WeightGoalUiState.Recommended -> AlertDialog(
-            onDismissRequest = onDismiss,
-            title = { Text(stringResource(R.string.settings_weight_goal_confirm_title)) },
-            text = {
-                Text(
-                    stringResource(R.string.settings_weight_goal_confirm_body, uiState.weightKg, uiState.cups)
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.settings_weight_goal_dialog_title)) },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = uiState.weightInput,
+                    onValueChange = onWeightInputChange,
+                    label = { Text(stringResource(R.string.settings_weight_goal_input_label)) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
                 )
-            },
-            confirmButton = {
-                TextButton(onClick = { onApply(uiState.cups) }) {
-                    Text(stringResource(R.string.settings_weight_goal_confirm_apply))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = onDismiss) {
-                    Text(stringResource(R.string.settings_dialog_cancel))
+                if (uiState.recommendedCups != null) {
+                    Spacer(Modifier.height(12.dp))
+                    Text(
+                        stringResource(R.string.settings_weight_goal_recommended, uiState.recommendedCups),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
                 }
             }
-        )
-    }
+        },
+        confirmButton = {
+            TextButton(onClick = onApply, enabled = uiState.recommendedCups != null) {
+                Text(stringResource(R.string.settings_weight_goal_confirm_apply))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.settings_dialog_cancel))
+            }
+        }
+    )
 }
 
 @Composable
@@ -972,7 +891,7 @@ private fun HydrationSyncDialogs(
                     }
                     onDismiss()
                 }) {
-                    Text(stringResource(R.string.settings_weight_goal_open_play_store))
+                    Text(stringResource(R.string.settings_health_connect_open_play_store))
                 }
             },
             dismissButton = {
@@ -988,7 +907,7 @@ private fun HydrationSyncDialogs(
             text = { Text(stringResource(R.string.settings_hydration_sync_permission_denied_body)) },
             confirmButton = {
                 TextButton(onClick = onDismiss) {
-                    Text(stringResource(R.string.settings_weight_goal_dialog_ok))
+                    Text(stringResource(R.string.settings_health_connect_dialog_ok))
                 }
             }
         )

@@ -6,10 +6,7 @@ import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.PermissionController
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.HydrationRecord
-import androidx.health.connect.client.records.WeightRecord
 import androidx.health.connect.client.records.metadata.Metadata
-import androidx.health.connect.client.request.ReadRecordsRequest
-import androidx.health.connect.client.time.TimeRangeFilter
 import androidx.health.connect.client.units.Volume
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.Instant
@@ -25,10 +22,6 @@ class HealthConnectService @Inject constructor(
         // 수분 기록은 저장(write)만 함 — 로컬 DataStore가 이미 진실의 원천이라 읽기 권한은 불필요
         val HYDRATION_PERMISSIONS: Set<String> = setOf(
             HealthPermission.getWritePermission(HydrationRecord::class)
-        )
-
-        val WEIGHT_PERMISSIONS: Set<String> = setOf(
-            HealthPermission.getReadPermission(WeightRecord::class)
         )
     }
 
@@ -51,19 +44,6 @@ class HealthConnectService @Inject constructor(
 
     fun permissionRequestContract(): ActivityResultContract<Set<String>, Set<String>> =
         PermissionController.createRequestPermissionResultContract()
-
-    // 가장 최근에 기록된 체중 1건만 필요 — 스마트 목표 추천은 현재 체중 기준으로만 계산
-    suspend fun readLatestWeightKg(): Double? {
-        val response = client?.readRecords(
-            ReadRecordsRequest(
-                recordType = WeightRecord::class,
-                timeRangeFilter = TimeRangeFilter.before(Instant.now()),
-                ascendingOrder = false,
-                pageSize = 1
-            )
-        ) ?: return null
-        return response.records.firstOrNull()?.weight?.inKilograms
-    }
 
     // 물 마시기는 지속 시간이 없는 단일 이벤트지만, HydrationRecord는 startTime < endTime을
     // 요구해 종료 시각을 1ms 뒤로 둠(실측 검증 중 IllegalArgumentException으로 확인)

@@ -2,7 +2,6 @@ package com.watering.app.core.service
 
 import androidx.health.connect.client.HealthConnectClient
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class HealthConnectServiceTest {
@@ -34,10 +33,5 @@ class HealthConnectServiceTest {
     @Test
     fun HYDRATION_PERMISSIONS_쓰기권한만포함한다() {
         assertEquals(1, HealthConnectService.HYDRATION_PERMISSIONS.size)
-    }
-
-    @Test
-    fun WEIGHT_PERMISSIONS_읽기권한을포함한다() {
-        assertTrue(HealthConnectService.WEIGHT_PERMISSIONS.isNotEmpty())
     }
 }

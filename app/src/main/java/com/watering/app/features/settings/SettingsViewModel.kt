@@ -31,12 +31,7 @@ import javax.inject.Inject
 
 sealed interface WeightGoalUiState {
     data object Idle : WeightGoalUiState
-    data object Loading : WeightGoalUiState
-    data object NeedsPermission : WeightGoalUiState
-    data object PermissionDenied : WeightGoalUiState
-    data class NotAvailable(val availability: HealthConnectAvailability) : WeightGoalUiState
-    data object NoWeightData : WeightGoalUiState
-    data class Recommended(val cups: Int, val weightKg: Double) : WeightGoalUiState
+    data class Editing(val weightInput: String, val recommendedCups: Int?) : WeightGoalUiState
 }
 
 sealed interface HydrationSyncUiState {
@@ -103,51 +98,42 @@ class SettingsViewModel @Inject constructor(
 
     fun healthConnectPermissionContract() = healthConnectService.permissionRequestContract()
 
-    fun requestWeightBasedGoal() {
-        viewModelScope.launch {
-            _weightGoalUiState.value = WeightGoalUiState.Loading
-            val availability = healthConnectService.availability
-            if (availability != HealthConnectAvailability.AVAILABLE) {
-                _weightGoalUiState.value = WeightGoalUiState.NotAvailable(availability)
-                return@launch
+    // 저장된 몸무게가 있으면 입력값을 미리 채워서 열고, 없으면 빈 입력으로 연다
+    fun openWeightGoalDialog() {
+        val savedWeightKg = settings.value.weightKg
+        _weightGoalUiState.value = WeightGoalUiState.Editing(
+            weightInput = savedWeightKg?.let { formatWeightInput(it) } ?: "",
+            recommendedCups = savedWeightKg?.let {
+                StatsInsightService.recommendedGoalCups(it, settings.value.cupSize)
             }
-            if (!healthConnectService.hasPermissions(HealthConnectService.WEIGHT_PERMISSIONS)) {
-                _weightGoalUiState.value = WeightGoalUiState.NeedsPermission
-                return@launch
-            }
-            readWeightAndRecommend()
-        }
+        )
     }
 
-    fun onWeightPermissionResult(granted: Set<String>) {
-        if (!granted.containsAll(HealthConnectService.WEIGHT_PERMISSIONS)) {
-            _weightGoalUiState.value = WeightGoalUiState.PermissionDenied
-            return
-        }
-        viewModelScope.launch {
-            _weightGoalUiState.value = WeightGoalUiState.Loading
-            readWeightAndRecommend()
-        }
-    }
-
-    private suspend fun readWeightAndRecommend() {
-        val weightKg = healthConnectService.readLatestWeightKg()
-        _weightGoalUiState.value = if (weightKg == null) {
-            WeightGoalUiState.NoWeightData
+    fun onWeightInputChange(input: String) {
+        val weightKg = input.toDoubleOrNull()
+        val cups = if (weightKg != null && weightKg > 0) {
+            StatsInsightService.recommendedGoalCups(weightKg, settings.value.cupSize)
         } else {
-            val cups = StatsInsightService.recommendedGoalCups(weightKg, settings.value.cupSize)
-            WeightGoalUiState.Recommended(cups, weightKg)
+            null
         }
+        _weightGoalUiState.value = WeightGoalUiState.Editing(input, cups)
     }
 
-    fun applyRecommendedGoal(cups: Int) {
-        updateDailyGoal(cups)
+    fun applyWeightGoal() {
+        val state = _weightGoalUiState.value
+        if (state !is WeightGoalUiState.Editing) return
+        val weightKg = state.weightInput.toDoubleOrNull() ?: return
+        val cups = state.recommendedCups ?: return
+        update(refreshWidget = true) { it.copy(weightKg = weightKg, dailyGoal = cups) }
         _weightGoalUiState.value = WeightGoalUiState.Idle
     }
 
     fun dismissWeightGoalState() {
         _weightGoalUiState.value = WeightGoalUiState.Idle
     }
+
+    private fun formatWeightInput(weightKg: Double): String =
+        if (weightKg == weightKg.toLong().toDouble()) weightKg.toLong().toString() else weightKg.toString()
 
     private val _hydrationSyncUiState = MutableStateFlow<HydrationSyncUiState>(HydrationSyncUiState.Idle)
     val hydrationSyncUiState: StateFlow<HydrationSyncUiState> = _hydrationSyncUiState.asStateFlow()

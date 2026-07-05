@@ -13,6 +13,7 @@ data class UserSettings(
     val dustAlertEnabled: Boolean = false,
     val heatAlertEnabled: Boolean = false,
     val healthConnectEnabled: Boolean = false,
+    val weightKg: Double? = null,          // 체중 기반 목표 계산용, 사용자가 직접 입력
     val isPremium: Boolean = false,
     val isOnboardingDone: Boolean = false,
     val reviewRequested: Boolean = false,  // 인앱 리뷰 요청 1회 제한용

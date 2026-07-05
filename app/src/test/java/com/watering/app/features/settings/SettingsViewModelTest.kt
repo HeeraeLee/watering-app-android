@@ -170,89 +170,89 @@ class SettingsViewModelTest {
     }
 
     @Test
-    fun requestWeightBasedGoal_SDK사용불가면NotAvailable상태가된다() = runTest(mainDispatcherRule.testDispatcher) {
-        val viewModel = createViewModel()
-        every { healthConnectService.availability } returns HealthConnectAvailability.NOT_INSTALLED
+    fun openWeightGoalDialog_저장된몸무게있으면입력값과추천잔수를채운다() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val viewModel = createViewModel(UserSettings(cupSize = 200, weightKg = 60.0))
 
-        viewModel.requestWeightBasedGoal()
+            viewModel.settings.test {
+                awaitItem()
+                viewModel.openWeightGoalDialog()
+                cancelAndIgnoreRemainingEvents()
+            }
 
-        assertEquals(
-            WeightGoalUiState.NotAvailable(HealthConnectAvailability.NOT_INSTALLED),
-            viewModel.weightGoalUiState.value
-        )
-    }
-
-    @Test
-    fun requestWeightBasedGoal_권한없으면NeedsPermission상태가된다() = runTest(mainDispatcherRule.testDispatcher) {
-        val viewModel = createViewModel()
-        coEvery { healthConnectService.hasPermissions(HealthConnectService.WEIGHT_PERMISSIONS) } returns false
-
-        viewModel.requestWeightBasedGoal()
-
-        assertEquals(WeightGoalUiState.NeedsPermission, viewModel.weightGoalUiState.value)
-    }
+            assertEquals(
+                WeightGoalUiState.Editing(weightInput = "60", recommendedCups = 10),
+                viewModel.weightGoalUiState.value
+            )
+        }
 
     @Test
-    fun requestWeightBasedGoal_권한있고체중데이터있으면Recommended상태가된다() =
+    fun openWeightGoalDialog_저장된몸무게없으면빈입력으로연다() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val viewModel = createViewModel(UserSettings(weightKg = null))
+
+            viewModel.openWeightGoalDialog()
+
+            assertEquals(
+                WeightGoalUiState.Editing(weightInput = "", recommendedCups = null),
+                viewModel.weightGoalUiState.value
+            )
+        }
+
+    @Test
+    fun onWeightInputChange_유효한몸무게면추천잔수를계산한다() =
         runTest(mainDispatcherRule.testDispatcher) {
             val viewModel = createViewModel(UserSettings(cupSize = 200))
-            coEvery { healthConnectService.hasPermissions(HealthConnectService.WEIGHT_PERMISSIONS) } returns true
-            coEvery { healthConnectService.readLatestWeightKg() } returns 60.0
 
-            viewModel.requestWeightBasedGoal()
+            viewModel.onWeightInputChange("60")
 
-            assertEquals(WeightGoalUiState.Recommended(10, 60.0), viewModel.weightGoalUiState.value)
+            assertEquals(
+                WeightGoalUiState.Editing(weightInput = "60", recommendedCups = 10),
+                viewModel.weightGoalUiState.value
+            )
         }
 
     @Test
-    fun requestWeightBasedGoal_체중데이터없으면NoWeightData상태가된다() =
-        runTest(mainDispatcherRule.testDispatcher) {
-            val viewModel = createViewModel()
-            coEvery { healthConnectService.hasPermissions(HealthConnectService.WEIGHT_PERMISSIONS) } returns true
-            coEvery { healthConnectService.readLatestWeightKg() } returns null
-
-            viewModel.requestWeightBasedGoal()
-
-            assertEquals(WeightGoalUiState.NoWeightData, viewModel.weightGoalUiState.value)
-        }
-
-    @Test
-    fun onWeightPermissionResult_권한거부되면PermissionDenied상태가된다() =
+    fun onWeightInputChange_유효하지않으면추천잔수는null이다() =
         runTest(mainDispatcherRule.testDispatcher) {
             val viewModel = createViewModel()
 
-            viewModel.onWeightPermissionResult(emptySet())
+            viewModel.onWeightInputChange("abc")
 
-            assertEquals(WeightGoalUiState.PermissionDenied, viewModel.weightGoalUiState.value)
+            assertEquals(
+                WeightGoalUiState.Editing(weightInput = "abc", recommendedCups = null),
+                viewModel.weightGoalUiState.value
+            )
         }
 
     @Test
-    fun onWeightPermissionResult_권한허용되면체중을읽어Recommended상태가된다() =
+    fun applyWeightGoal_몸무게와목표를저장하고Idle로되돌린다() =
         runTest(mainDispatcherRule.testDispatcher) {
-            val viewModel = createViewModel(UserSettings(cupSize = 200))
-            coEvery { healthConnectService.readLatestWeightKg() } returns 60.0
-
-            viewModel.onWeightPermissionResult(HealthConnectService.WEIGHT_PERMISSIONS)
-
-            assertEquals(WeightGoalUiState.Recommended(10, 60.0), viewModel.weightGoalUiState.value)
-        }
-
-    @Test
-    fun applyRecommendedGoal_목표를저장하고상태를Idle로되돌린다() =
-        runTest(mainDispatcherRule.testDispatcher) {
-            val viewModel = createViewModel(UserSettings(dailyGoal = 8))
+            val viewModel = createViewModel(UserSettings(dailyGoal = 8, cupSize = 200))
             val slot = slot<UserSettings>()
             coEvery { settingsRepository.updateSettings(capture(slot)) } returns Unit
 
             viewModel.settings.test {
                 awaitItem()
-                viewModel.applyRecommendedGoal(10)
+                viewModel.onWeightInputChange("60")
+                viewModel.applyWeightGoal()
                 cancelAndIgnoreRemainingEvents()
             }
 
+            assertEquals(60.0, slot.captured.weightKg)
             assertEquals(10, slot.captured.dailyGoal)
             assertEquals(WeightGoalUiState.Idle, viewModel.weightGoalUiState.value)
         }
+
+    @Test
+    fun dismissWeightGoalState_Idle로되돌린다() = runTest(mainDispatcherRule.testDispatcher) {
+        val viewModel = createViewModel()
+        viewModel.onWeightInputChange("60")
+
+        viewModel.dismissWeightGoalState()
+
+        assertEquals(WeightGoalUiState.Idle, viewModel.weightGoalUiState.value)
+    }
 
     @Test
     fun onHydrationSyncToggle_false면바로저장하고끈다() = runTest(mainDispatcherRule.testDispatcher) {
