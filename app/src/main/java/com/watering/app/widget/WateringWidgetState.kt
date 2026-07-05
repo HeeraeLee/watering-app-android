@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.glance.currentState
 import com.watering.app.core.data.SettingsRepository
 import com.watering.app.core.data.WaterRepository
+import com.watering.app.core.datastore.AchievementDataStore
 import com.watering.app.core.model.WidgetTheme
 import com.watering.app.core.service.AchievementChecker
 import com.watering.app.core.service.AnalyticsService
@@ -46,6 +47,7 @@ interface WidgetEntryPoint {
     fun waterService(): WaterService
     fun analyticsService(): AnalyticsService
     fun achievementChecker(): AchievementChecker
+    fun achievementDataStore(): AchievementDataStore
 }
 
 // 위젯 데이터 로드 실패 시 이 프로세스에서 마지막으로 성공한 상태로 대체하기 위한 캐시

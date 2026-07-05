@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.watering.app.R
 import com.watering.app.core.data.SettingsRepository
 import com.watering.app.core.data.WaterRepository
+import com.watering.app.core.datastore.AchievementDataStore
 import com.watering.app.core.model.Achievement
 import com.watering.app.core.model.DayRecord
 import com.watering.app.core.model.DrinkType
@@ -40,6 +41,7 @@ class HomeViewModel @Inject constructor(
     private val waterRepository: WaterRepository,
     private val settingsRepository: SettingsRepository,
     private val achievementChecker: AchievementChecker,
+    private val achievementDataStore: AchievementDataStore,
     private val reviewService: ReviewService,
     private val analyticsService: AnalyticsService
 ) : ViewModel() {
@@ -61,6 +63,13 @@ class HomeViewModel @Inject constructor(
 
     private val _pendingAchievement = MutableStateFlow<Achievement?>(null)
     val pendingAchievement: StateFlow<Achievement?> = _pendingAchievement
+
+    init {
+        // 위젯 탭으로 달성했지만 아직 못 보여준 업적이 있으면 앱 진입 시 모달로 보여준다
+        viewModelScope.launch {
+            achievementDataStore.consumePendingDisplay()?.let { _pendingAchievement.value = it }
+        }
+    }
 
     fun addWater(drinkType: DrinkType = DrinkType.WATER) {
         viewModelScope.launch {

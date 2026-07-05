@@ -6,6 +6,7 @@ import app.cash.turbine.test
 import com.watering.app.R
 import com.watering.app.core.data.SettingsRepository
 import com.watering.app.core.data.WaterRepository
+import com.watering.app.core.datastore.AchievementDataStore
 import com.watering.app.core.model.Achievement
 import com.watering.app.core.model.DayRecord
 import com.watering.app.core.model.DrinkType
@@ -37,6 +38,7 @@ class HomeViewModelTest {
     private lateinit var waterRepository: WaterRepository
     private lateinit var settingsRepository: SettingsRepository
     private lateinit var achievementChecker: AchievementChecker
+    private lateinit var achievementDataStore: AchievementDataStore
     private lateinit var reviewService: ReviewService
     private lateinit var analyticsService: AnalyticsService
 
@@ -44,7 +46,7 @@ class HomeViewModelTest {
     private val streak = StreakInfo(currentStreak = 2)
     private val settings = UserSettings(dailyGoal = 8, cupSize = 200, isPremium = false)
 
-    private fun createViewModel(): HomeViewModel {
+    private fun createViewModel(pendingFromWidget: Achievement? = null): HomeViewModel {
         context = mockk {
             every { getString(R.string.home_snackbar_water_recorded, 200) } returns "💧 +200ml 기록됐어요"
             every { getString(DrinkType.COFFEE.displayNameRes) } returns "커피"
@@ -61,9 +63,12 @@ class HomeViewModelTest {
             every { userSettings } returns MutableStateFlow(settings)
         }
         achievementChecker = mockk()
+        achievementDataStore = mockk {
+            coEvery { consumePendingDisplay() } returns pendingFromWidget
+        }
         reviewService = mockk(relaxed = true)
         analyticsService = mockk(relaxed = true)
-        return HomeViewModel(context, waterService, waterRepository, settingsRepository, achievementChecker, reviewService, analyticsService)
+        return HomeViewModel(context, waterService, waterRepository, settingsRepository, achievementChecker, achievementDataStore, reviewService, analyticsService)
     }
 
     @Test
@@ -112,6 +117,21 @@ class HomeViewModelTest {
         }
 
         assertEquals(Achievement.GOAL_ACHIEVED, viewModel.pendingAchievement.value)
+    }
+
+    @Test
+    fun init_위젯에서달성한pending업적이있으면pendingAchievement로로드한다() = runTest(mainDispatcherRule.testDispatcher) {
+        val viewModel = createViewModel(pendingFromWidget = Achievement.STREAK_7)
+
+        assertEquals(Achievement.STREAK_7, viewModel.pendingAchievement.value)
+        coVerify { achievementDataStore.consumePendingDisplay() }
+    }
+
+    @Test
+    fun init_대기중인업적이없으면pendingAchievement는null이다() = runTest(mainDispatcherRule.testDispatcher) {
+        val viewModel = createViewModel(pendingFromWidget = null)
+
+        assertNull(viewModel.pendingAchievement.value)
     }
 
     @Test
