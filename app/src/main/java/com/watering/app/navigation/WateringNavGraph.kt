@@ -14,7 +14,12 @@ import com.watering.app.features.home.HomeScreen
 import com.watering.app.features.home.HomeViewModel
 import com.watering.app.features.onboarding.OnboardingScreen
 import com.watering.app.features.onboarding.OnboardingViewModel
+import com.watering.app.features.settings.AppInfoScreen
+import com.watering.app.features.settings.BackupScreen
+import com.watering.app.features.settings.HealthConnectSettingsScreen
+import com.watering.app.features.settings.NotificationSettingsScreen
 import com.watering.app.features.settings.SettingsScreen
+import com.watering.app.features.settings.WidgetThemeScreen
 import com.watering.app.features.stats.SmartStatsScreen
 import com.watering.app.features.stats.StatsScreen
 import com.watering.app.features.premium.PremiumScreen
@@ -26,6 +31,11 @@ sealed class Screen(val route: String) {
     object SmartStats : Screen("smart_stats")
     object Settings : Screen("settings")
     object Premium : Screen("premium")
+    object SettingsWidgetTheme : Screen("settings_widget_theme")
+    object SettingsHealthConnect : Screen("settings_health_connect")
+    object SettingsNotifications : Screen("settings_notifications")
+    object SettingsBackup : Screen("settings_backup")
+    object SettingsAppInfo : Screen("settings_app_info")
 }
 
 @Composable
@@ -76,7 +86,29 @@ fun WateringNavGraph(
             SmartStatsScreen(onBack = { navController.popBackStack() })
         }
         composable(Screen.Settings.route) {
-            SettingsScreen(onBack = { navController.popBackStack() })
+            SettingsScreen(
+                onBack = { navController.popBackStack() },
+                onNavigateToWidgetTheme = { navController.navigate(Screen.SettingsWidgetTheme.route) },
+                onNavigateToHealthConnect = { navController.navigate(Screen.SettingsHealthConnect.route) },
+                onNavigateToNotifications = { navController.navigate(Screen.SettingsNotifications.route) },
+                onNavigateToBackup = { navController.navigate(Screen.SettingsBackup.route) },
+                onNavigateToAppInfo = { navController.navigate(Screen.SettingsAppInfo.route) }
+            )
+        }
+        composable(Screen.SettingsWidgetTheme.route) {
+            WidgetThemeScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Screen.SettingsHealthConnect.route) {
+            HealthConnectSettingsScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Screen.SettingsNotifications.route) {
+            NotificationSettingsScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Screen.SettingsBackup.route) {
+            BackupScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Screen.SettingsAppInfo.route) {
+            AppInfoScreen(onBack = { navController.popBackStack() })
         }
         composable(Screen.Premium.route) {
             PremiumScreen(onBack = { navController.popBackStack() })

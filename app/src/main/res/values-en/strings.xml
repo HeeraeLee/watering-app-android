@@ -207,6 +207,13 @@
     <string name="settings_hour_increase_content_description">Increase by 1 hour</string>
     <string name="settings_feedback_email_subject">Watering Feedback</string>
 
+    <!-- Settings restructure: More menu -->
+    <string name="settings_section_more">More</string>
+    <string name="settings_menu_widget_theme_subtitle">Change home screen widget color</string>
+    <string name="settings_menu_health_subtitle">Auto-save to Health Connect</string>
+    <string name="settings_menu_notification_subtitle">Reminder time and interval</string>
+    <string name="settings_menu_backup_subtitle">Back up with your Google account</string>
+
     <!-- App info -->
     <string name="settings_app_info">App Info</string>
     <string name="settings_privacy_policy">Privacy Policy</string>

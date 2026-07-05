@@ -207,6 +207,13 @@
     <string name="settings_hour_increase_content_description">1시간 증가</string>
     <string name="settings_feedback_email_subject">워터링 의견</string>
 
+    <!-- 설정 화면 재구성: 더보기 메뉴 -->
+    <string name="settings_section_more">더보기</string>
+    <string name="settings_menu_widget_theme_subtitle">홈 화면 위젯 색상 변경</string>
+    <string name="settings_menu_health_subtitle">Health Connect 자동 저장</string>
+    <string name="settings_menu_notification_subtitle">물 마시기 알림 시간/간격</string>
+    <string name="settings_menu_backup_subtitle">구글 계정으로 백업하기</string>
+
     <!-- 앱 정보 -->
     <string name="settings_app_info">앱 정보</string>
     <string name="settings_privacy_policy">개인정보처리방침</string>

@@ -216,13 +216,14 @@ private fun WeekBarChart(stats: List<DayStat>) {
     )
 }
 
-private val MiniStatCardColor = Color(0xFFEDE7FA)
+private val SummaryChipColor = Color(0xFFEDF0F2)
+private val StreakStatCardColor = Color(0xFFEDE7FA)
 
 @Composable
 private fun SummaryChip(label: String, value: String, modifier: Modifier = Modifier) {
     Surface(
         shape = RoundedCornerShape(14.dp),
-        color = MiniStatCardColor,
+        color = SummaryChipColor,
         modifier = modifier
     ) {
         Column(
@@ -251,7 +252,7 @@ private fun SummaryChip(label: String, value: String, modifier: Modifier = Modif
 private fun StreakStatCard(icon: ImageVector, tint: Color, label: String, value: String, modifier: Modifier = Modifier) {
     Surface(
         shape = RoundedCornerShape(14.dp),
-        color = MiniStatCardColor,
+        color = StreakStatCardColor,
         modifier = modifier
     ) {
         Column(
