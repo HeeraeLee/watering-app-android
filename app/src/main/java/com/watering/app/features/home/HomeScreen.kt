@@ -152,7 +152,8 @@ fun HomeScreen(
                 Button(
                     onClick = { viewModel.addWater() },
                     modifier = Modifier.fillMaxWidth().height(56.dp),
-                    shape = RoundedCornerShape(16.dp)
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
                 ) {
                     Text(stringResource(R.string.home_drink_water_button), fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
                     Spacer(Modifier.width(8.dp))
