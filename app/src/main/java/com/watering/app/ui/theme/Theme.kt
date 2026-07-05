@@ -5,7 +5,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+
+// 홈/통계/설정 화면 공통 배경 그라데이션 (스카이 블루 → 라벤더 퍼플, 웹 목업 비교 후 확정)
+val AppBackgroundGradient = Brush.linearGradient(
+    colors = listOf(Color(0xFFD3ECF3), Color(0xFFE1D7F0))
+)
 
 // 파스텔 옵션 N 확정 적용 (#7CDAED 근처 변형 중 선택)
 private val WateringAqua = Color(0xFF5DCEE6)

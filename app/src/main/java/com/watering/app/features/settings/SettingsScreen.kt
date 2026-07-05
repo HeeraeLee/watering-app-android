@@ -31,6 +31,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.CloudDone
@@ -55,6 +56,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -77,6 +79,7 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.firebase.auth.FirebaseUser
 import com.watering.app.R
+import com.watering.app.ui.theme.AppBackgroundGradient
 import com.watering.app.core.model.WidgetTheme
 import com.watering.app.core.service.HealthConnectService
 import java.text.SimpleDateFormat
@@ -204,7 +207,9 @@ fun SettingsScreen(
         onDismiss = viewModel::dismissHydrationSyncState
     )
 
+    Box(modifier = Modifier.fillMaxSize().background(AppBackgroundGradient)) {
     Scaffold(
+        containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.settings_title)) },
@@ -212,7 +217,8 @@ fun SettingsScreen(
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.content_description_back))
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         }
     ) { padding ->
@@ -222,15 +228,6 @@ fun SettingsScreen(
                 .padding(padding),
             contentPadding = PaddingValues(bottom = 32.dp)
         ) {
-            item { SectionHeader(stringResource(R.string.settings_section_widget_theme)) }
-            item {
-                WidgetThemeSetting(
-                    selectedTheme = settings.widgetTheme,
-                    onSelectTheme = viewModel::updateWidgetTheme
-                )
-            }
-            item { SectionDivider() }
-
             item { SectionHeader(stringResource(R.string.settings_section_recording)) }
 
             item {
@@ -262,6 +259,16 @@ fun SettingsScreen(
             }
 
             item { SectionDivider() }
+
+            item { SectionHeader(stringResource(R.string.settings_section_widget_theme)) }
+            item {
+                WidgetThemeSetting(
+                    selectedTheme = settings.widgetTheme,
+                    onSelectTheme = viewModel::updateWidgetTheme
+                )
+            }
+            item { SectionDivider() }
+
             item { SectionHeader(stringResource(R.string.settings_section_health)) }
 
             item {
@@ -410,6 +417,7 @@ fun SettingsScreen(
 
         }
     }
+    }
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -481,6 +489,7 @@ private fun HealthConnectVisibilityHint(onOpenSettings: () -> Unit) {
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .background(infoColor.copy(alpha = 0.1f), RoundedCornerShape(12.dp))
+            .clickable(onClick = onOpenSettings)
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -498,9 +507,7 @@ private fun HealthConnectVisibilityHint(onOpenSettings: () -> Unit) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-        TextButton(onClick = onOpenSettings) {
-            Text(stringResource(R.string.settings_hydration_sync_other_app_open), color = infoColor)
-        }
+        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = infoColor)
     }
 }
 
@@ -521,6 +528,7 @@ private fun BackupSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(infoColor.copy(alpha = 0.1f), RoundedCornerShape(12.dp))
+                .let { if (currentUser == null) it.clickable(onClick = onSignIn) else it }
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -562,7 +570,7 @@ private fun BackupSection(
             if (currentUser != null) {
                 TextButton(onClick = onSignOut) { Text(stringResource(R.string.settings_backup_sign_out)) }
             } else {
-                TextButton(onClick = onSignIn) { Text(stringResource(R.string.settings_backup_sign_in)) }
+                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = infoColor)
             }
         }
 

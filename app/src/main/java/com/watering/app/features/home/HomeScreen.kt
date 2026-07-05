@@ -54,7 +54,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.background
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -70,6 +69,7 @@ import com.watering.app.R
 import com.watering.app.core.model.DrinkType
 import com.watering.app.core.model.WaterEntry
 import com.watering.app.features.record.RecordSheet
+import com.watering.app.ui.theme.AppBackgroundGradient
 
 private fun Context.findActivity(): Activity? = when (this) {
     is Activity -> this
@@ -100,11 +100,7 @@ fun HomeScreen(
         }
     }
 
-    val homeBackgroundGradient = Brush.linearGradient(
-        colors = listOf(Color(0xFFD3ECF3), Color(0xFFE1D7F0))
-    )
-
-    Box(modifier = Modifier.fillMaxSize().background(homeBackgroundGradient)) {
+    Box(modifier = Modifier.fillMaxSize().background(AppBackgroundGradient)) {
         Scaffold(
             containerColor = Color.Transparent,
             topBar = {
@@ -331,7 +327,7 @@ private fun AchievementRing(current: Int, goal: Int, rate: Double, isAchieved: B
     }
 }
 
-private val CardBackgroundColor = Color(0xFFEAF7FB)
+private val CardBackgroundColor = Color(0xFFFDFAF4)
 
 @Composable
 private fun StreakCard(
