@@ -31,8 +31,7 @@ data class StatsUiState(
     val goalDays: Int = 0,
     val weeklyTotal: Int = 0,
     val currentStreak: Int = 0,
-    val longestStreak: Int = 0,
-    val isPremium: Boolean = false
+    val longestStreak: Int = 0
 )
 
 @HiltViewModel
@@ -72,8 +71,7 @@ class StatsViewModel @Inject constructor(
             goalDays = week.count { it.count >= it.goal },
             weeklyTotal = counts.sum(),
             currentStreak = streak.currentStreak,
-            longestStreak = streak.longestStreak,
-            isPremium = settings.isPremium
+            longestStreak = streak.longestStreak
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), StatsUiState())
 }

@@ -16,7 +16,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -43,7 +42,6 @@ import com.watering.app.R
 fun StatsScreen(
     onBack: () -> Unit,
     onNavigateToSmartStats: () -> Unit = {},
-    onNavigateToPremium: () -> Unit = {},
     viewModel: StatsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -123,28 +121,20 @@ fun StatsScreen(
                 }
             }
 
-            // 스마트 통계 (30일 트렌드 + 연간 기록) — 프리미엄 게이팅
+            // 스마트 통계 (30일 트렌드 + 연간 기록)
             item {
-                SmartStatsCta(
-                    isPremium = uiState.isPremium,
-                    onNavigateToSmartStats = onNavigateToSmartStats,
-                    onNavigateToPremium = onNavigateToPremium
-                )
+                SmartStatsCta(onNavigateToSmartStats = onNavigateToSmartStats)
             }
         }
     }
 }
 
 @Composable
-private fun SmartStatsCta(
-    isPremium: Boolean,
-    onNavigateToSmartStats: () -> Unit,
-    onNavigateToPremium: () -> Unit
-) {
+private fun SmartStatsCta(onNavigateToSmartStats: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { if (isPremium) onNavigateToSmartStats() else onNavigateToPremium() }
+            .clickable(onClick = onNavigateToSmartStats)
             .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(20.dp))
             .padding(20.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -159,22 +149,6 @@ private fun SmartStatsCta(
                 stringResource(R.string.stats_smart_cta_description),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            if (!isPremium) {
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    stringResource(R.string.settings_widget_theme_locked_hint),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-        }
-        if (!isPremium) {
-            Icon(
-                Icons.Filled.Lock,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(20.dp)
             )
         }
     }

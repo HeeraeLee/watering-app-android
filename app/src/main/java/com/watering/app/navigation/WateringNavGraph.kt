@@ -63,25 +63,20 @@ fun WateringNavGraph(
             HomeScreen(
                 viewModel = viewModel,
                 onNavigateToStats = { navController.navigate(Screen.Stats.route) },
-                onNavigateToSettings = { navController.navigate(Screen.Settings.route) },
-                onNavigateToPremium = { navController.navigate(Screen.Premium.route) }
+                onNavigateToSettings = { navController.navigate(Screen.Settings.route) }
             )
         }
         composable(Screen.Stats.route) {
             StatsScreen(
                 onBack = { navController.popBackStack() },
-                onNavigateToSmartStats = { navController.navigate(Screen.SmartStats.route) },
-                onNavigateToPremium = { navController.navigate(Screen.Premium.route) }
+                onNavigateToSmartStats = { navController.navigate(Screen.SmartStats.route) }
             )
         }
         composable(Screen.SmartStats.route) {
             SmartStatsScreen(onBack = { navController.popBackStack() })
         }
         composable(Screen.Settings.route) {
-            SettingsScreen(
-                onBack = { navController.popBackStack() },
-                onNavigateToPremium = { navController.navigate(Screen.Premium.route) }
-            )
+            SettingsScreen(onBack = { navController.popBackStack() })
         }
         composable(Screen.Premium.route) {
             PremiumScreen(onBack = { navController.popBackStack() })

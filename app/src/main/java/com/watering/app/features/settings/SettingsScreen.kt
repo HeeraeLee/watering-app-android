@@ -36,11 +36,9 @@ import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MonitorWeight
 import androidx.compose.material.icons.filled.NotificationsOff
 import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -101,7 +99,6 @@ private fun Context.sendSupportEmail(subject: String) {
 @Composable
 fun SettingsScreen(
     onBack: () -> Unit,
-    onNavigateToPremium: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel(),
     backupViewModel: BackupViewModel = hiltViewModel()
 ) {
@@ -225,21 +222,11 @@ fun SettingsScreen(
                 .padding(padding),
             contentPadding = PaddingValues(bottom = 32.dp)
         ) {
-            item {
-                PremiumSection(
-                    isPremium = settings.isPremium,
-                    onClick = onNavigateToPremium
-                )
-            }
-            item { SectionDivider() }
-
             item { SectionHeader(stringResource(R.string.settings_section_widget_theme)) }
             item {
                 WidgetThemeSetting(
-                    isPremium = settings.isPremium,
                     selectedTheme = settings.widgetTheme,
-                    onSelectTheme = viewModel::updateWidgetTheme,
-                    onLockedClick = onNavigateToPremium
+                    onSelectTheme = viewModel::updateWidgetTheme
                 )
             }
             item { SectionDivider() }
@@ -271,11 +258,7 @@ fun SettingsScreen(
             item { Spacer(Modifier.height(8.dp)) }
 
             item {
-                CsvExportRow(
-                    isPremium = settings.isPremium,
-                    onClick = viewModel::exportCsv,
-                    onLockedClick = onNavigateToPremium
-                )
+                CsvExportRow(onClick = viewModel::exportCsv)
             }
 
             item { SectionDivider() }
@@ -425,55 +408,6 @@ fun SettingsScreen(
                 }
             }
 
-            // 디버그 빌드 전용 — 실제 결제 없이 프리미엄 기능 테스트용 토글 (release 빌드에는 노출 안 됨)
-            if (com.watering.app.BuildConfig.DEBUG) {
-                item {
-                    TextButton(
-                        onClick = { viewModel.toggleDebugPremium() },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                    ) {
-                        Text(
-                            if (settings.isPremium) "[DEBUG] 프리미엄 끄기" else "[DEBUG] 프리미엄 켜기",
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun PremiumSection(isPremium: Boolean, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .let { if (isPremium) it else it.clickable(onClick = onClick) }
-            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp))
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            Icons.Filled.WorkspacePremium,
-            contentDescription = null,
-            tint = Color(0xFFFFC107)
-        )
-        Spacer(Modifier.width(12.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                if (isPremium) stringResource(R.string.settings_premium_active) else stringResource(R.string.settings_premium_upgrade),
-                style = MaterialTheme.typography.bodyLarge
-            )
-            if (!isPremium) {
-                Text(
-                    stringResource(R.string.feature_streak_protection_description),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
         }
     }
 }
@@ -481,10 +415,8 @@ private fun PremiumSection(isPremium: Boolean, onClick: () -> Unit) {
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun WidgetThemeSetting(
-    isPremium: Boolean,
     selectedTheme: WidgetTheme,
-    onSelectTheme: (WidgetTheme) -> Unit,
-    onLockedClick: () -> Unit
+    onSelectTheme: (WidgetTheme) -> Unit
 ) {
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
         FlowRow(
@@ -492,40 +424,20 @@ private fun WidgetThemeSetting(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             WidgetTheme.entries.forEach { theme ->
-                val isSelected = isPremium && theme == selectedTheme
+                val isSelected = theme == selectedTheme
                 Box(
                     modifier = Modifier
                         .size(40.dp)
                         .clip(CircleShape)
-                        .background(theme.accentColor.copy(alpha = if (isPremium) 1f else 0.35f))
+                        .background(theme.accentColor)
                         .border(
                             width = if (isSelected) 3.dp else 0.dp,
                             color = MaterialTheme.colorScheme.onSurface,
                             shape = CircleShape
                         )
-                        .clickable {
-                            if (isPremium) onSelectTheme(theme) else onLockedClick()
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (!isPremium) {
-                        Icon(
-                            Icons.Filled.Lock,
-                            contentDescription = stringResource(theme.displayNameRes),
-                            tint = Color.White,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
-                }
+                        .clickable { onSelectTheme(theme) }
+                )
             }
-        }
-        if (!isPremium) {
-            Spacer(Modifier.height(8.dp))
-            Text(
-                stringResource(R.string.settings_widget_theme_locked_hint),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
         }
     }
 }
@@ -790,11 +702,11 @@ private fun WeightGoalRow(onClick: () -> Unit) {
 }
 
 @Composable
-private fun CsvExportRow(isPremium: Boolean, onClick: () -> Unit, onLockedClick: () -> Unit) {
+private fun CsvExportRow(onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { if (isPremium) onClick() else onLockedClick() }
+            .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -803,19 +715,9 @@ private fun CsvExportRow(isPremium: Boolean, onClick: () -> Unit, onLockedClick:
         Column(modifier = Modifier.weight(1f)) {
             Text(stringResource(R.string.settings_csv_export_title), style = MaterialTheme.typography.bodyLarge)
             Text(
-                stringResource(
-                    if (isPremium) R.string.settings_csv_export_subtitle else R.string.settings_csv_export_locked_hint
-                ),
+                stringResource(R.string.settings_csv_export_subtitle),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-        if (!isPremium) {
-            Icon(
-                Icons.Filled.Lock,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(20.dp)
             )
         }
     }

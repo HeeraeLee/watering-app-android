@@ -128,9 +128,9 @@ class WaterServiceTest {
         val record = DayRecord(dateKey = "2026-07-02")
         val current = StreakInfo(currentStreak = 3)
         val updated = current.copy(currentStreak = 4)
-        coEvery { repository.updateStreak(record, current, true) } returns updated
+        coEvery { repository.updateStreak(record, current) } returns updated
 
-        val result = service.updateStreak(record, current, isPremium = true)
+        val result = service.updateStreak(record, current)
 
         assertEquals(updated, result)
     }

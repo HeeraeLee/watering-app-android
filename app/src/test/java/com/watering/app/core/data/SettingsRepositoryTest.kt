@@ -44,15 +44,6 @@ class SettingsRepositoryTest {
     }
 
     @Test
-    fun updatePremium_dataStore에위임한다() = runTest {
-        coEvery { dataStore.updatePremium(true) } returns Unit
-
-        repository.updatePremium(true)
-
-        coVerify { dataStore.updatePremium(true) }
-    }
-
-    @Test
     fun completeOnboarding_dataStore에위임한다() = runTest {
         coEvery { dataStore.completeOnboarding() } returns Unit
 

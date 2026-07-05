@@ -82,8 +82,7 @@ private fun Context.findActivity(): Activity? = when (this) {
 fun HomeScreen(
     viewModel: HomeViewModel,
     onNavigateToStats: () -> Unit,
-    onNavigateToSettings: () -> Unit,
-    onNavigateToPremium: () -> Unit
+    onNavigateToSettings: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarMessage by viewModel.snackbarMessage.collectAsStateWithLifecycle()

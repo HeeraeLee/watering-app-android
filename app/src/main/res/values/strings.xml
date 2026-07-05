@@ -159,7 +159,6 @@
     <string name="settings_weight_goal_subtitle">몸무게를 입력하면 하루 목표를 계산해드려요</string>
     <string name="settings_csv_export_title">기록 CSV로 내보내기</string>
     <string name="settings_csv_export_subtitle">전체 물 마시기 기록을 CSV 파일로 저장하고 공유해요</string>
-    <string name="settings_csv_export_locked_hint">프리미엄에서 잠금 해제</string>
     <string name="settings_csv_export_error">CSV 내보내기에 실패했어요. 다시 시도해주세요</string>
     <string name="settings_weight_goal_dialog_title">몸무게로 목표 계산하기</string>
     <string name="settings_weight_goal_input_label">몸무게 (kg)</string>
@@ -184,8 +183,6 @@
     <string name="settings_notification_switch_subtitle">정해진 간격마다 물 마시기를 알려드려요</string>
     <string name="settings_notification_start">알림 시작</string>
     <string name="settings_notification_end">알림 종료</string>
-    <string name="settings_premium_active">프리미엄 이용 중</string>
-    <string name="settings_premium_upgrade">프리미엄으로 업그레이드</string>
     <string name="settings_notification_permission_title">알림 권한이 필요해요</string>
     <string name="settings_notification_permission_body">설정 &gt; 앱 &gt; 알림에서 허용해주세요</string>
     <string name="settings_notification_permission_open">설정 열기</string>
@@ -242,6 +239,5 @@
     <string name="widget_theme_butter_yellow">버터옐로우</string>
     <string name="widget_theme_gray_mono">그레이모노</string>
     <string name="settings_section_widget_theme">위젯 테마</string>
-    <string name="settings_widget_theme_locked_hint">프리미엄에서 잠금 해제</string>
     <string name="feature_widget_theme_description">잠금화면 위젯을 원하는 색상 테마로 꾸며보세요</string>
 </resources>

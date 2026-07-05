@@ -14,7 +14,6 @@ import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -50,7 +49,7 @@ class WaterRepositoryTest {
         val notAchieved = DayRecord(dateKey = todayKey, entries = emptyList(), goal = 1)
         val current = StreakInfo(currentStreak = 5)
 
-        val result = repository.updateStreak(notAchieved, current, isPremium = false)
+        val result = repository.updateStreak(notAchieved, current)
 
         assertSame(current, result)
         coVerify(exactly = 0) { dataStore.saveStreakInfo(any()) }
@@ -65,7 +64,7 @@ class WaterRepositoryTest {
         val recordFromYesterday = achievedRecord(dateKey = yesterdayKey)
         val current = StreakInfo(currentStreak = 5, longestStreak = 5, lastAchievedDateKey = twoDaysAgoKey)
 
-        val result = repository.updateStreak(recordFromYesterday, current, isPremium = false)
+        val result = repository.updateStreak(recordFromYesterday, current)
 
         assertEquals(6, result.currentStreak)
         assertEquals(yesterdayKey, result.lastAchievedDateKey)
@@ -76,7 +75,7 @@ class WaterRepositoryTest {
     fun updateStreak_연속기록없다가오늘첫달성_streak1로시작() = runTest {
         val current = StreakInfo(currentStreak = 0, longestStreak = 0)
 
-        val result = repository.updateStreak(achievedRecord(), current, isPremium = false)
+        val result = repository.updateStreak(achievedRecord(), current)
 
         assertEquals(1, result.currentStreak)
         assertEquals(1, result.longestStreak)
@@ -92,7 +91,7 @@ class WaterRepositoryTest {
             lastAchievedDateKey = yesterdayKey
         )
 
-        val result = repository.updateStreak(achievedRecord(), current, isPremium = false)
+        val result = repository.updateStreak(achievedRecord(), current)
 
         assertEquals(4, result.currentStreak)
         assertEquals(5, result.longestStreak) // 기존 최장기록 유지
@@ -106,7 +105,7 @@ class WaterRepositoryTest {
             lastAchievedDateKey = yesterdayKey
         )
 
-        val result = repository.updateStreak(achievedRecord(), current, isPremium = false)
+        val result = repository.updateStreak(achievedRecord(), current)
 
         assertEquals(6, result.currentStreak)
         assertEquals(6, result.longestStreak)
@@ -120,27 +119,13 @@ class WaterRepositoryTest {
             lastAchievedDateKey = todayKey
         )
 
-        val result = repository.updateStreak(achievedRecord(), current, isPremium = false)
+        val result = repository.updateStreak(achievedRecord(), current)
 
         assertEquals(4, result.currentStreak)
     }
 
     @Test
-    fun updateStreak_이틀전달성_비프리미엄이면_streak가1로리셋() = runTest {
-        val current = StreakInfo(
-            currentStreak = 10,
-            longestStreak = 10,
-            lastAchievedDateKey = twoDaysAgoKey
-        )
-
-        val result = repository.updateStreak(achievedRecord(), current, isPremium = false)
-
-        assertEquals(1, result.currentStreak)
-        assertFalse(result.protectionUsedThisMonth)
-    }
-
-    @Test
-    fun updateStreak_이틀전달성_프리미엄이고보호미사용이면_streak가보호되어1증가() = runTest {
+    fun updateStreak_이틀전달성_보호미사용이면_streak가보호되어1증가() = runTest {
         val current = StreakInfo(
             currentStreak = 10,
             longestStreak = 10,
@@ -148,7 +133,7 @@ class WaterRepositoryTest {
             protectionUsedThisMonth = false
         )
 
-        val result = repository.updateStreak(achievedRecord(), current, isPremium = true)
+        val result = repository.updateStreak(achievedRecord(), current)
 
         assertEquals(11, result.currentStreak)
         assertTrue(result.protectionUsedThisMonth)
@@ -156,7 +141,7 @@ class WaterRepositoryTest {
     }
 
     @Test
-    fun updateStreak_이틀전달성_프리미엄이지만이번달보호이미사용했으면_streak가1로리셋() = runTest {
+    fun updateStreak_이틀전달성_이번달보호이미사용했으면_streak가1로리셋() = runTest {
         val current = StreakInfo(
             currentStreak = 10,
             longestStreak = 10,
@@ -165,13 +150,13 @@ class WaterRepositoryTest {
             protectionUsedMonthKey = currentMonthKey
         )
 
-        val result = repository.updateStreak(achievedRecord(), current, isPremium = true)
+        val result = repository.updateStreak(achievedRecord(), current)
 
         assertEquals(1, result.currentStreak)
     }
 
     @Test
-    fun updateStreak_삼일이상공백은_프리미엄이어도보호대상아니라streak가1로리셋() = runTest {
+    fun updateStreak_삼일이상공백은_보호대상아니라streak가1로리셋() = runTest {
         val threeDaysAgoKey = today.minusDays(3).format(formatter)
         val current = StreakInfo(
             currentStreak = 10,
@@ -179,7 +164,7 @@ class WaterRepositoryTest {
             lastAchievedDateKey = threeDaysAgoKey
         )
 
-        val result = repository.updateStreak(achievedRecord(), current, isPremium = true)
+        val result = repository.updateStreak(achievedRecord(), current)
 
         assertEquals(1, result.currentStreak)
     }

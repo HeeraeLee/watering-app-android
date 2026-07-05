@@ -29,8 +29,8 @@ class WaterRepository @Inject constructor(
     suspend fun removeLastEntry(goal: Int): DayRecord =
         dataStore.removeLastEntry(goal)
 
-    // 프리미엄 유저는 한 달에 하루, 정확히 하루를 놓쳤을 때만 연속 기록이 끊기지 않는다 (2일 이상 공백은 보호 대상 아님)
-    suspend fun updateStreak(record: DayRecord, current: StreakInfo, isPremium: Boolean): StreakInfo {
+    // 한 달에 하루, 정확히 하루를 놓쳤을 때만 연속 기록이 끊기지 않는다 (2일 이상 공백은 보호 대상 아님)
+    suspend fun updateStreak(record: DayRecord, current: StreakInfo): StreakInfo {
         if (!record.isAchieved) return current
 
         // 시스템 시각(LocalDate.now())이 아닌 레코드 자체의 날짜를 기준으로 계산 — 자정 경계에서
@@ -41,8 +41,8 @@ class WaterRepository @Inject constructor(
         val yesterdayKey = today.minusDays(1).format(formatter)
         val twoDaysAgoKey = today.minusDays(2).format(formatter)
         val currentMonthKey = today.format(monthFormatter)
-        val protectionAvailable = isPremium &&
-            (current.protectionUsedMonthKey != currentMonthKey || !current.protectionUsedThisMonth)
+        val protectionAvailable =
+            current.protectionUsedMonthKey != currentMonthKey || !current.protectionUsedThisMonth
 
         var protectionUsedThisMonth = current.protectionUsedThisMonth
         var protectionUsedMonthKey = current.protectionUsedMonthKey

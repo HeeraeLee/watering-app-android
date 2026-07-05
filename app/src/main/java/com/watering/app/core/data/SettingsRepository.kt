@@ -13,7 +13,6 @@ class SettingsRepository @Inject constructor(
     val userSettings: Flow<UserSettings> = dataStore.userSettings
 
     suspend fun updateSettings(settings: UserSettings) = dataStore.updateSettings(settings)
-    suspend fun updatePremium(isPremium: Boolean) = dataStore.updatePremium(isPremium)
     suspend fun completeOnboarding() = dataStore.completeOnboarding()
     suspend fun markReviewRequested() = dataStore.markReviewRequested()
 }

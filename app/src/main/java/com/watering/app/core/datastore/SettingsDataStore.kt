@@ -52,15 +52,6 @@ class SettingsDataStore @Inject constructor(
         }
     }
 
-    suspend fun updatePremium(isPremium: Boolean) {
-        editSafely { prefs ->
-            val current = prefs[Keys.USER_SETTINGS]
-                ?.let { runCatching { json.decodeFromString<UserSettings>(it) }.getOrNull() }
-                ?: UserSettings()
-            prefs[Keys.USER_SETTINGS] = json.encodeToString(current.copy(isPremium = isPremium))
-        }
-    }
-
     suspend fun completeOnboarding() {
         editSafely { prefs ->
             val current = prefs[Keys.USER_SETTINGS]

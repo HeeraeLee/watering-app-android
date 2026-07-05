@@ -159,7 +159,6 @@
     <string name="settings_weight_goal_subtitle">Enter your weight and we\'ll calculate your daily goal</string>
     <string name="settings_csv_export_title">Export Records to CSV</string>
     <string name="settings_csv_export_subtitle">Save and share your full drinking history as a CSV file</string>
-    <string name="settings_csv_export_locked_hint">Unlock with Premium</string>
     <string name="settings_csv_export_error">Couldn\'t export CSV. Please try again</string>
     <string name="settings_weight_goal_dialog_title">Calculate Goal from Weight</string>
     <string name="settings_weight_goal_input_label">Weight (kg)</string>
@@ -184,8 +183,6 @@
     <string name="settings_notification_switch_subtitle">We\'ll remind you to drink water at set intervals</string>
     <string name="settings_notification_start">Start Time</string>
     <string name="settings_notification_end">End Time</string>
-    <string name="settings_premium_active">Premium Active</string>
-    <string name="settings_premium_upgrade">Upgrade to Premium</string>
     <string name="settings_notification_permission_title">Notification permission needed</string>
     <string name="settings_notification_permission_body">Please allow it in Settings &gt; Apps &gt; Notifications</string>
     <string name="settings_notification_permission_open">Open Settings</string>
@@ -240,6 +237,5 @@
     <string name="widget_theme_butter_yellow">Butter Yellow</string>
     <string name="widget_theme_gray_mono">Gray Mono</string>
     <string name="settings_section_widget_theme">Widget Theme</string>
-    <string name="settings_widget_theme_locked_hint">Unlock with Premium</string>
     <string name="feature_widget_theme_description">Customize your lock screen widget with your favorite color theme</string>
 </resources>

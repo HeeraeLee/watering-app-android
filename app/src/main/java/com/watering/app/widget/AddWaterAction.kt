@@ -35,11 +35,11 @@ class AddWaterAction : ActionCallback {
                 drinkType = DrinkType.WATER,
                 goal = settings.dailyGoal
             )
-            val streak = waterService.updateStreak(updated, waterRepository.streakInfo.first(), settings.isPremium)
+            val streak = waterService.updateStreak(updated, waterRepository.streakInfo.first())
             analyticsService.logRecordAdd(settings.cupSize, DrinkType.WATER.name, source = "widget")
             // 위젯에서 달성한 업적은 이 자리에서 모달을 못 띄우므로, 앱 재진입 시 HomeViewModel이
             // 보여줄 수 있도록 대기 상태로 저장해둔다 (AchievementDataStore.consumePendingDisplay 참고)
-            achievementChecker.check(prev, updated, streak, settings.isPremium)?.let {
+            achievementChecker.check(prev, updated, streak)?.let {
                 achievementDataStore.setPendingDisplay(it)
             }
             Log.d("WateringWidget", "after: ${updated.totalCount}/${updated.goal}")

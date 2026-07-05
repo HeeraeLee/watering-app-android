@@ -17,7 +17,6 @@ import com.android.billingclient.api.QueryPurchasesParams
 import com.android.billingclient.api.queryProductDetails
 import com.android.billingclient.api.queryPurchasesAsync
 import com.watering.app.R
-import com.watering.app.core.data.SettingsRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -35,7 +34,6 @@ import javax.inject.Singleton
 @Singleton
 class BillingService @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val settingsRepository: SettingsRepository,
     private val analyticsService: AnalyticsService
 ) : PurchasesUpdatedListener {
 
@@ -146,7 +144,6 @@ class BillingService @Inject constructor(
         val active = allPurchases.any { it.purchaseState == Purchase.PurchaseState.PURCHASED }
 
         _isPremium.value = active
-        settingsRepository.updatePremium(active)
         analyticsService.setPremiumUserProperty(active)
 
         allPurchases.forEach { acknowledgeIfNeeded(it) }

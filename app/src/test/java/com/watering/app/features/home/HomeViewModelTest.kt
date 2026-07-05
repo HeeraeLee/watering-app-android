@@ -44,7 +44,7 @@ class HomeViewModelTest {
 
     private val record = DayRecord(dateKey = "2026-07-02", goal = 8)
     private val streak = StreakInfo(currentStreak = 2)
-    private val settings = UserSettings(dailyGoal = 8, cupSize = 200, isPremium = false)
+    private val settings = UserSettings(dailyGoal = 8, cupSize = 200)
 
     private fun createViewModel(pendingFromWidget: Achievement? = null): HomeViewModel {
         context = mockk {
@@ -88,7 +88,7 @@ class HomeViewModelTest {
         val viewModel = createViewModel()
         val updated = record.copy(entries = record.entries)
         coEvery { waterService.addWater(200, DrinkType.WATER, 8) } returns updated
-        coEvery { waterService.updateStreak(updated, streak, false) } returns streak
+        coEvery { waterService.updateStreak(updated, streak) } returns streak
         coEvery { achievementChecker.check(any(), updated, streak) } returns null
 
         viewModel.uiState.test {
@@ -107,7 +107,7 @@ class HomeViewModelTest {
         val viewModel = createViewModel()
         val updated = record.copy()
         coEvery { waterService.addWater(200, DrinkType.WATER, 8) } returns updated
-        coEvery { waterService.updateStreak(updated, streak, false) } returns streak
+        coEvery { waterService.updateStreak(updated, streak) } returns streak
         coEvery { achievementChecker.check(any(), updated, streak) } returns Achievement.GOAL_ACHIEVED
 
         viewModel.uiState.test {
@@ -139,7 +139,7 @@ class HomeViewModelTest {
         val viewModel = createViewModel()
         val updated = record.copy()
         coEvery { waterService.addWater(350, DrinkType.COFFEE, 8) } returns updated
-        coEvery { waterService.updateStreak(updated, streak, false) } returns streak
+        coEvery { waterService.updateStreak(updated, streak) } returns streak
         coEvery { achievementChecker.check(any(), updated, streak) } returns null
 
         viewModel.uiState.test {
@@ -215,7 +215,7 @@ class HomeViewModelTest {
     private suspend fun setPendingAchievement(viewModel: HomeViewModel, achievement: Achievement) {
         val updated = record.copy()
         coEvery { waterService.addWater(200, DrinkType.WATER, 8) } returns updated
-        coEvery { waterService.updateStreak(updated, streak, false) } returns streak
+        coEvery { waterService.updateStreak(updated, streak) } returns streak
         coEvery { achievementChecker.check(any(), updated, streak) } returns achievement
 
         viewModel.uiState.test {

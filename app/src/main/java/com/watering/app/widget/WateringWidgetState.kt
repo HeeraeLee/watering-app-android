@@ -65,13 +65,11 @@ suspend fun loadWidgetState(context: Context): WidgetState {
         val record = entryPoint.waterRepository().todayRecord.first()
         val settings = entryPoint.settingsRepository().userSettings.first()
         val goal = settings.dailyGoal.coerceAtLeast(1)
-        // 구독이 만료돼도 선택했던 테마는 저장된 채로 두고 위젯만 기본 테마로 되돌린다 (재구독 시 즉시 복원)
-        val theme = if (settings.isPremium) settings.widgetTheme else WidgetTheme.DEFAULT
         WidgetState(
             totalCount = record.totalCount,
             goal = goal,
             achievementRate = record.totalCount.toDouble() / goal,
-            theme = theme
+            theme = settings.widgetTheme
         ).also { WidgetStateCache.lastKnownGood = it }
     } catch (e: Exception) {
         WidgetStateCache.lastKnownGood ?: WidgetState()
