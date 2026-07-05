@@ -324,6 +324,8 @@ private fun AchievementRing(current: Int, goal: Int, rate: Double, isAchieved: B
     }
 }
 
+private val CardBackgroundColor = Color(0xFFEAF7FB)
+
 @Composable
 private fun StreakCard(
     icon: ImageVector,
@@ -334,7 +336,7 @@ private fun StreakCard(
 ) {
     Surface(
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant,
+        color = CardBackgroundColor,
         modifier = modifier
     ) {
         Column(
@@ -360,7 +362,7 @@ private fun WaterEntryRow(entry: WaterEntry) {
 
     Surface(
         shape = RoundedCornerShape(12.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant,
+        color = CardBackgroundColor,
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
