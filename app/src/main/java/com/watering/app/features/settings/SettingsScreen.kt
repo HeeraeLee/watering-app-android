@@ -45,6 +45,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -72,6 +73,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -380,33 +382,37 @@ fun SettingsScreen(
             item { SectionHeader(stringResource(R.string.settings_app_info)) }
 
             item {
-                TextButton(
-                    onClick = {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(privacyPolicyUrl))
-                        context.startActivity(intent)
-                    },
+                val feedbackSubject = stringResource(R.string.settings_feedback_email_subject)
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         stringResource(R.string.settings_privacy_policy),
-                        style = MaterialTheme.typography.bodyLarge
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.clickable {
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(privacyPolicyUrl))
+                            context.startActivity(intent)
+                        }
                     )
-                }
-            }
-
-            item {
-                val feedbackSubject = stringResource(R.string.settings_feedback_email_subject)
-                TextButton(
-                    onClick = { context.sendSupportEmail(subject = feedbackSubject) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                ) {
+                    Text(
+                        " · ",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                     Text(
                         stringResource(R.string.settings_send_feedback),
-                        style = MaterialTheme.typography.bodyLarge
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.clickable {
+                            context.sendSupportEmail(subject = feedbackSubject)
+                        }
                     )
                 }
             }
@@ -494,6 +500,8 @@ private fun NotificationPermissionBanner(onOpenSettings: () -> Unit) {
     }
 }
 
+private val InfoBannerBackgroundColor = Color(0xFFFBF3DA)
+
 @Composable
 private fun HealthConnectVisibilityHint(onOpenSettings: () -> Unit) {
     val infoColor = MaterialTheme.colorScheme.primary
@@ -501,7 +509,7 @@ private fun HealthConnectVisibilityHint(onOpenSettings: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
-            .background(infoColor.copy(alpha = 0.1f), RoundedCornerShape(12.dp))
+            .background(InfoBannerBackgroundColor, RoundedCornerShape(12.dp))
             .clickable(onClick = onOpenSettings)
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -540,7 +548,7 @@ private fun BackupSection(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(infoColor.copy(alpha = 0.1f), RoundedCornerShape(12.dp))
+                .background(InfoBannerBackgroundColor, RoundedCornerShape(12.dp))
                 .let { if (currentUser == null) it.clickable(onClick = onSignIn) else it }
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -693,12 +701,19 @@ private fun CupSizeSetting(cupSize: Int, onCupSizeChange: (Int) -> Unit) {
                 FilterChip(
                     selected = cupSize == size,
                     onClick = { onCupSizeChange(size) },
-                    label = { Text("${size}ml") }
+                    label = { Text("${size}ml") },
+                    colors = selectedChipColors()
                 )
             }
         }
     }
 }
+
+@Composable
+private fun selectedChipColors() = FilterChipDefaults.filterChipColors(
+    selectedContainerColor = Color(0xFFB8A8E8),
+    selectedLabelColor = Color.White
+)
 
 @Composable
 private fun WeightGoalRow(subtitle: String, onClick: () -> Unit) {
@@ -885,7 +900,8 @@ private fun IntervalSetting(interval: Int, onIntervalChange: (Int) -> Unit) {
                 FilterChip(
                     selected = interval == minutes,
                     onClick = { onIntervalChange(minutes) },
-                    label = { Text(label) }
+                    label = { Text(label) },
+                    colors = selectedChipColors()
                 )
             }
         }
