@@ -9,8 +9,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
 // 홈/통계/설정 화면 공통 배경 그라데이션 (스카이 블루 → 라벤더 퍼플, 웹 목업 비교 후 확정)
+// 라벤더가 옅다는 피드백으로 끝점을 살짝 진하게 조정(옵션 1) 테스트 중
 val AppBackgroundGradient = Brush.linearGradient(
-    colors = listOf(Color(0xFFD3ECF3), Color(0xFFE1D7F0))
+    colors = listOf(Color(0xFFD3ECF3), Color(0xFFDDD0EF))
 )
 
 // 홈 화면의 연속 기록/기록 카드 등에 쓰던 연한 크림 배경 (웹 목업 비교 후 확정), 통계 화면 카드에도 공용
