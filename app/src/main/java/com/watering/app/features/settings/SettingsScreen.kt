@@ -263,7 +263,8 @@ fun SettingsScreen(
     }
 }
 
-private val MenuRowIconBackgroundColor = Color(0xFFEDE7FA)
+private val SettingsAccentColor = Color(0xFF5A5A66)
+private val MenuRowIconBackgroundColor = Color(0xFFECECEF)
 
 @Composable
 private fun SettingsMenuRow(
@@ -285,7 +286,7 @@ private fun SettingsMenuRow(
                 .background(MenuRowIconBackgroundColor, RoundedCornerShape(10.dp)),
             contentAlignment = Alignment.Center
         ) {
-            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+            Icon(icon, contentDescription = null, tint = SettingsAccentColor, modifier = Modifier.size(20.dp))
         }
         Spacer(Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
@@ -311,7 +312,7 @@ private fun SectionHeader(title: String) {
     Text(
         text = title,
         style = MaterialTheme.typography.labelMedium,
-        color = MaterialTheme.colorScheme.primary,
+        color = SettingsAccentColor,
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
     )
 }
