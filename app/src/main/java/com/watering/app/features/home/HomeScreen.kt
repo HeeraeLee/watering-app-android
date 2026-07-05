@@ -264,9 +264,11 @@ fun HomeScreen(
     }
 }
 
+private val AchievedColor = Color(0xFFBFA8DE)
+
 @Composable
 private fun AchievementRing(current: Int, goal: Int, rate: Double, isAchieved: Boolean) {
-    val ringColor = if (isAchieved) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary
+    val ringColor = if (isAchieved) AchievedColor else MaterialTheme.colorScheme.primary
     val animatedRate by animateFloatAsState(
         targetValue = rate.coerceIn(0.0, 1.0).toFloat(),
         animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
@@ -310,7 +312,7 @@ private fun AchievementRing(current: Int, goal: Int, rate: Double, isAchieved: B
                 Text(
                     text = stringResource(R.string.label_goal_achieved_banner),
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.secondary,
+                    color = AchievedColor,
                     fontWeight = FontWeight.SemiBold
                 )
             } else {
