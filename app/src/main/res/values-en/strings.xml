@@ -218,7 +218,7 @@
     <!-- Settings screen -->
     <string name="settings_title">Settings</string>
     <string name="settings_restore_confirm_title">Restore backup?</string>
-    <string name="settings_restore_confirm_body">Your current records on this device will be overwritten with the cloud backup.\nThis action cannot be undone.</string>
+    <string name="settings_restore_confirm_body">Your current records on this device\nwill be overwritten with the cloud backup.\nThis action cannot be undone.</string>
     <string name="settings_restore_confirm_button">Restore</string>
     <string name="settings_dialog_cancel">Cancel</string>
     <string name="settings_reset_confirm_title">Reset All Records</string>
@@ -260,8 +260,8 @@
     <string name="settings_backup_signed_in_default">Signed in</string>
     <string name="settings_backup_last_backup">Last backup: %1$s</string>
     <string name="settings_backup_none">No backup yet</string>
-    <string name="settings_backup_signed_out_body">Sign in with Google to back up your records to the cloud</string>
-    <string name="settings_backup_signed_out_hint">Backup isn\'t real-time sync. If you use multiple devices, back up from your most recently used one</string>
+    <string name="settings_backup_signed_out_body">Sign in with Google\nto back up your records to the cloud</string>
+    <string name="settings_backup_signed_out_hint">Backup isn\'t real-time sync\nIf you use multiple devices, back up from your most recently used one</string>
     <string name="settings_backup_sign_out">Sign Out</string>
     <string name="settings_backup_now">Back Up Now</string>
     <string name="settings_backup_restore">Restore</string>

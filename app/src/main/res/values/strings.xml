@@ -221,7 +221,7 @@
     <!-- 설정 화면 -->
     <string name="settings_title">설정</string>
     <string name="settings_restore_confirm_title">복원하시겠어요?</string>
-    <string name="settings_restore_confirm_body">기기에 저장된 현재 기록이 클라우드 백업 내용으로 덮어써집니다.\n이 작업은 되돌릴 수 없습니다.</string>
+    <string name="settings_restore_confirm_body">기기에 저장된 현재 기록이\n클라우드 백업 내용으로 덮어써집니다.\n이 작업은 되돌릴 수 없습니다.</string>
     <string name="settings_restore_confirm_button">복원</string>
     <string name="settings_dialog_cancel">취소</string>
     <string name="settings_reset_confirm_title">모든 기록 초기화</string>
@@ -263,8 +263,8 @@
     <string name="settings_backup_signed_in_default">로그인됨</string>
     <string name="settings_backup_last_backup">마지막 백업: %1$s</string>
     <string name="settings_backup_none">백업 기록 없음</string>
-    <string name="settings_backup_signed_out_body">구글 계정으로 로그인하면 기록을 클라우드에 백업할 수 있어요</string>
-    <string name="settings_backup_signed_out_hint">백업은 실시간 동기화가 아니에요. 여러 기기를 쓰신다면 최신 기기에서 백업해주세요</string>
+    <string name="settings_backup_signed_out_body">구글 계정으로 로그인하면\n기록을 클라우드에 백업할 수 있어요</string>
+    <string name="settings_backup_signed_out_hint">백업은 실시간 동기화가 아니에요\n여러 기기를 쓰신다면 최신 기기에서 백업해주세요</string>
     <string name="settings_backup_sign_out">로그아웃</string>
     <string name="settings_backup_now">지금 백업하기</string>
     <string name="settings_backup_restore">복원하기</string>
