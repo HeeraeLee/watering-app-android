@@ -2,6 +2,7 @@ package com.watering.app.features.stats
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.shadow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.EmojiEvents
@@ -147,6 +149,7 @@ private fun SmartStatsCta(onNavigateToSmartStats: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .shadow(1.5.dp, RoundedCornerShape(20.dp))
             .clickable(onClick = onNavigateToSmartStats)
             .background(AppCardBackgroundColor, RoundedCornerShape(20.dp))
             .padding(20.dp),
@@ -156,7 +159,8 @@ private fun SmartStatsCta(onNavigateToSmartStats: () -> Unit) {
             Text(
                 stringResource(R.string.smart_stats_title),
                 style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface
             )
             Text(
                 stringResource(R.string.stats_smart_cta_description),
@@ -172,6 +176,7 @@ fun SectionCard(title: String, content: @Composable () -> Unit) {
     Surface(
         shape = RoundedCornerShape(20.dp),
         color = AppCardBackgroundColor,
+        shadowElevation = 1.5.dp,
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
@@ -216,14 +221,17 @@ private fun WeekBarChart(stats: List<DayStat>) {
     )
 }
 
-private val SummaryChipColor = Color(0xFFEDF0F2)
-private val StreakStatCardColor = Color(0xFFEDE7FA)
+private val SummaryChipColor: Color
+    @Composable get() = if (isSystemInDarkTheme()) Color(0xFF1A4642) else Color(0xFFEDF0F2)
+private val StreakStatCardColor: Color
+    @Composable get() = if (isSystemInDarkTheme()) Color(0xFF1C4D49) else Color(0xFFEDE7FA)
 
 @Composable
 private fun SummaryChip(label: String, value: String, modifier: Modifier = Modifier) {
     Surface(
         shape = RoundedCornerShape(14.dp),
         color = SummaryChipColor,
+        shadowElevation = 1.5.dp,
         modifier = modifier
     ) {
         Column(
@@ -253,6 +261,7 @@ private fun StreakStatCard(icon: ImageVector, tint: Color, label: String, value:
     Surface(
         shape = RoundedCornerShape(14.dp),
         color = StreakStatCardColor,
+        shadowElevation = 1.5.dp,
         modifier = modifier
     ) {
         Column(
@@ -261,7 +270,12 @@ private fun StreakStatCard(icon: ImageVector, tint: Color, label: String, value:
         ) {
             Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(28.dp))
             Spacer(Modifier.height(4.dp))
-            Text(value, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+            Text(
+                value,
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
             Text(label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }

@@ -203,10 +203,10 @@ fun SettingsScreen(
 
                 item {
                     SettingsMenuRow(
-                        icon = Icons.Filled.Palette,
-                        title = stringResource(R.string.settings_section_widget_theme),
-                        subtitle = stringResource(R.string.settings_menu_widget_theme_subtitle),
-                        onClick = onNavigateToWidgetTheme
+                        icon = Icons.Filled.Notifications,
+                        title = stringResource(R.string.settings_section_notification),
+                        subtitle = stringResource(R.string.settings_menu_notification_subtitle),
+                        onClick = onNavigateToNotifications
                     )
                 }
                 item {
@@ -219,10 +219,10 @@ fun SettingsScreen(
                 }
                 item {
                     SettingsMenuRow(
-                        icon = Icons.Filled.Notifications,
-                        title = stringResource(R.string.settings_section_notification),
-                        subtitle = stringResource(R.string.settings_menu_notification_subtitle),
-                        onClick = onNavigateToNotifications
+                        icon = Icons.Filled.Palette,
+                        title = stringResource(R.string.settings_section_widget_theme),
+                        subtitle = stringResource(R.string.settings_menu_widget_theme_subtitle),
+                        onClick = onNavigateToWidgetTheme
                     )
                 }
                 item {
@@ -290,7 +290,7 @@ private fun SettingsMenuRow(
         }
         Spacer(Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
-            Text(title, style = MaterialTheme.typography.bodyLarge)
+            Text(title, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
             if (subtitle != null) {
                 Text(
                     subtitle,
@@ -331,7 +331,7 @@ private fun DailyGoalSetting(goal: Int, onGoalChange: (Int) -> Unit) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(stringResource(R.string.label_daily_goal), style = MaterialTheme.typography.titleMedium)
+        Text(stringResource(R.string.label_daily_goal), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(
                 onClick = { onGoalChange(goal - 1) },
@@ -365,7 +365,7 @@ private fun CupSizeSetting(cupSize: Int, onCupSizeChange: (Int) -> Unit) {
     val cupSizes = listOf(150, 200, 250, 300, 350, 500)
 
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-        Text(stringResource(R.string.label_cup_size), style = MaterialTheme.typography.bodyLarge)
+        Text(stringResource(R.string.label_cup_size), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
         Spacer(Modifier.height(8.dp))
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             cupSizes.forEach { size ->
@@ -398,7 +398,7 @@ private fun WeightGoalRow(subtitle: String, onClick: () -> Unit) {
         Icon(Icons.Filled.MonitorWeight, contentDescription = null)
         Spacer(Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
-            Text(stringResource(R.string.settings_weight_goal_title), style = MaterialTheme.typography.bodyLarge)
+            Text(stringResource(R.string.settings_weight_goal_title), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
             Text(
                 subtitle,
                 style = MaterialTheme.typography.bodySmall,
@@ -420,7 +420,7 @@ private fun CsvExportRow(onClick: () -> Unit) {
         Icon(Icons.Filled.FileDownload, contentDescription = null)
         Spacer(Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
-            Text(stringResource(R.string.settings_csv_export_title), style = MaterialTheme.typography.bodyLarge)
+            Text(stringResource(R.string.settings_csv_export_title), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
             Text(
                 stringResource(R.string.settings_csv_export_subtitle),
                 style = MaterialTheme.typography.bodySmall,
@@ -490,7 +490,7 @@ internal fun SettingSwitchRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f)) {
-            Text(title, style = MaterialTheme.typography.bodyLarge)
+            Text(title, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
             Text(
                 subtitle,
                 style = MaterialTheme.typography.bodySmall,

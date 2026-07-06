@@ -10,15 +10,27 @@ import androidx.compose.ui.graphics.Color
 
 // 홈/통계/설정/앱 정보 화면 공통 배경 그라데이션 (라벤더 → 크림, 앱 정보 화면 꾸미기 웹 목업에서
 // 마음에 든다는 피드백으로 2026-07-06 전체 배경으로 확정)
-val AppBackgroundGradient = Brush.linearGradient(
-    colors = listOf(Color(0xFFF3EDFC), Color(0xFFFBF7F2))
-)
+// 2026-07-06: 다크모드에서 텍스트가 흐려 보이는 문제 수정 — 이 카드/배경 색들이 하드코딩 라이트
+// 값이라 다크모드에서도 안 바뀌는데, 텍스트는 MaterialTheme.colorScheme 기반이라 다크모드용 밝은
+// 색으로 바뀌어 "밝은 글씨 on 밝은 배경"이 되던 문제. isSystemInDarkTheme()로 분기하는 커스텀
+// getter로 바꿔 호출부 변경 없이 다크모드 전용 값을 제공
+// 2026-07-06: 다크모드 배경/카드 색이 파스텔을 단순히 어둡게만 낮춰서 칙칙해 보인다는 피드백으로,
+// 채도를 살린 딥 퍼플 톤으로 재조정했다가(웹 목업 "① 채도를 살린 딥 퍼플"), 그마저도 칙칙하다는
+// 추가 피드백으로 딥 틸 톤으로 최종 변경(웹 목업 다크 박스 색 10안 중 "① 딥 틸" 채택)
+val AppBackgroundGradient: Brush
+    @Composable get() = if (isSystemInDarkTheme()) {
+        Brush.linearGradient(colors = listOf(Color(0xFF1A3D3A), Color(0xFF101E1C)))
+    } else {
+        Brush.linearGradient(colors = listOf(Color(0xFFF3EDFC), Color(0xFFFBF7F2)))
+    }
 
 // 홈 화면의 연속 기록/기록 카드 등에 쓰던 연한 크림 배경 (웹 목업 비교 후 확정), 통계 화면 카드에도 공용
-val AppCardBackgroundColor = Color(0xFFFDFAF4)
+val AppCardBackgroundColor: Color
+    @Composable get() = if (isSystemInDarkTheme()) Color(0xFF1C4D49) else Color(0xFFFDFAF4)
 
 // 설정 화면의 안내 배너(건강 연동/백업) 공용 배경 (웹 목업 비교 후 소프트 옐로우로 확정)
-val AppInfoBannerBackgroundColor = Color(0xFFFBF3DA)
+val AppInfoBannerBackgroundColor: Color
+    @Composable get() = if (isSystemInDarkTheme()) Color(0xFF4A3A16) else Color(0xFFFBF3DA)
 
 // 파스텔 옵션 N 확정 적용 (#7CDAED 근처 변형 중 선택)
 private val WateringAqua = Color(0xFF5DCEE6)

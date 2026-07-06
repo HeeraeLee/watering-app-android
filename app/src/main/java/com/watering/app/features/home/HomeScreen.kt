@@ -31,8 +31,10 @@ import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.WaterDrop
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -110,7 +112,8 @@ fun HomeScreen(
                         Text(
                             stringResource(R.string.home_title),
                             style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     },
                     actions = {
@@ -156,15 +159,14 @@ fun HomeScreen(
                     Icon(Icons.Filled.WaterDrop, contentDescription = null, modifier = Modifier.size(20.dp))
                 }
                 Spacer(Modifier.height(8.dp))
-                Button(
+                OutlinedButton(
                     onClick = { showRecordSheet = true },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.White,
+                    border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary),
+                    colors = ButtonDefaults.outlinedButtonColors(
                         contentColor = MaterialTheme.colorScheme.primary
-                    ),
-                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 3.dp)
+                    )
                 ) {
                     Text(stringResource(R.string.home_select_other_drink))
                 }
@@ -200,7 +202,12 @@ fun HomeScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(stringResource(R.string.home_today_record), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                    Text(
+                        stringResource(R.string.home_today_record),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
                     if (uiState.record.entries.isNotEmpty()) {
                         Text(
                             stringResource(R.string.home_undo_last),
@@ -339,6 +346,7 @@ private fun StreakCard(
     Surface(
         shape = RoundedCornerShape(16.dp),
         color = AppCardBackgroundColor,
+        shadowElevation = 3.dp,
         modifier = modifier
     ) {
         Column(
@@ -347,7 +355,12 @@ private fun StreakCard(
         ) {
             Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(28.dp))
             Spacer(Modifier.height(4.dp))
-            Text(value, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+            Text(
+                value,
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
             Text(label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
@@ -365,6 +378,7 @@ private fun WaterEntryRow(entry: WaterEntry) {
     Surface(
         shape = RoundedCornerShape(12.dp),
         color = AppCardBackgroundColor,
+        shadowElevation = 1.5.dp,
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
@@ -385,7 +399,12 @@ private fun WaterEntryRow(entry: WaterEntry) {
                 }
                 Spacer(Modifier.width(12.dp))
                 Column {
-                    Text(drinkName, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+                    Text(
+                        drinkName,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
                     Text(
                         "${entry.amount}ml",
                         style = MaterialTheme.typography.bodySmall,
