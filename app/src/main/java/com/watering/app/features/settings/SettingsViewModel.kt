@@ -80,7 +80,19 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun updateDailyGoal(goal: Int) = update(refreshWidget = true) { it.copy(dailyGoal = goal) }
-    fun updateCupSize(size: Int) = update { it.copy(cupSize = size) }
+
+    // 몸무게 기반 목표가 적용된 상태(weightKg 존재)라면 컵 크기가 바뀌어도 목표 수분량(ml)이
+    // 유지되도록 잔 수를 다시 계산한다. 그렇지 않으면 기존 잔 수 그대로 컵 크기만 바뀐다.
+    fun updateCupSize(size: Int) {
+        val weightKg = settings.value.weightKg
+        update(refreshWidget = weightKg != null) { s ->
+            if (weightKg != null) {
+                s.copy(cupSize = size, dailyGoal = StatsInsightService.recommendedGoalCups(weightKg, size))
+            } else {
+                s.copy(cupSize = size)
+            }
+        }
+    }
     fun updateNotificationEnabled(enabled: Boolean) = update { it.copy(notificationEnabled = enabled) }
     fun updateNotificationInterval(minutes: Int) = update { it.copy(notificationInterval = minutes) }
     fun updateNotificationStart(hour: Int) = update { it.copy(notificationStart = hour) }

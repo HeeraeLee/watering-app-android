@@ -48,19 +48,48 @@ class NotificationWorker @AssistedInject constructor(
     }
 
     private fun showReminderNotification(current: Int, goal: Int) {
+        val progress = if (goal > 0) current.toDouble() / goal else 0.0
+        val (title, bodyTemplate) = pickReminderMessage(progress, LocalTime.now().hour)
+        val body = String.format(java.util.Locale.getDefault(), bodyTemplate, current, goal)
+
         val intent = Intent(applicationContext, MainActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(
             applicationContext, 0, intent, PendingIntent.FLAG_IMMUTABLE
         )
         val notification = NotificationCompat.Builder(applicationContext, NotificationService.CHANNEL_REMINDER)
             .setSmallIcon(R.drawable.ic_water_drop)
-            .setContentTitle(applicationContext.getString(R.string.notification_reminder_title))
-            .setContentText(applicationContext.getString(R.string.notification_reminder_body, current, goal))
+            .setContentTitle(title)
+            .setContentText(body)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .build()
 
         NotificationManagerCompat.from(applicationContext)
             .notify(NotificationService.NOTIFICATION_ID_REMINDER, notification)
+    }
+
+    // 진행률(low/mid/near) 그룹 + 시간대(morning/afternoon/evening) 그룹 + 숫자 없는 감성형(generic)
+    // 그룹을 합쳐서 무작위로 하나 선택. title/body는 같은 인덱스끼리 짝을 이룬다
+    private fun pickReminderMessage(progress: Double, hour: Int): Pair<String, String> {
+        val progressBucket = when {
+            progress < 0.5 -> R.array.notification_reminder_titles_low to R.array.notification_reminder_bodies_low
+            progress < 0.8 -> R.array.notification_reminder_titles_mid to R.array.notification_reminder_bodies_mid
+            else -> R.array.notification_reminder_titles_near to R.array.notification_reminder_bodies_near
+        }
+        val timeBucket = when {
+            hour < 12 -> R.array.notification_reminder_titles_morning to R.array.notification_reminder_bodies_morning
+            hour < 18 -> R.array.notification_reminder_titles_afternoon to R.array.notification_reminder_bodies_afternoon
+            else -> R.array.notification_reminder_titles_evening to R.array.notification_reminder_bodies_evening
+        }
+        val genericBucket = R.array.notification_reminder_titles_generic to R.array.notification_reminder_bodies_generic
+
+        val titles = mutableListOf<String>()
+        val bodies = mutableListOf<String>()
+        for ((titleRes, bodyRes) in listOf(progressBucket, timeBucket, genericBucket)) {
+            titles += applicationContext.resources.getStringArray(titleRes)
+            bodies += applicationContext.resources.getStringArray(bodyRes)
+        }
+        val index = titles.indices.random()
+        return titles[index] to bodies[index]
     }
 }

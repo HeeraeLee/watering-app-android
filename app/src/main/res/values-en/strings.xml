@@ -8,8 +8,74 @@
     <string name="notification_channel_achievement">Goal Achievement Notifications</string>
 
     <!-- Notification content -->
-    <string name="notification_reminder_title">💧 Time to drink some water</string>
-    <string name="notification_reminder_body">You\'ve had %1$d / %2$d glasses today. Keep going!</string>
+    <string-array name="notification_reminder_titles_low">
+        <item>💧 Time to drink some water</item>
+        <item>💧 How about a glass of water?</item>
+        <item>💧 Your body is waiting for water</item>
+        <item>💧 Haven\'t forgotten to drink water today?</item>
+        <item>💧 Time to hydrate!</item>
+    </string-array>
+    <string-array name="notification_reminder_bodies_low">
+        <item>You\'ve had %1$d / %2$d glasses today. How about a sip?</item>
+        <item>Only %1$d / %2$d glasses so far today</item>
+        <item>You\'ve had %1$d / %2$d glasses so far</item>
+        <item>You\'re at %1$d / %2$d glasses</item>
+        <item>You\'ve had %1$d / %2$d glasses today</item>
+    </string-array>
+    <string-array name="notification_reminder_titles_mid">
+        <item>💧 You\'re halfway there</item>
+        <item>💧 Great pace</item>
+        <item>💧 How about another glass?</item>
+        <item>💧 Steady progress</item>
+    </string-array>
+    <string-array name="notification_reminder_bodies_mid">
+        <item>%1$d / %2$d glasses, doing great!</item>
+        <item>You\'ve had %1$d / %2$d glasses today. Keep going!</item>
+        <item>You\'re at %1$d / %2$d glasses now</item>
+        <item>%1$d / %2$d glasses and counting</item>
+    </string-array>
+    <string-array name="notification_reminder_titles_near">
+        <item>💧 Almost there!</item>
+        <item>💧 The finish line is close</item>
+        <item>💧 Not much left for today\'s goal</item>
+    </string-array>
+    <string-array name="notification_reminder_bodies_near">
+        <item>%1$d / %2$d glasses, keep going!</item>
+        <item>%1$d / %2$d glasses, how about one more?</item>
+        <item>You\'re at %1$d / %2$d glasses</item>
+    </string-array>
+    <string-array name="notification_reminder_titles_morning">
+        <item>🌅 Good morning!</item>
+        <item>🌅 Had your first glass yet?</item>
+    </string-array>
+    <string-array name="notification_reminder_bodies_morning">
+        <item>Start your day with a glass of water</item>
+        <item>Start your day feeling refreshed</item>
+    </string-array>
+    <string-array name="notification_reminder_titles_afternoon">
+        <item>☀️ Stay hydrated this afternoon!</item>
+        <item>☀️ Feeling sluggish?</item>
+    </string-array>
+    <string-array name="notification_reminder_bodies_afternoon">
+        <item>You\'re at %1$d / %2$d glasses, don\'t forget</item>
+        <item>A glass of water can help</item>
+    </string-array>
+    <string-array name="notification_reminder_titles_evening">
+        <item>🌙 Before you wrap up the day</item>
+        <item>🌙 Let\'s catch up this evening?</item>
+    </string-array>
+    <string-array name="notification_reminder_bodies_evening">
+        <item>How about a glass of water? You\'re at %1$d / %2$d glasses</item>
+        <item>%1$d / %2$d glasses left to reach today\'s goal</item>
+    </string-array>
+    <string-array name="notification_reminder_titles_generic">
+        <item>💧 Listen to your body</item>
+        <item>💧 A moment for water</item>
+    </string-array>
+    <string-array name="notification_reminder_bodies_generic">
+        <item>Drink before you feel thirsty!</item>
+        <item>Take a glass now</item>
+    </string-array>
     <string name="notification_achievement_title">🎉 Goal Achieved!</string>
     <string name="notification_achievement_body">You\'ve reached today\'s hydration goal. Great job!</string>
 

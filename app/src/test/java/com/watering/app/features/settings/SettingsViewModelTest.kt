@@ -10,6 +10,7 @@ import com.watering.app.core.service.CsvExportService
 import com.watering.app.core.service.HealthConnectAvailability
 import com.watering.app.core.service.HealthConnectService
 import com.watering.app.core.service.NotificationService
+import com.watering.app.core.service.StatsInsightService
 import com.watering.app.core.service.WaterService
 import com.watering.app.testutil.MainDispatcherRule
 import com.watering.app.widget.WateringWidgetUpdater
@@ -115,6 +116,27 @@ class SettingsViewModelTest {
 
         coVerify(exactly = 0) { widgetUpdater.updateAll() }
     }
+
+    @Test
+    fun updateCupSize_몸무게가설정되어있으면목표잔수를재계산하고위젯을갱신한다() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val viewModel = createViewModel(UserSettings(cupSize = 200, dailyGoal = 10, weightKg = 60.0))
+            val slot = slot<UserSettings>()
+            coEvery { settingsRepository.updateSettings(capture(slot)) } returns Unit
+
+            viewModel.settings.test {
+                awaitItem()
+                viewModel.updateCupSize(400)
+                cancelAndIgnoreRemainingEvents()
+            }
+
+            assertEquals(400, slot.captured.cupSize)
+            assertEquals(
+                StatsInsightService.recommendedGoalCups(60.0, 400),
+                slot.captured.dailyGoal
+            )
+            coVerify { widgetUpdater.updateAll() }
+        }
 
     @Test
     fun updateNotificationEnabled_false로바꾸면알림을취소한다() = runTest(mainDispatcherRule.testDispatcher) {

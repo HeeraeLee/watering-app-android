@@ -8,8 +8,77 @@
     <string name="notification_channel_achievement">목표 달성 알림</string>
 
     <!-- 알림 내용 -->
-    <string name="notification_reminder_title">💧 물 마실 시간이에요</string>
-    <string name="notification_reminder_body">오늘 %1$d / %2$d 잔 마셨어요. 조금만 더!</string>
+    <!-- 리마인드 알림 문구 20종 — 진행률(low/mid/near) 3그룹 + 시간대(morning/afternoon/evening) 3그룹 +
+         숫자 없는 감성형(generic) 1그룹. NotificationWorker가 진행률·시간대에 맞는 그룹 + generic을
+         합쳐서 무작위로 하나 선택. title/body는 같은 인덱스끼리 짝을 이룸 -->
+    <string-array name="notification_reminder_titles_low">
+        <item>💧 물 마실 시간이에요</item>
+        <item>💧 잠깐, 물 한 잔 어때요?</item>
+        <item>💧 몸이 물을 기다리고 있어요</item>
+        <item>💧 오늘 물 마시는 거 잊지 않으셨죠?</item>
+        <item>💧 수분 보충할 시간!</item>
+    </string-array>
+    <string-array name="notification_reminder_bodies_low">
+        <item>오늘 %1$d / %2$d 잔 마셨어요. 한 모금 어때요?</item>
+        <item>오늘 아직 %1$d / %2$d 잔이에요</item>
+        <item>지금까지 %1$d / %2$d 잔 마셨어요</item>
+        <item>%1$d / %2$d 잔 중이에요</item>
+        <item>오늘 %1$d / %2$d 잔 마셨어요</item>
+    </string-array>
+    <string-array name="notification_reminder_titles_mid">
+        <item>💧 벌써 절반 왔어요</item>
+        <item>💧 좋은 페이스예요</item>
+        <item>💧 물 한 잔 더 어때요?</item>
+        <item>💧 순조롭게 채워지고 있어요</item>
+    </string-array>
+    <string-array name="notification_reminder_bodies_mid">
+        <item>%1$d / %2$d 잔, 잘하고 있어요!</item>
+        <item>오늘 %1$d / %2$d 잔 마셨어요. 계속 가봐요!</item>
+        <item>지금 %1$d / %2$d 잔이에요</item>
+        <item>%1$d / %2$d 잔 달성 중이에요</item>
+    </string-array>
+    <string-array name="notification_reminder_titles_near">
+        <item>💧 거의 다 왔어요!</item>
+        <item>💧 마무리가 눈앞이에요</item>
+        <item>💧 오늘 목표까지 얼마 안 남았어요</item>
+    </string-array>
+    <string-array name="notification_reminder_bodies_near">
+        <item>%1$d / %2$d 잔, 조금만 더!</item>
+        <item>%1$d / %2$d 잔, 한 잔만 더 마셔볼까요?</item>
+        <item>%1$d / %2$d 잔이에요</item>
+    </string-array>
+    <string-array name="notification_reminder_titles_morning">
+        <item>🌅 좋은 아침이에요!</item>
+        <item>🌅 첫 물 한 잔 마셨나요?</item>
+    </string-array>
+    <string-array name="notification_reminder_bodies_morning">
+        <item>물 한 잔으로 하루를 시작해봐요</item>
+        <item>상쾌하게 하루를 시작해봐요</item>
+    </string-array>
+    <string-array name="notification_reminder_titles_afternoon">
+        <item>☀️ 오후에도 수분 보충!</item>
+        <item>☀️ 나른한 오후엔</item>
+    </string-array>
+    <string-array name="notification_reminder_bodies_afternoon">
+        <item>%1$d / %2$d 잔이에요, 잊지 마세요</item>
+        <item>물 한 잔이 도움이 돼요</item>
+    </string-array>
+    <string-array name="notification_reminder_titles_evening">
+        <item>🌙 하루를 마무리하기 전에</item>
+        <item>🌙 저녁에 채워볼까요?</item>
+    </string-array>
+    <string-array name="notification_reminder_bodies_evening">
+        <item>물 한 잔 어때요? %1$d / %2$d 잔이에요</item>
+        <item>오늘 목표까지 %1$d / %2$d 잔 남았어요</item>
+    </string-array>
+    <string-array name="notification_reminder_titles_generic">
+        <item>💧 몸이 보내는 신호</item>
+        <item>💧 물 한 잔의 여유</item>
+    </string-array>
+    <string-array name="notification_reminder_bodies_generic">
+        <item>목마름 느끼기 전에 마셔요!</item>
+        <item>지금 가져보세요</item>
+    </string-array>
     <string name="notification_achievement_title">🎉 목표 달성!</string>
     <string name="notification_achievement_body">오늘 하루 수분 섭취 목표를 달성했어요. 대단해요!</string>
 
