@@ -20,6 +20,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.border
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -98,6 +100,21 @@ fun AchievementDialog(
             // 파티클
             ParticleLayer()
 
+            // 카드 바깥으로 은은하게 퍼지는 앰비언트 발광
+            Box(
+                modifier = Modifier
+                    .size(340.dp)
+                    .alpha(cardAlpha.value)
+                    .background(
+                        Brush.radialGradient(
+                            listOf(
+                                Color(0xFFE9DC86).copy(alpha = 0.32f),
+                                Color.Transparent
+                            )
+                        )
+                    )
+            )
+
             // 카드
             Surface(
                 modifier = Modifier
@@ -114,26 +131,43 @@ fun AchievementDialog(
                 Box(
                     modifier = Modifier
                         .background(
-                            Brush.verticalGradient(
-                                listOf(Color(0xFF1A2A4A), Color(0xFF0D1B2A))
+                            Brush.radialGradient(
+                                listOf(Color(0xFFFFFEF4), Color(0xFFF7EDB8))
                             ),
                             RoundedCornerShape(32.dp)
                         )
+                        .border(1.dp, Color(0xFFE9DC86), RoundedCornerShape(32.dp))
                         .padding(horizontal = 40.dp, vertical = 48.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = achievement.emoji,
-                            fontSize = 80.sp,
-                            modifier = Modifier.scale(emojiScale.value)
-                        )
+                        Box(contentAlignment = Alignment.Center) {
+                            // 이모지 뒤 은은한 발광 효과
+                            Box(
+                                modifier = Modifier
+                                    .size(110.dp)
+                                    .scale(emojiScale.value)
+                                    .background(
+                                        Brush.radialGradient(
+                                            listOf(
+                                                Color(0xFFFFFFFF).copy(alpha = 0.5f),
+                                                Color.Transparent
+                                            )
+                                        )
+                                    )
+                            )
+                            Text(
+                                text = achievement.emoji,
+                                fontSize = 80.sp,
+                                modifier = Modifier.scale(emojiScale.value)
+                            )
+                        }
                         Spacer(Modifier.height(20.dp))
                         Text(
                             text = stringResource(achievement.titleRes),
                             fontSize = 26.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF00B4D8),
+                            color = Color(0xFF7A6B28),
                             textAlign = TextAlign.Center,
                             modifier = Modifier.alpha(textAlpha.value)
                         )
@@ -141,7 +175,7 @@ fun AchievementDialog(
                         Text(
                             text = stringResource(achievement.messageRes),
                             fontSize = 16.sp,
-                            color = Color.White.copy(alpha = 0.7f),
+                            color = Color(0xFF96874A),
                             textAlign = TextAlign.Center,
                             modifier = Modifier.alpha(textAlpha.value)
                         )
@@ -149,7 +183,7 @@ fun AchievementDialog(
                         Text(
                             text = stringResource(R.string.achievement_dismiss_hint),
                             fontSize = 13.sp,
-                            color = Color.White.copy(alpha = 0.3f),
+                            color = Color(0xFFC2B26F),
                             modifier = Modifier
                                 .alpha(textAlpha.value)
                                 .clickable(
@@ -206,7 +240,7 @@ private fun ParticleLayer() {
             Text(
                 text = "✦",
                 fontSize = p.size.sp,
-                color = Color(0xFF00B4D8).copy(alpha = (0.6f - progress * 0.6f).coerceIn(0f, 1f)),
+                color = Color(0xFFE0CB54).copy(alpha = (0.6f - progress * 0.6f).coerceIn(0f, 1f)),
                 modifier = Modifier.offset {
                     IntOffset(
                         x = (p.x * 900).dp.roundToPx(),

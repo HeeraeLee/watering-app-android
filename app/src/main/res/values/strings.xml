@@ -289,6 +289,10 @@
 
     <!-- 앱 정보 -->
     <string name="settings_app_info">앱 정보</string>
+    <string name="app_info_intro_1">\'워터링\'은 물을 준다는 뜻 그대로, 스스로에게 물을 주듯 수분 섭취 습관을 만들어주는 앱입니다.</string>
+    <string name="app_info_intro_2">하루에도 수십 번 들여다보는 홈 화면, 그 순간을 활용해 별다른 노력 없이 물 마시는 습관을 들이는 게 워터링의 목표예요.</string>
+    <string name="app_info_intro_3">위젯을 탭 한 번만 누르면 기록이 끝나고, 물은 물론 커피·차·주스·우유까지 함께 기록할 수 있어요.</string>
+    <string name="app_info_intro_4">매일 목표를 달성하면 연속 기록이 쌓이고, 나에게 맞는 시간에 알림도 받아보세요.</string>
     <string name="settings_privacy_policy">개인정보처리방침</string>
     <string name="privacy_policy_url">https://sites.google.com/view/watering-privacy/%ED%99%88</string>
     <string name="settings_send_feedback">의견 보내기</string>

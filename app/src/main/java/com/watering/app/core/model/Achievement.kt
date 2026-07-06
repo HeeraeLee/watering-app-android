@@ -10,7 +10,7 @@ enum class Achievement(
     val isStreakBased: Boolean = false
 ) {
     FIRST_SIP("🌱", R.string.achievement_first_sip_title, R.string.achievement_first_sip_message),
-    HALF_WAY("💧", R.string.achievement_half_way_title, R.string.achievement_half_way_message),
+    HALF_WAY("🌊", R.string.achievement_half_way_title, R.string.achievement_half_way_message),
     GOAL_ACHIEVED("🏆", R.string.achievement_goal_achieved_title, R.string.achievement_goal_achieved_message),
     STREAK_3("🔥", R.string.achievement_streak_3_title, R.string.achievement_streak_3_message, isStreakBased = true),
     STREAK_7("⚡", R.string.achievement_streak_7_title, R.string.achievement_streak_7_message, isStreakBased = true),

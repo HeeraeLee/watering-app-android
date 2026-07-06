@@ -21,20 +21,40 @@ class AchievementDataStore @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
     private val KEY = stringPreferencesKey("earned_today")
+    private val LIFETIME_KEY = stringPreferencesKey("earned_lifetime")
     private val PENDING_DISPLAY_KEY = stringPreferencesKey("pending_display")
 
     // "yyyy-MM-dd|ACHIEVEMENT_NAME" 형식으로 저장, ';' 구분
-    private suspend fun getEarnedSet(): Set<String> {
+    private suspend fun getEarnedTodaySet(): Set<String> {
         val prefs = context.achievementDataStore.data.first()
         return prefs[KEY]?.split(";")?.toSet() ?: emptySet()
     }
 
+    private suspend fun getLifetimeEarnedSet(): Set<String> {
+        val prefs = context.achievementDataStore.data.first()
+        return prefs[LIFETIME_KEY]?.split(";")?.toSet() ?: emptySet()
+    }
+
+    // 연속 기록 마일스톤(isStreakBased)은 평생 한 번만 — 스트릭이 유지되는 동안 매일 조건을
+    // 다시 만족하므로 날짜 기준으로 지우면 매일 재발생한다. 그 외 성취(첫 잔/절반 돌파/오늘 목표
+    // 달성)는 매일 리셋되는 게 맞는 동작이라 기존 날짜별 저장을 유지한다
     suspend fun isAlreadyEarned(dateKey: String, achievement: Achievement): Boolean {
+        if (achievement.isStreakBased) {
+            return getLifetimeEarnedSet().contains(achievement.name)
+        }
         val token = "$dateKey|${achievement.name}"
-        return getEarnedSet().contains(token)
+        return getEarnedTodaySet().contains(token)
     }
 
     suspend fun markEarned(dateKey: String, achievement: Achievement) {
+        if (achievement.isStreakBased) {
+            context.achievementDataStore.edit { prefs ->
+                val current = prefs[LIFETIME_KEY]?.split(";")?.toMutableSet() ?: mutableSetOf()
+                current.add(achievement.name)
+                prefs[LIFETIME_KEY] = current.joinToString(";")
+            }
+            return
+        }
         val token = "$dateKey|${achievement.name}"
         context.achievementDataStore.edit { prefs ->
             val current = prefs[KEY]?.split(";")?.toMutableSet() ?: mutableSetOf()

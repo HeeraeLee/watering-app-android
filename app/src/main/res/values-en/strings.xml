@@ -286,6 +286,10 @@
 
     <!-- App info -->
     <string name="settings_app_info">App Info</string>
+    <string name="app_info_intro_1">\'Watering\' means giving water — just like watering a plant, this app helps you build a hydration habit for yourself.</string>
+    <string name="app_info_intro_2">You check your home screen dozens of times a day. Watering uses that moment to help you build a water-drinking habit effortlessly — that\'s our goal.</string>
+    <string name="app_info_intro_3">Tap the widget once and you\'re done logging — track not just water but coffee, tea, juice, and milk too.</string>
+    <string name="app_info_intro_4">Hit your daily goal and your streak grows. Get reminders at the times that work best for you.</string>
     <string name="settings_privacy_policy">Privacy Policy</string>
     <string name="settings_send_feedback">Send Feedback</string>
 
