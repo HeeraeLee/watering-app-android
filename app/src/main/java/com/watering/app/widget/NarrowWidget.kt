@@ -31,6 +31,8 @@ import androidx.glance.layout.height
 import androidx.glance.layout.padding
 import androidx.glance.layout.size
 import androidx.glance.layout.width
+import androidx.glance.semantics.contentDescription
+import androidx.glance.semantics.semantics
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextAlign
@@ -79,6 +81,7 @@ private fun NarrowWidgetContent(state: WidgetState) {
             .fillMaxSize()
             .background(ColorProvider(bgColor))
             .cornerRadius(16.dp)
+            .semantics { contentDescription = context.getString(R.string.widget_talkback_hint, state.totalCount, state.goal) }
             .clickable(actionRunCallback<AddWaterAction>())
             .padding(horizontal = 14.dp),
         verticalAlignment = Alignment.CenterVertically

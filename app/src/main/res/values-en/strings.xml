@@ -309,6 +309,7 @@
     <string name="widget_circular_description">Watering Circular Widget</string>
     <string name="widget_rectangular_description">Watering Rectangular Widget</string>
     <string name="widget_narrow_description">Watering Narrow Widget</string>
+    <string name="widget_talkback_hint">Water %1$d of %2$d glasses. Tap to log one glass</string>
     <string name="widget_app_label">Watering</string>
     <string name="widget_motivation_almost_there">Almost there!</string>
     <string name="widget_motivation_keep_going">Keep it up</string>
