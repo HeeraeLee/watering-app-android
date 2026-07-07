@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- 텀블러(뚜껑+빨대) — 웹 목업 "③ 텀블러" 안 확정 (2026-07-07) -->
+    <path
+        android:pathData="M7.5,9 h9 l-0.9,10.2 a1.6,1.6 0 0 1 -1.6,1.5 H10 a1.6,1.6 0 0 1 -1.6,-1.5 L7.5,9 Z"
+        android:strokeColor="#FF1B1B1B"
+        android:strokeWidth="1.8"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000" />
+    <path
+        android:pathData="M6.8,6.6 h10.4 v2.4 H6.8 Z"
+        android:strokeColor="#FF1B1B1B"
+        android:strokeWidth="1.8"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000" />
+    <path
+        android:pathData="M14.5,4 v3.4"
+        android:strokeColor="#FF1B1B1B"
+        android:strokeWidth="1.8"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000" />
+</vector>

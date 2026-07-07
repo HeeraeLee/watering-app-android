@@ -27,6 +27,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.watering.app.R
 import com.watering.app.core.model.DrinkType
+import com.watering.app.ui.theme.DrinkBadge
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -117,7 +118,8 @@ private fun DrinkTypeSelector(
             FilterChip(
                 selected = type == selected,
                 onClick = { onSelect(type) },
-                label = { Text("${type.emoji} ${stringResource(type.displayNameRes)}") }
+                label = { Text(stringResource(type.displayNameRes)) },
+                leadingIcon = { DrinkBadge(type, size = 22.dp) }
             )
         }
     }

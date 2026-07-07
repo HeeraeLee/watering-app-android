@@ -73,6 +73,7 @@ import com.watering.app.core.model.WaterEntry
 import com.watering.app.features.record.RecordSheet
 import com.watering.app.ui.theme.AppBackgroundGradient
 import com.watering.app.ui.theme.AppCardBackgroundColor
+import com.watering.app.ui.theme.DrinkBadge
 
 private fun Context.findActivity(): Activity? = when (this) {
     is Activity -> this
@@ -368,7 +369,6 @@ private fun StreakCard(
 
 @Composable
 private fun WaterEntryRow(entry: WaterEntry) {
-    val emoji = entry.drinkType.emoji
     val drinkName = stringResource(entry.drinkType.displayNameRes)
     val time = java.time.Instant.ofEpochMilli(entry.timestampMillis)
         .atZone(java.time.ZoneId.systemDefault())
@@ -387,16 +387,7 @@ private fun WaterEntryRow(entry: WaterEntry) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                if (entry.drinkType == DrinkType.WATER) {
-                    Icon(
-                        Icons.Filled.WaterDrop,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(22.dp)
-                    )
-                } else {
-                    Text(emoji, fontSize = 22.sp)
-                }
+                DrinkBadge(entry.drinkType, size = 36.dp)
                 Spacer(Modifier.width(12.dp))
                 Column {
                     Text(
