@@ -2,6 +2,7 @@ package com.watering.app.features.home
 
 import android.app.Activity
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.watering.app.R
@@ -46,6 +47,10 @@ class HomeViewModel @Inject constructor(
     private val analyticsService: AnalyticsService
 ) : ViewModel() {
 
+    private companion object {
+        const val TAG = "HomeViewModel"
+    }
+
     val uiState: StateFlow<HomeUiState> = combine(
         waterRepository.todayRecord,
         waterRepository.streakInfo,
@@ -86,6 +91,7 @@ class HomeViewModel @Inject constructor(
                 analyticsService.logRecordAdd(current.settings.cupSize, drinkType.name, source = "home")
                 achievementChecker.check(prev, updated, streak)?.let { _pendingAchievement.value = it }
             } catch (e: Exception) {
+                Log.w(TAG, "물 기록 추가 실패", e)
                 _snackbarMessage.value = context.getString(R.string.home_snackbar_record_failed)
             }
         }
@@ -111,6 +117,7 @@ class HomeViewModel @Inject constructor(
                 analyticsService.logRecordAdd(amount, drinkType.name, source = "home")
                 achievementChecker.check(prev, updated, streak)?.let { _pendingAchievement.value = it }
             } catch (e: Exception) {
+                Log.w(TAG, "음료 기록 추가 실패", e)
                 _snackbarMessage.value = context.getString(R.string.home_snackbar_record_failed)
             }
         }

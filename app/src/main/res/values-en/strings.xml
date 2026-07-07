@@ -129,6 +129,10 @@
     <string name="home_select_other_drink">Other drink</string>
     <string name="home_today_record">Today\'s Log</string>
     <string name="home_undo_last">Undo last</string>
+    <string name="home_undo_confirm_title">Delete last record?</string>
+    <string name="home_undo_confirm_body">The most recently logged drink will be deleted.\nThis action cannot be undone.</string>
+    <string name="home_undo_confirm_button">Delete</string>
+    <string name="home_undo_confirm_cancel">Cancel</string>
     <string name="home_empty_record">No records yet.\nDrink some water and log it!</string>
     <string name="home_snackbar_undo_action">Undo</string>
     <string name="home_snackbar_water_recorded">💧 +%1$dml recorded</string>

@@ -1,7 +1,6 @@
 package com.watering.app.features.home
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
@@ -223,15 +222,6 @@ private fun ParticleLayer() {
                 RepeatMode.Restart
             ),
             label = "p"
-        )
-        val alpha by transition.animateFloat(
-            initialValue = 0f,
-            targetValue = 0f,
-            animationSpec = infiniteRepeatable(
-                tween((2000 / p.speed).toInt(), p.delay, FastOutSlowInEasing),
-                RepeatMode.Restart
-            ),
-            label = "a"
         )
         Box(
             modifier = Modifier

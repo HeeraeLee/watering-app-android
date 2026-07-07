@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
@@ -45,6 +46,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -94,6 +96,7 @@ fun HomeScreen(
     val activity = LocalContext.current.findActivity()
     val snackbarHostState = remember { SnackbarHostState() }
     var showRecordSheet by remember { mutableStateOf(false) }
+    var showUndoConfirmDialog by remember { mutableStateOf(false) }
 
     val undoActionLabel = stringResource(R.string.home_snackbar_undo_action)
     LaunchedEffect(snackbarMessage) {
@@ -102,6 +105,27 @@ fun HomeScreen(
             if (result == SnackbarResult.ActionPerformed) viewModel.undoLastEntry()
             viewModel.clearSnackbar()
         }
+    }
+
+    if (showUndoConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = { showUndoConfirmDialog = false },
+            title = { Text(stringResource(R.string.home_undo_confirm_title)) },
+            text = { Text(stringResource(R.string.home_undo_confirm_body)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.undoLastEntry()
+                    showUndoConfirmDialog = false
+                }) {
+                    Text(stringResource(R.string.home_undo_confirm_button), color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showUndoConfirmDialog = false }) {
+                    Text(stringResource(R.string.home_undo_confirm_cancel))
+                }
+            }
+        )
     }
 
     Box(modifier = Modifier.fillMaxSize().background(AppBackgroundGradient)) {
@@ -215,7 +239,7 @@ fun HomeScreen(
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.error,
                             modifier = Modifier
-                                .clickable(onClick = { viewModel.undoLastEntry() })
+                                .clickable(onClick = { showUndoConfirmDialog = true })
                                 .semantics { role = Role.Button }
                                 .padding(12.dp)
                         )

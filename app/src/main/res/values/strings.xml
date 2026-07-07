@@ -132,6 +132,10 @@
     <string name="home_select_other_drink">다른 음료 선택</string>
     <string name="home_today_record">오늘 기록</string>
     <string name="home_undo_last">마지막 취소</string>
+    <string name="home_undo_confirm_title">마지막 기록을 삭제할까요?</string>
+    <string name="home_undo_confirm_body">가장 최근에 기록한 음료가 삭제됩니다.\n이 작업은 되돌릴 수 없습니다.</string>
+    <string name="home_undo_confirm_button">삭제</string>
+    <string name="home_undo_confirm_cancel">취소</string>
     <string name="home_empty_record">아직 기록이 없어요.\n물을 마시고 기록해 보세요!</string>
     <string name="home_snackbar_undo_action">취소</string>
     <string name="home_snackbar_water_recorded">💧 +%1$dml 기록됐어요</string>
