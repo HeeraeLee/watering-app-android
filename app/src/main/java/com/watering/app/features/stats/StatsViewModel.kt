@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import java.time.Clock
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
@@ -38,18 +39,20 @@ data class StatsUiState(
 class StatsViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val waterRepository: WaterRepository,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    private val clock: Clock
 ) : ViewModel() {
 
     val uiState: StateFlow<StatsUiState> = combine(
         waterRepository.getHistory(),
         waterRepository.todayRecord,
         waterRepository.streakInfo,
-        settingsRepository.userSettings
-    ) { history, today, streak, settings ->
+        settingsRepository.userSettings,
+        minuteTicker
+    ) { history, today, streak, settings, _ ->
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
         val dayLabels = context.resources.getStringArray(R.array.weekday_labels_short)
-        val todayDate = LocalDate.now()
+        val todayDate = LocalDate.now(clock)
 
         val week = (6 downTo 0).map { offset ->
             val date = todayDate.minusDays(offset.toLong())

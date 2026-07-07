@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import java.time.Clock
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
@@ -29,17 +30,19 @@ data class SmartStatsUiState(
 @HiltViewModel
 class SmartStatsViewModel @Inject constructor(
     private val waterRepository: WaterRepository,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    private val clock: Clock
 ) : ViewModel() {
 
     val uiState: StateFlow<SmartStatsUiState> = combine(
         waterRepository.getHistory(),
         waterRepository.getAnnualHistory(),
         waterRepository.todayRecord,
-        settingsRepository.userSettings
-    ) { history, annualHistory, today, settings ->
+        settingsRepository.userSettings,
+        minuteTicker
+    ) { history, annualHistory, today, settings, _ ->
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-        val todayDate = LocalDate.now()
+        val todayDate = LocalDate.now(clock)
 
         val monthRecords = (29 downTo 0).map { offset ->
             val key = todayDate.minusDays(offset.toLong()).format(formatter)

@@ -8,6 +8,7 @@ import com.watering.app.core.model.DrinkType
 import com.watering.app.core.model.WaterEntry
 import io.mockk.every
 import io.mockk.mockk
+import java.time.Clock
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -25,7 +26,7 @@ class CsvExportServiceTest {
     fun setUp() {
         context = mockk()
         waterRepository = mockk()
-        service = CsvExportService(context, waterRepository)
+        service = CsvExportService(context, waterRepository, Clock.systemDefaultZone())
         every { context.getString(R.string.drink_water) } returns "물"
         every { context.getString(R.string.drink_coffee) } returns "커피"
     }

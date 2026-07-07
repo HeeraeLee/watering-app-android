@@ -13,6 +13,7 @@ import com.watering.app.core.model.WaterEntry
 import com.watering.app.testutil.MainDispatcherRule
 import io.mockk.every
 import io.mockk.mockk
+import java.time.Clock
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -55,7 +56,7 @@ class StatsViewModelTest {
             every { resources.getStringArray(R.array.weekday_labels_short) } returns
                 arrayOf("일", "월", "화", "수", "목", "금", "토")
         }
-        return StatsViewModel(context, waterRepository, settingsRepository)
+        return StatsViewModel(context, waterRepository, settingsRepository, Clock.systemDefaultZone())
     }
 
     @Test

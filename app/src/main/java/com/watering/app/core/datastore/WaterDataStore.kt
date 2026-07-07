@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import java.time.Clock
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
@@ -30,7 +31,8 @@ private val Context.waterDataStore: DataStore<Preferences> by preferencesDataSto
 
 @Singleton
 class WaterDataStore @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val clock: Clock
 ) {
     private val json = Json { ignoreUnknownKeys = true }
     private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
@@ -52,8 +54,12 @@ class WaterDataStore @Inject constructor(
         val LAST_UPDATED = stringPreferencesKey("last_updated")
     }
 
+    // 알려진 한계: 이 Flow는 context.waterDataStore.data가 새로 emit될 때만 재평가되므로, 자정을
+    // 넘겨도 새 기록/설정 변경이 없으면 dateKey가 갱신되지 않고 어제 값으로 멈춰있을 수 있다(Stats/
+    // SmartStatsViewModel은 v0.31.22에서 별도 주기 트리거로 이 문제를 해결했으나, 이 Flow 자체와
+    // 그걸 구독하는 HomeViewModel 등은 아직 범위 밖 — 필요시 후속 작업으로 동일 패턴 적용)
     val todayRecord: Flow<DayRecord> = context.waterDataStore.data.map { prefs ->
-        val todayKey = LocalDate.now().format(formatter)
+        val todayKey = LocalDate.now(clock).format(formatter)
         prefs[Keys.TODAY_RECORD]
             ?.let { runCatching { json.decodeFromString<DayRecord>(it) }.getOrNull() }
             ?.takeIf { it.dateKey == todayKey }
@@ -71,7 +77,7 @@ class WaterDataStore @Inject constructor(
     // 정확한 이전 상태다(트랜잭션 밖에서 별도로 .first()로 prev를 읽으면 그 사이 다른 쓰기가 끼어들어
     // stale해질 수 있음 — WaterUpdateResult 참고).
     suspend fun addEntry(amount: Int, drinkType: DrinkType, goal: Int): WaterUpdateResult {
-        val todayKey = LocalDate.now().format(formatter)
+        val todayKey = LocalDate.now(clock).format(formatter)
         lateinit var prev: DayRecord
         lateinit var updated: DayRecord
         editSafely { prefs ->
@@ -95,7 +101,7 @@ class WaterDataStore @Inject constructor(
     }
 
     suspend fun removeLastEntry(goal: Int): DayRecord {
-        val todayKey = LocalDate.now().format(formatter)
+        val todayKey = LocalDate.now(clock).format(formatter)
         lateinit var updated: DayRecord
         editSafely { prefs ->
             val current = prefs[Keys.TODAY_RECORD]
@@ -158,7 +164,7 @@ class WaterDataStore @Inject constructor(
     }
 
     suspend fun resetTodayRecord() {
-        val todayKey = LocalDate.now().format(formatter)
+        val todayKey = LocalDate.now(clock).format(formatter)
         editSafely { prefs ->
             prefs[Keys.TODAY_RECORD] = json.encodeToString(DayRecord(dateKey = todayKey))
         }

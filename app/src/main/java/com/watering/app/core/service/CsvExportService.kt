@@ -8,6 +8,7 @@ import com.watering.app.core.model.DayRecord
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
 import java.io.File
+import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -18,7 +19,8 @@ import javax.inject.Singleton
 @Singleton
 class CsvExportService @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val waterRepository: WaterRepository
+    private val waterRepository: WaterRepository,
+    private val clock: Clock
 ) {
 
     suspend fun exportToCsv(): Result<Uri> = runCatching {
@@ -49,7 +51,7 @@ class CsvExportService @Inject constructor(
 
     private fun writeToCache(csv: String): File {
         val dir = File(context.cacheDir, "csv").apply { mkdirs() }
-        val file = File(dir, "watering_기록_${LocalDate.now()}.csv")
+        val file = File(dir, "watering_기록_${LocalDate.now(clock)}.csv")
         file.writeText(csv, Charsets.UTF_8)
         return file
     }

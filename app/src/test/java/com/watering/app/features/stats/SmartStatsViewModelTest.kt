@@ -13,6 +13,7 @@ import com.watering.app.testutil.MainDispatcherRule
 import com.watering.app.core.service.TimeOfDayInsightResult
 import io.mockk.every
 import io.mockk.mockk
+import java.time.Clock
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -55,7 +56,7 @@ class SmartStatsViewModelTest {
         val settingsRepository = mockk<SettingsRepository> {
             every { userSettings } returns MutableStateFlow(settings)
         }
-        return SmartStatsViewModel(waterRepository, settingsRepository)
+        return SmartStatsViewModel(waterRepository, settingsRepository, Clock.systemDefaultZone())
     }
 
     @Test
