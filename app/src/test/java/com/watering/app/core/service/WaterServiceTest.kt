@@ -8,6 +8,7 @@ import com.watering.app.core.model.DrinkType
 import com.watering.app.core.model.StreakInfo
 import com.watering.app.core.model.UserSettings
 import com.watering.app.core.model.WaterEntry
+import com.watering.app.core.model.WaterUpdateResult
 import com.watering.app.widget.WateringWidgetUpdater
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -47,14 +48,16 @@ class WaterServiceTest {
             entries = listOf(WaterEntry(timestampMillis = timestamp, amount = amount, drinkType = drinkType))
         )
 
+    private val emptyPrev = DayRecord(dateKey = "2026-07-02")
+
     @Test
     fun addWater_repository에저장하고위젯을갱신한다() = runTest {
         val record = recordWithEntry()
-        coEvery { repository.addEntry(200, DrinkType.WATER, 8) } returns record
+        coEvery { repository.addEntry(200, DrinkType.WATER, 8) } returns WaterUpdateResult(emptyPrev, record)
 
         val result = service.addWater(amount = 200, drinkType = DrinkType.WATER, goal = 8)
 
-        assertEquals(record, result)
+        assertEquals(record, result.updated)
         coVerifyOrder {
             repository.addEntry(200, DrinkType.WATER, 8)
             widgetUpdater.updateAll()
@@ -64,7 +67,7 @@ class WaterServiceTest {
     @Test
     fun addWater_연동꺼져있으면HealthConnect에쓰지않는다() = runTest {
         val record = recordWithEntry()
-        coEvery { repository.addEntry(any(), any(), any()) } returns record
+        coEvery { repository.addEntry(any(), any(), any()) } returns WaterUpdateResult(emptyPrev, record)
 
         service.addWater(amount = 200, drinkType = DrinkType.WATER, goal = 8)
 
@@ -77,7 +80,7 @@ class WaterServiceTest {
         coEvery { healthConnectService.hasPermissions(HealthConnectService.HYDRATION_PERMISSIONS) } returns true
         // 커피 200ml * 0.7 = 140ml
         val record = recordWithEntry(amount = 200, drinkType = DrinkType.COFFEE, timestamp = 12345L)
-        coEvery { repository.addEntry(200, DrinkType.COFFEE, 8) } returns record
+        coEvery { repository.addEntry(200, DrinkType.COFFEE, 8) } returns WaterUpdateResult(emptyPrev, record)
 
         service.addWater(amount = 200, drinkType = DrinkType.COFFEE, goal = 8)
 
@@ -89,7 +92,7 @@ class WaterServiceTest {
         every { settingsRepository.userSettings } returns MutableStateFlow(UserSettings(healthConnectEnabled = true))
         coEvery { healthConnectService.hasPermissions(HealthConnectService.HYDRATION_PERMISSIONS) } returns false
         val record = recordWithEntry()
-        coEvery { repository.addEntry(any(), any(), any()) } returns record
+        coEvery { repository.addEntry(any(), any(), any()) } returns WaterUpdateResult(emptyPrev, record)
 
         service.addWater(amount = 200, drinkType = DrinkType.WATER, goal = 8)
 
@@ -102,11 +105,11 @@ class WaterServiceTest {
         coEvery { healthConnectService.hasPermissions(HealthConnectService.HYDRATION_PERMISSIONS) } returns true
         coEvery { healthConnectService.writeHydrationRecord(any(), any()) } throws RuntimeException("boom")
         val record = recordWithEntry()
-        coEvery { repository.addEntry(any(), any(), any()) } returns record
+        coEvery { repository.addEntry(any(), any(), any()) } returns WaterUpdateResult(emptyPrev, record)
 
         val result = service.addWater(amount = 200, drinkType = DrinkType.WATER, goal = 8)
 
-        assertEquals(record, result)
+        assertEquals(record, result.updated)
     }
 
     @Test

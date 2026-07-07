@@ -80,16 +80,15 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val current = uiState.value
-                val prev = current.record
-                val updated = waterService.addWater(
+                val result = waterService.addWater(
                     amount = current.settings.cupSize,
                     drinkType = drinkType,
                     goal = current.settings.dailyGoal
                 )
-                val streak = waterService.updateStreak(updated, current.streak)
+                val streak = waterService.updateStreak(result.updated, current.streak)
                 _snackbarMessage.value = context.getString(R.string.home_snackbar_water_recorded, current.settings.cupSize)
                 analyticsService.logRecordAdd(current.settings.cupSize, drinkType.name, source = "home")
-                achievementChecker.check(prev, updated, streak)?.let { _pendingAchievement.value = it }
+                achievementChecker.check(result.prev, result.updated, streak)?.let { _pendingAchievement.value = it }
             } catch (e: Exception) {
                 Log.w(TAG, "물 기록 추가 실패", e)
                 _snackbarMessage.value = context.getString(R.string.home_snackbar_record_failed)
@@ -101,13 +100,12 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val current = uiState.value
-                val prev = current.record
-                val updated = waterService.addWater(
+                val result = waterService.addWater(
                     amount = amount,
                     drinkType = drinkType,
                     goal = current.settings.dailyGoal
                 )
-                val streak = waterService.updateStreak(updated, current.streak)
+                val streak = waterService.updateStreak(result.updated, current.streak)
                 _snackbarMessage.value = context.getString(
                     R.string.home_snackbar_drink_recorded,
                     drinkType.emoji,
@@ -115,7 +113,7 @@ class HomeViewModel @Inject constructor(
                     amount
                 )
                 analyticsService.logRecordAdd(amount, drinkType.name, source = "home")
-                achievementChecker.check(prev, updated, streak)?.let { _pendingAchievement.value = it }
+                achievementChecker.check(result.prev, result.updated, streak)?.let { _pendingAchievement.value = it }
             } catch (e: Exception) {
                 Log.w(TAG, "음료 기록 추가 실패", e)
                 _snackbarMessage.value = context.getString(R.string.home_snackbar_record_failed)

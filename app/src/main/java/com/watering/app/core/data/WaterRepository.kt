@@ -4,6 +4,7 @@ import com.watering.app.core.model.DailyAchievement
 import com.watering.app.core.model.DayRecord
 import com.watering.app.core.model.DrinkType
 import com.watering.app.core.model.StreakInfo
+import com.watering.app.core.model.WaterUpdateResult
 import com.watering.app.core.datastore.WaterDataStore
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
@@ -23,7 +24,7 @@ class WaterRepository @Inject constructor(
     fun getHistory(): Flow<Map<String, DayRecord>> = dataStore.getHistory()
     fun getAnnualHistory(): Flow<Map<String, DailyAchievement>> = dataStore.getAnnualHistory()
 
-    suspend fun addEntry(amount: Int, drinkType: DrinkType, goal: Int): DayRecord =
+    suspend fun addEntry(amount: Int, drinkType: DrinkType, goal: Int): WaterUpdateResult =
         dataStore.addEntry(amount, drinkType, goal)
 
     suspend fun removeLastEntry(goal: Int): DayRecord =

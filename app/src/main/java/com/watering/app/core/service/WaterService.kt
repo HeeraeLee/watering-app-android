@@ -7,6 +7,7 @@ import com.watering.app.core.data.WaterRepository
 import com.watering.app.core.model.DayRecord
 import com.watering.app.core.model.DrinkType
 import com.watering.app.core.model.StreakInfo
+import com.watering.app.core.model.WaterUpdateResult
 import com.watering.app.widget.WateringWidgetUpdater
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
@@ -29,11 +30,11 @@ class WaterService @Inject constructor(
         amount: Int,
         drinkType: DrinkType = DrinkType.WATER,
         goal: Int
-    ): DayRecord {
-        val updated = repository.addEntry(amount, drinkType, goal)
+    ): WaterUpdateResult {
+        val result = repository.addEntry(amount, drinkType, goal)
         widgetUpdater.updateAll()
-        syncToHealthConnectIfEnabled(updated)
-        return updated
+        syncToHealthConnectIfEnabled(result.updated)
+        return result
     }
 
     // Health Connect 동기화는 부가 기능이라 실패해도 로컬 기록/위젯 갱신에는 영향 없어야 함

@@ -13,6 +13,7 @@ import com.watering.app.core.model.DayRecord
 import com.watering.app.core.model.DrinkType
 import com.watering.app.core.model.StreakInfo
 import com.watering.app.core.model.WaterEntry
+import com.watering.app.core.model.WaterUpdateResult
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -65,14 +66,20 @@ class WaterDataStore @Inject constructor(
             ?: StreakInfo()
     }
 
-    suspend fun addEntry(amount: Int, drinkType: DrinkType, goal: Int): DayRecord {
+    // prev/updated를 같은 edit{} 트랜잭션 안에서 캡처해서 반환한다 — DataStore의 edit은 내부적으로
+    // 직렬화되므로, 여기서 읽은 prev는 위젯 연속 탭처럼 여러 호출이 겹쳐도 항상 그 트랜잭션 시점의
+    // 정확한 이전 상태다(트랜잭션 밖에서 별도로 .first()로 prev를 읽으면 그 사이 다른 쓰기가 끼어들어
+    // stale해질 수 있음 — WaterUpdateResult 참고).
+    suspend fun addEntry(amount: Int, drinkType: DrinkType, goal: Int): WaterUpdateResult {
         val todayKey = LocalDate.now().format(formatter)
+        lateinit var prev: DayRecord
         lateinit var updated: DayRecord
         editSafely { prefs ->
             val current = prefs[Keys.TODAY_RECORD]
                 ?.let { runCatching { json.decodeFromString<DayRecord>(it) }.getOrNull() }
                 ?.takeIf { it.dateKey == todayKey }
                 ?: DayRecord(dateKey = todayKey)
+            prev = current
             val entry = WaterEntry(
                 timestampMillis = System.currentTimeMillis(),
                 amount = amount,
@@ -84,7 +91,7 @@ class WaterDataStore @Inject constructor(
         }
         archiveTodayToHistory(updated)
         archiveToAnnualHistory(updated)
-        return updated
+        return WaterUpdateResult(prev, updated)
     }
 
     suspend fun removeLastEntry(goal: Int): DayRecord {
