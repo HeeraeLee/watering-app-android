@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.ComponentCallbacks2
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
+import com.watering.app.core.data.SettingsRepository
 import com.watering.app.core.service.BillingService
 import com.watering.app.core.service.NotificationService
 import com.watering.app.widget.WateringWidgetUpdater
@@ -11,6 +12,7 @@ import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -21,6 +23,7 @@ class WateringApp : Application(), Configuration.Provider {
     @Inject lateinit var workerFactory: HiltWorkerFactory
     @Inject lateinit var billingService: BillingService
     @Inject lateinit var widgetUpdater: WateringWidgetUpdater
+    @Inject lateinit var settingsRepository: SettingsRepository
 
     private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var lastNightMode = 0
@@ -35,6 +38,13 @@ class WateringApp : Application(), Configuration.Provider {
         notificationService.createChannels()
         notificationService.scheduleMidnightReset()
         billingService.startConnection()
+
+        // CLAUDE.md 원칙: "앱 실행 시 WorkManager 작업 유효성 검증 및 재등록" — 리마인더 알림은
+        // 기존엔 온보딩 완료/설정 변경 시점에만 재등록돼, OEM 배터리 최적화 등으로 PeriodicWorkRequest가
+        // 조용히 소실되면 사용자가 설정 화면을 다시 열기 전까지 알림이 영구 정지됐음(v0.31.17)
+        appScope.launch {
+            notificationService.scheduleReminders(settingsRepository.userSettings.first())
+        }
 
         val currentNightMode = resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
         lastNightMode = currentNightMode
