@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Remove
@@ -83,8 +84,30 @@ fun OnboardingScreen(
         ) {
             Spacer(Modifier.height(64.dp))
 
-            // 페이지 인디케이터
-            PageIndicator(currentPage = page, totalPages = 3)
+            // 뒤로가기(1페이지 이상일 때만) + 페이지 인디케이터 — 목표 잔 수를 잘못 정한 채
+            // 다음 페이지로 넘어가도 온보딩 안에서 정정할 수 있도록 함
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+            ) {
+                if (page > 0) {
+                    IconButton(
+                        onClick = { page-- },
+                        modifier = Modifier.align(Alignment.CenterStart)
+                    ) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.content_description_back)
+                        )
+                    }
+                }
+                PageIndicator(
+                    currentPage = page,
+                    totalPages = 3,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
 
             Spacer(Modifier.height(48.dp))
 
@@ -141,8 +164,8 @@ fun OnboardingScreen(
 }
 
 @Composable
-private fun PageIndicator(currentPage: Int, totalPages: Int) {
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+private fun PageIndicator(currentPage: Int, totalPages: Int, modifier: Modifier = Modifier) {
+    Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         repeat(totalPages) { index ->
             Box(
                 modifier = Modifier
