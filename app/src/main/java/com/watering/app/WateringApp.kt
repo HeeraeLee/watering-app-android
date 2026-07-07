@@ -5,7 +5,6 @@ import android.content.ComponentCallbacks2
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import com.watering.app.core.data.SettingsRepository
-import com.watering.app.core.service.BillingService
 import com.watering.app.core.service.NotificationService
 import com.watering.app.widget.WateringWidgetUpdater
 import dagger.hilt.android.HiltAndroidApp
@@ -21,7 +20,6 @@ class WateringApp : Application(), Configuration.Provider {
 
     @Inject lateinit var notificationService: NotificationService
     @Inject lateinit var workerFactory: HiltWorkerFactory
-    @Inject lateinit var billingService: BillingService
     @Inject lateinit var widgetUpdater: WateringWidgetUpdater
     @Inject lateinit var settingsRepository: SettingsRepository
 
@@ -37,7 +35,8 @@ class WateringApp : Application(), Configuration.Provider {
         super.onCreate()
         notificationService.createChannels()
         notificationService.scheduleMidnightReset()
-        billingService.startConnection()
+        // 프리미엄은 v0.30.0에서 전 기능 무료 전환되며 Screen.Premium 진입점이 제거됨(휴면 코드로만
+        // 보존) — 아무도 못 들어가는 화면을 위해 앱 실행마다 Billing에 연결하던 것을 제거(v0.31.18)
 
         // CLAUDE.md 원칙: "앱 실행 시 WorkManager 작업 유효성 검증 및 재등록" — 리마인더 알림은
         // 기존엔 온보딩 완료/설정 변경 시점에만 재등록돼, OEM 배터리 최적화 등으로 PeriodicWorkRequest가

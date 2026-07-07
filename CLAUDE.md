@@ -87,7 +87,7 @@ Material Design 3 가이드라인을 숙지하고 플랫폼 네이티브 UX를 �
 | 알림 | WorkManager + NotificationManager |
 | 건강 연동 | Health Connect (구현 완료 — 체중 기반 목표 추천 + 수분 기록 자동 저장) |
 | 날씨/대기질 | 기상청 + 에어코리아 API (v2 계획 — 미구현) |
-| 구독 결제 | Google Play Billing Library 7+ (구현 완료 — Play Console 상품 실등록만 남음) |
+| 구독 결제 | Google Play Billing Library 7+ (2026-07-05, v0.30.0에서 전 기능 무료 전환 — `BillingService`/`PremiumScreen` 등 코드는 복원 가능성을 위해 남겨뒀으나 네비게이션 진입점 없는 휴면 상태. 재활성화는 사용자 확인 후에만 진행) |
 | DI | Hilt |
 | 비동기 | Coroutines + Flow |
 | 네비게이션 | Navigation Component (Compose) |
