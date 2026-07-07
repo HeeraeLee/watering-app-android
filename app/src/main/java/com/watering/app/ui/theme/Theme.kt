@@ -29,8 +29,15 @@ val AppCardBackgroundColor: Color
     @Composable get() = if (isSystemInDarkTheme()) Color(0xFF1C4D49) else Color(0xFFFDFAF4)
 
 // 설정 화면의 안내 배너(건강 연동/백업) 공용 배경 (웹 목업 비교 후 소프트 옐로우로 확정)
+// 2026-07-08: 다크모드 값이 옐로우를 단순히 어둡게 낮춘 올리브-갈색이라 딥 틸 다크 팔레트와 충돌한다는
+// 피드백(Fable UI 리뷰)으로, 웹 목업 13안 비교 후 "틸 채우기 + 골드 보더"로 변경 — 배경은
+// AppCardBackgroundColor와 통일해 칙칙함을 없애고, 라이트 모드의 옐로우 정체성은
+// AppInfoBannerBorderColor(골드 보더)로만 다크 모드에 이어감. 라이트 모드는 변경 없음(무보더 유지)
 val AppInfoBannerBackgroundColor: Color
-    @Composable get() = if (isSystemInDarkTheme()) Color(0xFF4A3A16) else Color(0xFFFBF3DA)
+    @Composable get() = if (isSystemInDarkTheme()) Color(0xFF1C4D49) else Color(0xFFFBF3DA)
+
+val AppInfoBannerBorderColor: Color
+    @Composable get() = if (isSystemInDarkTheme()) Color(0xFFF5C860) else Color.Transparent
 
 // 파스텔 옵션 N 확정 적용 (#7CDAED 근처 변형 중 선택)
 private val WateringAqua = Color(0xFF5DCEE6)

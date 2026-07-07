@@ -3,6 +3,7 @@ package com.watering.app.features.settings
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -42,6 +43,7 @@ import com.watering.app.R
 import com.watering.app.core.service.HealthConnectService
 import com.watering.app.ui.theme.AppBackgroundGradient
 import com.watering.app.ui.theme.AppInfoBannerBackgroundColor
+import com.watering.app.ui.theme.AppInfoBannerBorderColor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -116,6 +118,7 @@ private fun HealthConnectVisibilityHint(onOpenSettings: () -> Unit) {
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .background(AppInfoBannerBackgroundColor, RoundedCornerShape(12.dp))
+            .border(1.5.dp, AppInfoBannerBorderColor, RoundedCornerShape(12.dp))
             .clickable(onClick = onOpenSettings)
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically

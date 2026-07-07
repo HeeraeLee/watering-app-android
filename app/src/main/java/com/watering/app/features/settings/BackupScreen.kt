@@ -1,6 +1,7 @@
 package com.watering.app.features.settings
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -49,6 +50,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.watering.app.R
 import com.watering.app.ui.theme.AppBackgroundGradient
 import com.watering.app.ui.theme.AppInfoBannerBackgroundColor
+import com.watering.app.ui.theme.AppInfoBannerBorderColor
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -131,6 +133,7 @@ private fun BackupSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(AppInfoBannerBackgroundColor, RoundedCornerShape(12.dp))
+                .border(1.5.dp, AppInfoBannerBorderColor, RoundedCornerShape(12.dp))
                 .let { if (currentUser == null) it.clickable(onClick = onSignIn) else it }
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
