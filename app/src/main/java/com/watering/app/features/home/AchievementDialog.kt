@@ -114,7 +114,8 @@ fun AchievementDialog(
                     )
             )
 
-            // 카드
+            // 카드 — "탭해서 닫기" 안내대로 카드 전체도 탭하면 닫히게 함(예전엔 onClick={}로 탭을
+            // 삼켜서 안내 라벨을 정확히 눌러야만 닫혔음, 2026-07-08 Fable UI 리뷰로 발견)
             Surface(
                 modifier = Modifier
                     .scale(cardScale.value)
@@ -122,7 +123,7 @@ fun AchievementDialog(
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
-                        onClick = {}
+                        onClick = onDismiss
                     ),
                 shape = RoundedCornerShape(32.dp),
                 color = Color.Transparent
