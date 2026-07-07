@@ -338,7 +338,7 @@ private fun DailyGoalSetting(goal: Int, onGoalChange: (Int) -> Unit) {
                 enabled = goal > 1,
                 modifier = Modifier.size(48.dp)
             ) {
-                Icon(Icons.Default.Remove, contentDescription = stringResource(R.string.content_description_goal_decrease))
+                Icon(Icons.Default.Remove, contentDescription = stringResource(R.string.content_description_goal_decrease), tint = MaterialTheme.colorScheme.onSurface)
             }
             Text(
                 text = stringResource(R.string.glasses_count, goal),
@@ -353,7 +353,7 @@ private fun DailyGoalSetting(goal: Int, onGoalChange: (Int) -> Unit) {
                 enabled = goal < 20,
                 modifier = Modifier.size(48.dp)
             ) {
-                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.content_description_goal_increase))
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.content_description_goal_increase), tint = MaterialTheme.colorScheme.onSurface)
             }
         }
     }
@@ -395,7 +395,7 @@ private fun WeightGoalRow(subtitle: String, onClick: () -> Unit) {
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(Icons.Filled.MonitorWeight, contentDescription = null)
+        Icon(Icons.Filled.MonitorWeight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface)
         Spacer(Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(stringResource(R.string.settings_weight_goal_title), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
@@ -417,7 +417,7 @@ private fun CsvExportRow(onClick: () -> Unit) {
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(Icons.Filled.FileDownload, contentDescription = null)
+        Icon(Icons.Filled.FileDownload, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface)
         Spacer(Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(stringResource(R.string.settings_csv_export_title), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)

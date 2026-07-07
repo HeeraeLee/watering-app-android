@@ -190,7 +190,8 @@ private fun InsightCard(insight: TimeOfDayInsightResult) {
                     TimeOfDayInsightResult.InsufficientData ->
                         stringResource(R.string.smart_stats_insight_placeholder)
                 },
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
     }
@@ -211,7 +212,8 @@ private fun HydrationVolumeCard(volumeMl: Int) {
             Spacer(Modifier.width(8.dp))
             Text(
                 text = stringResource(R.string.smart_stats_hydration_volume, volumeMl),
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
     }

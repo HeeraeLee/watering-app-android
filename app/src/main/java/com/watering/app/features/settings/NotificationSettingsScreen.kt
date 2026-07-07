@@ -177,7 +177,7 @@ private fun IntervalSetting(interval: Int, onIntervalChange: (Int) -> Unit) {
     )
 
     Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-        Text(stringResource(R.string.settings_interval_label), style = MaterialTheme.typography.bodyLarge)
+        Text(stringResource(R.string.settings_interval_label), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
         Spacer(Modifier.height(8.dp))
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             intervals.forEach { (minutes, label) ->
@@ -206,17 +206,18 @@ private fun TimeAdjusterRow(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(label, style = MaterialTheme.typography.bodyLarge)
+        Text(label, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(
                 onClick = { onHourChange(hour - 1) },
                 enabled = hour > range.first
             ) {
-                Icon(Icons.Default.Remove, contentDescription = stringResource(R.string.settings_hour_decrease_content_description))
+                Icon(Icons.Default.Remove, contentDescription = stringResource(R.string.settings_hour_decrease_content_description), tint = MaterialTheme.colorScheme.onSurface)
             }
             Text(
                 text = "%02d:00".format(hour),
                 style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.width(56.dp)
             )
@@ -224,7 +225,7 @@ private fun TimeAdjusterRow(
                 onClick = { onHourChange(hour + 1) },
                 enabled = hour < range.last
             ) {
-                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.settings_hour_increase_content_description))
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.settings_hour_increase_content_description), tint = MaterialTheme.colorScheme.onSurface)
             }
         }
     }

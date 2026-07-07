@@ -148,6 +148,7 @@ private fun IntroFeatureRow(icon: ImageVector, text: String) {
         Text(
             text,
             style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.padding(top = 4.dp)
         )
     }

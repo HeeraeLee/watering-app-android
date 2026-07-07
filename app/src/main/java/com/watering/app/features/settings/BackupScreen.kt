@@ -145,7 +145,8 @@ private fun BackupSection(
                 if (currentUser != null) {
                     Text(
                         currentUser.email ?: stringResource(R.string.settings_backup_signed_in_default),
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         text = when (backupUiState) {
@@ -161,7 +162,8 @@ private fun BackupSection(
                 } else {
                     Text(
                         stringResource(R.string.settings_backup_signed_out_body),
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         stringResource(R.string.settings_backup_signed_out_hint),
