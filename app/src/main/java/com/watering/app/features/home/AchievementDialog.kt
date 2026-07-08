@@ -12,6 +12,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -20,6 +21,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.border
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
@@ -84,6 +86,17 @@ fun AchievementDialog(
             textAlpha.animateTo(1f, tween(300))
         }
 
+        // 다크모드 카드 톤 (Fable UI 리뷰 findings — 성취 다이얼로그, 2026-07-08)
+        // 라이트 연노랑 그라데이션을 다크에서도 그대로 써서 눈부심 문제가 있던 것을, v0.31.26
+        // (다크모드 안내 배너)에서 확립한 "딥 틸 채우기 + 골드 보더" 패턴으로 통일
+        val isDark = isSystemInDarkTheme()
+        val cardBorderColor = if (isDark) Color(0xFFF5C860) else Color(0xFFE9DC86)
+        val titleColor = if (isDark) Color(0xFFF7EDB8) else Color(0xFF7A6B28)
+        val messageColor = if (isDark) Color(0xFFCBB980) else Color(0xFF96874A)
+        // "탭해서 닫기" 힌트가 실제 액션 텍스트인데도 타이틀·메시지보다 옅은 색이던 위계 역전 수정
+        // — 라이트는 타이틀보다 더 진한 올리브로, 다크는 보더와 동일한 골드로 가장 눈에 띄게
+        val hintColor = if (isDark) Color(0xFFF5C860) else Color(0xFF6B5D1F)
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -96,8 +109,10 @@ fun AchievementDialog(
                 ),
             contentAlignment = Alignment.Center
         ) {
-            // 파티클
-            ParticleLayer()
+            // 파티클 — 상태바 영역까지 침범하던 문제(Fable UI 리뷰 findings) 수정, 콘텐츠 영역으로 제한
+            Box(modifier = Modifier.fillMaxSize().statusBarsPadding()) {
+                ParticleLayer()
+            }
 
             // 카드 바깥으로 은은하게 퍼지는 앰비언트 발광
             Box(
@@ -130,13 +145,19 @@ fun AchievementDialog(
             ) {
                 Box(
                     modifier = Modifier
-                        .background(
-                            Brush.radialGradient(
-                                listOf(Color(0xFFFFFEF4), Color(0xFFF7EDB8))
-                            ),
-                            RoundedCornerShape(32.dp)
+                        .then(
+                            if (isDark) {
+                                Modifier.background(Color(0xFF1C4D49), RoundedCornerShape(32.dp))
+                            } else {
+                                Modifier.background(
+                                    Brush.radialGradient(
+                                        listOf(Color(0xFFFFFEF4), Color(0xFFF7EDB8))
+                                    ),
+                                    RoundedCornerShape(32.dp)
+                                )
+                            }
                         )
-                        .border(1.dp, Color(0xFFE9DC86), RoundedCornerShape(32.dp))
+                        .border(if (isDark) 1.5.dp else 1.dp, cardBorderColor, RoundedCornerShape(32.dp))
                         .padding(horizontal = 40.dp, vertical = 48.dp),
                     contentAlignment = Alignment.Center
                 ) {
@@ -167,7 +188,7 @@ fun AchievementDialog(
                             text = stringResource(achievement.titleRes),
                             fontSize = 26.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF7A6B28),
+                            color = titleColor,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.alpha(textAlpha.value)
                         )
@@ -175,7 +196,7 @@ fun AchievementDialog(
                         Text(
                             text = stringResource(achievement.messageRes),
                             fontSize = 16.sp,
-                            color = Color(0xFF96874A),
+                            color = messageColor,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.alpha(textAlpha.value)
                         )
@@ -183,7 +204,7 @@ fun AchievementDialog(
                         Text(
                             text = stringResource(R.string.achievement_dismiss_hint),
                             fontSize = 13.sp,
-                            color = Color(0xFFC2B26F),
+                            color = hintColor,
                             modifier = Modifier
                                 .alpha(textAlpha.value)
                                 .clickable(
