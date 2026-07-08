@@ -77,6 +77,7 @@ import com.watering.app.ui.theme.AppBackgroundGradient
 import com.watering.app.ui.theme.AppCardBackgroundColor
 import com.watering.app.ui.theme.AppUndoTextColor
 import com.watering.app.ui.theme.DrinkBadge
+import kotlinx.coroutines.withTimeoutOrNull
 
 private fun Context.findActivity(): Activity? = when (this) {
     is Activity -> this
@@ -102,7 +103,13 @@ fun HomeScreen(
     val undoActionLabel = stringResource(R.string.home_snackbar_undo_action)
     LaunchedEffect(snackbarMessage) {
         snackbarMessage?.let { msg ->
-            val result = snackbarHostState.showSnackbar(message = msg, actionLabel = undoActionLabel)
+            // actionLabel이 있으면 Compose 기본 duration이 Indefinite라 사용자가 직접 닫을 때까지
+            // 계속 떠있던 문제(2분 이상 유지 관찰됨) — withTimeoutOrNull로 5초 후 자동으로 사라지게 함.
+            // 타임아웃으로 취소되면 SnackbarHostState 내부적으로 currentSnackbarData가 null로 정리돼
+            // 스낵바 UI도 함께 사라짐(결과는 null)
+            val result = withTimeoutOrNull(5_000L) {
+                snackbarHostState.showSnackbar(message = msg, actionLabel = undoActionLabel)
+            }
             if (result == SnackbarResult.ActionPerformed) viewModel.undoLastEntry()
             viewModel.clearSnackbar()
         }
