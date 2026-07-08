@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Row
@@ -98,12 +99,15 @@ fun BarChartRow(
                         .height(barMaxHeight),
                     contentAlignment = Alignment.BottomCenter
                 ) {
-                    // 배경 트랙
+                    // 배경 트랙 — 얇은 중앙 축으로 표시(Fable UI 리뷰: 미기록일이 풀높이 바로 보여
+                    // "데이터가 있는 것"처럼 오독되는 문제 수정, 2026-07-08). 실제 값이 있으면 아래
+                    // "채워진 바"가 전체 너비로 덮어 가려지므로 시각적으로 겹치지 않음
                     Box(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.15f))
+                            .width(3.dp)
+                            .fillMaxHeight()
+                            .clip(RoundedCornerShape(1.5.dp))
+                            .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.35f))
                     )
                     // 채워진 바
                     Box(

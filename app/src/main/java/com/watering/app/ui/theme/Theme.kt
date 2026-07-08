@@ -56,6 +56,12 @@ private val WateringAquaDark = Color(0xFF48CAE4)
 // (설정 화면 Switch 체크 썸 등)에 의도치 않은 회귀가 생기지 않도록 대상 CTA 버튼에만 개별 적용
 val AquaCtaContentColor = Color(0xFF003544)
 
+// 통계 화면 요약 칩(일평균/목표일/주간합) 값 텍스트 색 (Fable UI 리뷰 화면별 findings — 통계)
+// 라이트 모드에서 프라이머리 아쿠아 그대로 쓰면 칩 배경(옅은 회색)과 저대비라 CTA와 동일한 남색으로
+// 교체(2026-07-08). 다크모드는 기존 프라이머리(밝은 아쿠아)가 이미 충분한 대비라 변경하지 않음.
+val AppSummaryValueColor: Color
+    @Composable get() = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else AquaCtaContentColor
+
 private val LightColorScheme = lightColorScheme(
     primary = WateringAqua,
     onPrimary = Color.White,

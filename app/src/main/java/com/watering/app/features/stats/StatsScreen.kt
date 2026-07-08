@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.shadow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -45,6 +46,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.watering.app.R
 import com.watering.app.ui.theme.AppBackgroundGradient
 import com.watering.app.ui.theme.AppCardBackgroundColor
+import com.watering.app.ui.theme.AppSummaryValueColor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -168,6 +170,12 @@ private fun SmartStatsCta(onNavigateToSmartStats: () -> Unit) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+        // 탭 가능 단서 부재 수정 (Fable UI 리뷰 화면별 findings — 통계, 2026-07-08)
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
@@ -240,7 +248,7 @@ private fun SummaryChip(label: String, value: String, modifier: Modifier = Modif
                 text = value,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary,
+                color = AppSummaryValueColor,
                 textAlign = TextAlign.Center
             )
             Spacer(Modifier.height(2.dp))
