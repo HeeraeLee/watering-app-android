@@ -49,6 +49,16 @@ val AppUndoTextColor: Color
 private val WateringAqua = Color(0xFF5DCEE6)
 private val WateringAquaDark = Color(0xFF48CAE4)
 
+// 설정 화면 "더보기" 메뉴 행 아이콘 타일 배경/아이콘 색 (Fable UI 리뷰 화면별 findings — 설정, 2026-07-08)
+// 다크모드에서 라이트 전용 밝은 회백색 타일(#ECECEF)이 딥 틸 배경 위에서 튀어 보인다는 지적으로,
+// 웹 목업 4안 비교 후 "프라이머리 틴트"(다크 프라이머리 16% 반투명 배경 + 다크 프라이머리 아이콘)로 확정.
+// 라이트 모드는 기존 값 유지.
+val SettingsMenuTileBackgroundColor: Color
+    @Composable get() = if (isSystemInDarkTheme()) WateringAquaDark.copy(alpha = 0.16f) else Color(0xFFECECEF)
+
+val SettingsMenuTileIconColor: Color
+    @Composable get() = if (isSystemInDarkTheme()) WateringAquaDark else Color(0xFF5A5A66)
+
 // 아쿠아(primary) 배경 CTA 버튼의 텍스트/아이콘 색 (Fable UI 리뷰 2026-07-08 Top 5 #3)
 // 라이트 기본 onPrimary(흰색)는 파스텔 아쿠아 위에서 약 1.8:1로 WCAG AA(4.5:1) 미달이라,
 // 다크 모드 onPrimary와 동일한 진한 남색을 양 모드 공통으로 사용 — 라이트 약 7.2:1, 다크 약 6.8:1.

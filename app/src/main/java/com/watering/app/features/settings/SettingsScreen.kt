@@ -71,6 +71,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.watering.app.R
 import com.watering.app.ui.theme.AppBackgroundGradient
+import com.watering.app.ui.theme.SettingsMenuTileBackgroundColor
+import com.watering.app.ui.theme.SettingsMenuTileIconColor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -264,7 +266,6 @@ fun SettingsScreen(
 }
 
 private val SettingsAccentColor = Color(0xFF5A5A66)
-private val MenuRowIconBackgroundColor = Color(0xFFECECEF)
 
 @Composable
 private fun SettingsMenuRow(
@@ -280,14 +281,7 @@ private fun SettingsMenuRow(
             .padding(horizontal = 16.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(
-            modifier = Modifier
-                .size(36.dp)
-                .background(MenuRowIconBackgroundColor, RoundedCornerShape(10.dp)),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(icon, contentDescription = null, tint = SettingsAccentColor, modifier = Modifier.size(20.dp))
-        }
+        MenuIconTile(icon)
         Spacer(Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(title, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
@@ -304,6 +298,21 @@ private fun SettingsMenuRow(
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onSurfaceVariant
         )
+    }
+}
+
+// 설정 화면 아이콘 행 공용 타일 (더보기 메뉴 행 / 체중 목표 / CSV 내보내기) — Fable UI 리뷰 findings에서
+// 체중 목표는 타일, CSV 내보내기는 맨 글리프로 처리 방식이 갈려있다는 지적으로 웹 목업 비교 후
+// "전부 타일로 통일" 안 채택(2026-07-08)
+@Composable
+private fun MenuIconTile(icon: androidx.compose.ui.graphics.vector.ImageVector) {
+    Box(
+        modifier = Modifier
+            .size(36.dp)
+            .background(SettingsMenuTileBackgroundColor, RoundedCornerShape(10.dp)),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(icon, contentDescription = null, tint = SettingsMenuTileIconColor, modifier = Modifier.size(20.dp))
     }
 }
 
@@ -395,7 +404,7 @@ private fun WeightGoalRow(subtitle: String, onClick: () -> Unit) {
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(Icons.Filled.MonitorWeight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface)
+        MenuIconTile(Icons.Filled.MonitorWeight)
         Spacer(Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(stringResource(R.string.settings_weight_goal_title), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
@@ -417,7 +426,7 @@ private fun CsvExportRow(onClick: () -> Unit) {
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(Icons.Filled.FileDownload, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface)
+        MenuIconTile(Icons.Filled.FileDownload)
         Spacer(Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(stringResource(R.string.settings_csv_export_title), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
