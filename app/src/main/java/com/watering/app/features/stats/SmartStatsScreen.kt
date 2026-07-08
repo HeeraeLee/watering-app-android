@@ -1,5 +1,6 @@
 package com.watering.app.features.stats
 
+import android.text.format.DateFormat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -19,6 +20,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.LocalDrink
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -41,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -54,6 +57,7 @@ import com.watering.app.ui.theme.AppBackgroundGradient
 import com.watering.app.ui.theme.AppCardBackgroundColor
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -155,7 +159,10 @@ private fun MonthBarChart(stats: List<DayStat>) {
         )
     }
 
-    val formatter = DateTimeFormatter.ofPattern("M/d")
+    // "6/8" 형식이 잔 수(예: "6/8잔")와 혼동된다는 지적(Fable UI 리뷰 화면별 findings — 스마트 통계)으로
+    // 슬래시 없는 로케일별 날짜 형식으로 변경(한국어 "6월 8일", 영어 "Jun 8")
+    val locale = Locale.getDefault()
+    val formatter = DateTimeFormatter.ofPattern(DateFormat.getBestDateTimePattern(locale, "MMMd"), locale)
     val startLabel = LocalDate.parse(stats.first().dateKey).format(formatter)
     val todayLabel = stringResource(R.string.smart_stats_axis_today)
     Spacer(Modifier.height(6.dp))
@@ -208,7 +215,14 @@ private fun HydrationVolumeCard(volumeMl: Int) {
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("🧪", fontSize = 20.sp)
+            // 시험관 이모지가 앱 아이콘 스타일과 안 어울린다는 지적으로 컵 벡터 아이콘으로 교체
+            // (Fable UI 리뷰 화면별 findings — 스마트 통계, 2026-07-08)
+            Icon(
+                imageVector = Icons.Filled.LocalDrink,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(20.dp)
+            )
             Spacer(Modifier.width(8.dp))
             Text(
                 text = stringResource(R.string.smart_stats_hydration_volume, volumeMl),
@@ -231,25 +245,70 @@ private fun AnnualHeatmap(days: List<DailyAchievement?>) {
         }
     }
 
+    // 월/요일 라벨 추가 (Fable UI 리뷰 화면별 findings — 스마트 통계, 2026-07-08). `days`의 마지막
+    // 항목은 ViewModel에서 항상 "오늘"로 채워지므로(null 아님), 그 dateKey를 기준으로 나머지 364개의
+    // 실제 날짜를 역산한다 — null인 날도 위치(index)로 날짜를 알 수 있어 별도 상태 변경 없이 해결.
+    val referenceDate = LocalDate.parse(days.last()!!.dateKey)
+    val firstDate = referenceDate.minusDays((days.size - 1).toLong())
+    val weekdayLabels = stringArrayResource(R.array.weekday_labels_short)
+    val monthFormatter = remember { DateTimeFormatter.ofPattern(DateFormat.getBestDateTimePattern(Locale.getDefault(), "MMM"), Locale.getDefault()) }
+
     val weeks = days.chunked(7)
-    Row(
-        modifier = Modifier.horizontalScroll(scrollState),
-        horizontalArrangement = Arrangement.spacedBy(3.dp)
-    ) {
-        weeks.forEach { week ->
-            Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                week.forEach { day ->
-                    val color = when {
-                        day == null || day.totalCount <= 0 -> MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
-                        day.isAchieved -> GreenColor
-                        else -> AquaColor.copy(alpha = (0.3f + 0.7f * day.achievementRate).toFloat().coerceIn(0.3f, 1f))
+
+    Row {
+        // 요일 라벨(고정, 스크롤 안 됨) — 월 라벨 행 높이만큼 상단 여백을 맞춘다
+        Column(
+            modifier = Modifier.padding(top = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(3.dp)
+        ) {
+            (0 until 7).forEach { row ->
+                val weekday = firstDate.plusDays(row.toLong()).dayOfWeek.value % 7
+                Box(modifier = Modifier.size(width = 16.dp, height = 12.dp), contentAlignment = Alignment.CenterStart) {
+                    Text(weekdayLabels[weekday], style = MaterialTheme.typography.labelSmall, fontSize = 8.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+        }
+
+        Column(modifier = Modifier.horizontalScroll(scrollState)) {
+            // 월 라벨 — 이전 주와 월이 다를 때만 표시(같은 월이 반복 표시되지 않도록)
+            Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                var lastShownMonth = -1
+                weeks.forEachIndexed { weekIndex, _ ->
+                    val weekStartDate = firstDate.plusDays((weekIndex * 7).toLong())
+                    val showLabel = weekStartDate.monthValue != lastShownMonth
+                    if (showLabel) lastShownMonth = weekStartDate.monthValue
+                    Box(modifier = Modifier.width(12.dp), contentAlignment = Alignment.CenterStart) {
+                        if (showLabel) {
+                            Text(
+                                weekStartDate.format(monthFormatter),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontSize = 8.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                softWrap = false
+                            )
+                        }
                     }
-                    Box(
-                        modifier = Modifier
-                            .size(12.dp)
-                            .clip(RoundedCornerShape(3.dp))
-                            .background(color)
-                    )
+                }
+            }
+            Spacer(Modifier.height(4.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                weeks.forEach { week ->
+                    Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                        week.forEach { day ->
+                            val color = when {
+                                day == null || day.totalCount <= 0 -> MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+                                day.isAchieved -> GreenColor
+                                else -> AquaColor.copy(alpha = (0.3f + 0.7f * day.achievementRate).toFloat().coerceIn(0.3f, 1f))
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .size(12.dp)
+                                    .clip(RoundedCornerShape(3.dp))
+                                    .background(color)
+                            )
+                        }
+                    }
                 }
             }
         }
