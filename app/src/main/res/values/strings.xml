@@ -153,8 +153,8 @@
     <string name="onboarding_next">다음</string>
     <string name="onboarding_start">시작하기 🚀</string>
     <string name="onboarding_welcome_title">워터링에\n오신 것을 환영해요!</string>
-    <string name="onboarding_welcome_subtitle">잠금화면에서 한 번의 탭으로\n물 마시기를 기록하세요.</string>
-    <string name="onboarding_feature_widget">잠금화면 위젯으로 빠른 기록</string>
+    <string name="onboarding_welcome_subtitle">앱을 열지 않고, 위젯 한 번의 탭으로\n물 마시기를 기록하세요.</string>
+    <string name="onboarding_feature_widget">홈 화면 위젯으로 빠른 기록</string>
     <string name="onboarding_feature_notification">맞춤형 수분 섭취 알림</string>
     <string name="onboarding_feature_streak">연속 기록으로 동기부여</string>
     <string name="onboarding_goal_title">목표를 설정해요</string>
@@ -312,8 +312,8 @@
 
     <!-- 위젯 -->
     <string name="widget_circular_description">워터링 원형 위젯</string>
-    <string name="widget_rectangular_description">워터링 직사각형 위젯</string>
-    <string name="widget_narrow_description">워터링 좁은 위젯</string>
+    <string name="widget_rectangular_description">워터링 카드형 위젯</string>
+    <string name="widget_narrow_description">워터링 가로형 위젯</string>
     <string name="widget_talkback_hint">물 %1$d / %2$d잔. 탭하여 한 잔 기록</string>
     <string name="widget_app_label">워터링</string>
     <string name="widget_motivation_almost_there">거의 다 왔어요!</string>
@@ -330,7 +330,7 @@
     <string name="widget_theme_butter_yellow">버터옐로우</string>
     <string name="widget_theme_gray_mono">그레이모노</string>
     <string name="settings_section_widget_theme">위젯 테마</string>
-    <string name="feature_widget_theme_description">잠금화면 위젯을 원하는 색상 테마로 꾸며보세요</string>
+    <string name="feature_widget_theme_description">위젯을 원하는 색상 테마로 꾸며보세요</string>
     <string name="settings_widget_theme_guide">선택한 색상이 위젯에 바로 적용돼요</string>
     <string name="settings_widget_theme_preview_label">2×2 위젯 미리보기</string>
 </resources>

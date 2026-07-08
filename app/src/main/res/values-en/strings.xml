@@ -150,8 +150,8 @@
     <string name="onboarding_next">Next</string>
     <string name="onboarding_start">Get Started 🚀</string>
     <string name="onboarding_welcome_title">Welcome to\nWatering!</string>
-    <string name="onboarding_welcome_subtitle">Log your water intake with\na single tap from the lock screen.</string>
-    <string name="onboarding_feature_widget">Quick logging with lock screen widgets</string>
+    <string name="onboarding_welcome_subtitle">No need to open the app —\nlog your water intake with a single widget tap.</string>
+    <string name="onboarding_feature_widget">Quick logging with home screen widgets</string>
     <string name="onboarding_feature_notification">Personalized hydration reminders</string>
     <string name="onboarding_feature_streak">Stay motivated with streaks</string>
     <string name="onboarding_goal_title">Set your goal</string>
@@ -307,8 +307,8 @@
 
     <!-- Widgets -->
     <string name="widget_circular_description">Watering Circular Widget</string>
-    <string name="widget_rectangular_description">Watering Rectangular Widget</string>
-    <string name="widget_narrow_description">Watering Narrow Widget</string>
+    <string name="widget_rectangular_description">Watering Card Widget</string>
+    <string name="widget_narrow_description">Watering Wide Widget</string>
     <string name="widget_talkback_hint">Water %1$d of %2$d glasses. Tap to log one glass</string>
     <string name="widget_app_label">Watering</string>
     <string name="widget_motivation_almost_there">Almost there!</string>
@@ -325,7 +325,7 @@
     <string name="widget_theme_butter_yellow">Butter Yellow</string>
     <string name="widget_theme_gray_mono">Gray Mono</string>
     <string name="settings_section_widget_theme">Widget Theme</string>
-    <string name="feature_widget_theme_description">Customize your lock screen widget with your favorite color theme</string>
+    <string name="feature_widget_theme_description">Customize your widget with your favorite color theme</string>
     <string name="settings_widget_theme_guide">The selected color applies to your widget right away</string>
     <string name="settings_widget_theme_preview_label">2×2 widget preview</string>
 </resources>
