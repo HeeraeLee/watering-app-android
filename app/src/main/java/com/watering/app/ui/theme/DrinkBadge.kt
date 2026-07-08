@@ -21,9 +21,11 @@ import com.watering.app.core.model.DrinkType
 private data class DrinkBadgeColors(val background: Color, val icon: Color)
 
 // 음료 아이콘 원형 뱃지 색상 — 웹 목업 "① 파스텔 필" 안 확정 색상 (2026-07-07).
-// 물은 앱 프라이머리 아쿠아(Theme.kt의 LightColorScheme/DarkColorScheme primaryContainer/onPrimaryContainer)와 동일한 값을 사용.
+// 물은 라이트/다크 모두 하늘색(#CAF0F8) 배경 + 남색 아이콘 사용 — 다크모드 카드 배경(#1C4D49)과
+// 명도가 가까운 남색을 배경으로 쓰면 배지 윤곽이 묻혀 보이는 문제가 있어(Fable UI 리뷰 지적),
+// 라이트 모드와 동일하게 밝은 배경으로 통일함(2026-07-08).
 private fun drinkBadgeColors(type: DrinkType, dark: Boolean): DrinkBadgeColors = when (type) {
-    DrinkType.WATER -> if (dark) DrinkBadgeColors(Color(0xFF004F62), Color(0xFFCAF0F8))
+    DrinkType.WATER -> if (dark) DrinkBadgeColors(Color(0xFFCAF0F8), Color(0xFF004F62))
         else DrinkBadgeColors(Color(0xFFCAF0F8), Color(0xFF003544))
     DrinkType.COFFEE -> if (dark) DrinkBadgeColors(Color(0xFF4A3524), Color(0xFFE3B78E))
         else DrinkBadgeColors(Color(0xFFF0E1D3), Color(0xFF8A5A34))

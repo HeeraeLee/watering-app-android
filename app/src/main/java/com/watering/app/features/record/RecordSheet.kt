@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
@@ -27,6 +28,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.watering.app.R
 import com.watering.app.core.model.DrinkType
+import com.watering.app.ui.theme.AquaCtaContentColor
 import com.watering.app.ui.theme.DrinkBadge
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -87,7 +89,9 @@ fun RecordSheet(
                 enabled = uiState.selectedAmount > 0,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(52.dp)
+                    .height(52.dp),
+                // 파스텔 아쿠아 배경 위 흰 글자 저대비(약 1.8:1) 수정 — AquaCtaContentColor 주석 참고
+                colors = ButtonDefaults.buttonColors(contentColor = AquaCtaContentColor)
             ) {
                 Text(
                     text = stringResource(

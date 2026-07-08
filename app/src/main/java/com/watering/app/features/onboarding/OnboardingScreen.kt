@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -39,7 +40,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,15 +52,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.watering.app.R
+import com.watering.app.ui.theme.AquaCtaContentColor
 
 @Composable
 fun OnboardingScreen(
     viewModel: OnboardingViewModel = hiltViewModel(),
     onComplete: () -> Unit
 ) {
-    var page by remember { mutableIntStateOf(0) }
-    var dailyGoal by remember { mutableIntStateOf(8) }
-    var cupSize by remember { mutableIntStateOf(200) }
+    // 다크모드 전환 등 Activity/Compose 재생성 시 진행 중이던 페이지·입력값이 1페이지로 리셋되던
+    // 문제(Fable UI 리뷰 2026-07-08 Top 5 #5) — remember 대신 rememberSaveable로 재생성에서 복원
+    var page by rememberSaveable { mutableIntStateOf(0) }
+    var dailyGoal by rememberSaveable { mutableIntStateOf(8) }
+    var cupSize by rememberSaveable { mutableIntStateOf(200) }
 
     // 알림 권한 결과를 받으면 바로 온보딩 완료
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
@@ -149,7 +153,9 @@ fun OnboardingScreen(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp)
+                    .height(56.dp),
+                // 파스텔 아쿠아 배경 위 흰 글자 저대비(약 1.8:1) 수정 — AquaCtaContentColor 주석 참고
+                colors = ButtonDefaults.buttonColors(contentColor = AquaCtaContentColor)
             ) {
                 Text(
                     text = if (page < 2) stringResource(R.string.onboarding_next) else stringResource(R.string.onboarding_start),

@@ -43,6 +43,13 @@ val AppInfoBannerBorderColor: Color
 private val WateringAqua = Color(0xFF5DCEE6)
 private val WateringAquaDark = Color(0xFF48CAE4)
 
+// 아쿠아(primary) 배경 CTA 버튼의 텍스트/아이콘 색 (Fable UI 리뷰 2026-07-08 Top 5 #3)
+// 라이트 기본 onPrimary(흰색)는 파스텔 아쿠아 위에서 약 1.8:1로 WCAG AA(4.5:1) 미달이라,
+// 다크 모드 onPrimary와 동일한 진한 남색을 양 모드 공통으로 사용 — 라이트 약 7.2:1, 다크 약 6.8:1.
+// LightColorScheme.onPrimary 자체를 바꾸지 않는 이유: onPrimary를 암묵적으로 쓰는 다른 M3 컴포넌트
+// (설정 화면 Switch 체크 썸 등)에 의도치 않은 회귀가 생기지 않도록 대상 CTA 버튼에만 개별 적용
+val AquaCtaContentColor = Color(0xFF003544)
+
 private val LightColorScheme = lightColorScheme(
     primary = WateringAqua,
     onPrimary = Color.White,

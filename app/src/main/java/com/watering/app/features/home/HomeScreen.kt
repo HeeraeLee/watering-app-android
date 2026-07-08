@@ -75,6 +75,7 @@ import com.watering.app.core.model.WaterEntry
 import com.watering.app.features.record.RecordSheet
 import com.watering.app.ui.theme.AppBackgroundGradient
 import com.watering.app.ui.theme.AppCardBackgroundColor
+import com.watering.app.ui.theme.AquaCtaContentColor
 import com.watering.app.ui.theme.DrinkBadge
 
 private fun Context.findActivity(): Activity? = when (this) {
@@ -177,7 +178,9 @@ fun HomeScreen(
                     onClick = { viewModel.addWater() },
                     modifier = Modifier.fillMaxWidth().height(56.dp),
                     shape = RoundedCornerShape(16.dp),
-                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp),
+                    // 파스텔 아쿠아 배경 위 흰 글자 저대비(약 1.8:1) 수정 — AquaCtaContentColor 주석 참고
+                    colors = ButtonDefaults.buttonColors(contentColor = AquaCtaContentColor)
                 ) {
                     Text(stringResource(R.string.home_drink_water_button), fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
                     Spacer(Modifier.width(8.dp))
