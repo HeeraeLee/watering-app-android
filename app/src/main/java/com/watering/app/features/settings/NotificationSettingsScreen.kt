@@ -17,7 +17,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -38,7 +40,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -208,12 +212,12 @@ private fun TimeAdjusterRow(
     ) {
         Text(label, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
         Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(
+            HourStepButton(
+                icon = Icons.Default.Remove,
+                contentDescription = stringResource(R.string.settings_hour_decrease_content_description),
                 onClick = { onHourChange(hour - 1) },
                 enabled = hour > range.first
-            ) {
-                Icon(Icons.Default.Remove, contentDescription = stringResource(R.string.settings_hour_decrease_content_description), tint = MaterialTheme.colorScheme.onSurface)
-            }
+            )
             Text(
                 text = "%02d:00".format(hour),
                 style = MaterialTheme.typography.bodyLarge,
@@ -221,12 +225,34 @@ private fun TimeAdjusterRow(
                 textAlign = TextAlign.Center,
                 modifier = Modifier.width(56.dp)
             )
-            IconButton(
+            HourStepButton(
+                icon = Icons.Default.Add,
+                contentDescription = stringResource(R.string.settings_hour_increase_content_description),
                 onClick = { onHourChange(hour + 1) },
                 enabled = hour < range.last
-            ) {
-                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.settings_hour_increase_content_description), tint = MaterialTheme.colorScheme.onSurface)
-            }
+            )
         }
+    }
+}
+
+// 시간 스테퍼 터치 타깃이 작고 촘촘하다는 지적 (Fable UI 리뷰 findings — 알림 설정, 2026-07-08)
+// 웹 목업 비교 후 "52dp 버튼 + 연회색 배경 원" 안 채택 — 기본 IconButton(48dp, 배경 없음) 대비
+// 탭 영역이 커지고 시각적으로도 탭 가능한 영역이 원으로 명확히 구분됨
+@Composable
+private fun HourStepButton(
+    icon: ImageVector,
+    contentDescription: String,
+    onClick: () -> Unit,
+    enabled: Boolean
+) {
+    IconButton(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = Modifier
+            .size(52.dp)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))
+    ) {
+        Icon(icon, contentDescription = contentDescription, tint = MaterialTheme.colorScheme.onSurface)
     }
 }

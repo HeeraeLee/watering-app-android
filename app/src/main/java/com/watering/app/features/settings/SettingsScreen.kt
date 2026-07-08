@@ -389,9 +389,13 @@ private fun CupSizeSetting(cupSize: Int, onCupSizeChange: (Int) -> Unit) {
     }
 }
 
+// 선택된 칩 배경(연보라)+흰 텍스트 대비 부족 (Fable UI 리뷰 findings — 알림 설정, 2026-07-08)
+// 컵 크기(설정 화면)/알림 간격(알림 설정 화면)이 이 함수를 공유해서 흰 텍스트를 쓰는데,
+// 배경이 파스텔이라 대비가 약함(White on #B8A8E8 ≈2.1:1). 웹 목업 비교 후 "배경색 자체를
+// 더 진하게" 안 채택 — 텍스트는 흰색 유지, 배경만 어둡게 해 두 화면 모두 자동 반영됨
 @Composable
 internal fun selectedChipColors() = FilterChipDefaults.filterChipColors(
-    selectedContainerColor = Color(0xFFB8A8E8),
+    selectedContainerColor = Color(0xFF9B87D9),
     selectedLabelColor = Color.White
 )
 

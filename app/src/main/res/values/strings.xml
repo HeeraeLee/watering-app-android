@@ -300,6 +300,7 @@
     <string name="settings_privacy_policy">개인정보처리방침</string>
     <string name="privacy_policy_url">https://sites.google.com/view/watering-privacy/%ED%99%88</string>
     <string name="settings_send_feedback">의견 보내기</string>
+    <string name="app_info_version">버전 %1$s (%2$d)</string>
     <string name="support_email" translatable="false">wateringapp.help@gmail.com</string>
 
     <!-- 결제 -->
@@ -332,5 +333,8 @@
     <string name="settings_section_widget_theme">위젯 테마</string>
     <string name="feature_widget_theme_description">위젯을 원하는 색상 테마로 꾸며보세요</string>
     <string name="settings_widget_theme_guide">선택한 색상이 위젯에 바로 적용돼요</string>
-    <string name="settings_widget_theme_preview_label">2×2 위젯 미리보기</string>
+    <string name="settings_widget_theme_preview_label">%1$s 위젯 미리보기</string>
+    <string name="widget_shape_mini">미니형</string>
+    <string name="widget_shape_card">카드형</string>
+    <string name="widget_shape_wide">가로형</string>
 </resources>

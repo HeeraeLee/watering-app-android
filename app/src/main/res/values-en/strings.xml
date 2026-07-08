@@ -296,6 +296,7 @@
     <string name="app_info_intro_4">Hit your daily goal and your streak grows. Get reminders at the times that work best for you.</string>
     <string name="settings_privacy_policy">Privacy Policy</string>
     <string name="settings_send_feedback">Send Feedback</string>
+    <string name="app_info_version">Version %1$s (%2$d)</string>
 
     <!-- Billing -->
     <string name="billing_error_product_unavailable">Couldn\'t load product information.</string>
@@ -327,5 +328,8 @@
     <string name="settings_section_widget_theme">Widget Theme</string>
     <string name="feature_widget_theme_description">Customize your widget with your favorite color theme</string>
     <string name="settings_widget_theme_guide">The selected color applies to your widget right away</string>
-    <string name="settings_widget_theme_preview_label">2×2 widget preview</string>
+    <string name="settings_widget_theme_preview_label">%1$s widget preview</string>
+    <string name="widget_shape_mini">Mini</string>
+    <string name="widget_shape_card">Card</string>
+    <string name="widget_shape_wide">Wide</string>
 </resources>

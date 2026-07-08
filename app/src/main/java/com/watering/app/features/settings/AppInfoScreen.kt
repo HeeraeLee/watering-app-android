@@ -39,6 +39,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.watering.app.BuildConfig
 import com.watering.app.R
 import com.watering.app.ui.theme.AppBackgroundGradient
 
@@ -120,6 +121,18 @@ fun AppInfoScreen(onBack: () -> Unit) {
                         }
                     )
                 }
+                Spacer(Modifier.height(8.dp))
+                // 버전/빌드 번호가 화면 어디에도 없다는 지적(Fable UI 리뷰 findings, 2026-07-08) —
+                // 웹 목업 비교 후 하단 링크 바로 아래에 작은 회색 캡션으로 추가
+                Text(
+                    stringResource(
+                        R.string.app_info_version,
+                        BuildConfig.VERSION_NAME,
+                        BuildConfig.VERSION_CODE
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }
