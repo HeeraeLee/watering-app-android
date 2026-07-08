@@ -306,7 +306,7 @@
     <string name="backup_error_restore_failed">Restore failed. Please check your network connection</string>
 
     <!-- Widgets -->
-    <string name="widget_circular_description">Watering Circular Widget</string>
+    <string name="widget_circular_description">Watering Mini Widget</string>
     <string name="widget_rectangular_description">Watering Card Widget</string>
     <string name="widget_narrow_description">Watering Wide Widget</string>
     <string name="widget_talkback_hint">Water %1$d of %2$d glasses. Tap to log one glass</string>

@@ -311,7 +311,7 @@
     <string name="backup_error_restore_failed">복원에 실패했어요. 네트워크 연결을 확인해주세요</string>
 
     <!-- 위젯 -->
-    <string name="widget_circular_description">워터링 원형 위젯</string>
+    <string name="widget_circular_description">워터링 미니형 위젯</string>
     <string name="widget_rectangular_description">워터링 카드형 위젯</string>
     <string name="widget_narrow_description">워터링 가로형 위젯</string>
     <string name="widget_talkback_hint">물 %1$d / %2$d잔. 탭하여 한 잔 기록</string>
