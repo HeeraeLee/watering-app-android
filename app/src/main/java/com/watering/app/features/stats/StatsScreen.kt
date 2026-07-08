@@ -223,8 +223,6 @@ private fun WeekBarChart(stats: List<DayStat>) {
 
 private val SummaryChipColor: Color
     @Composable get() = if (isSystemInDarkTheme()) Color(0xFF1A4642) else Color(0xFFEDF0F2)
-private val StreakStatCardColor: Color
-    @Composable get() = if (isSystemInDarkTheme()) Color(0xFF1C4D49) else Color(0xFFEDE7FA)
 
 @Composable
 private fun SummaryChip(label: String, value: String, modifier: Modifier = Modifier) {
@@ -260,7 +258,7 @@ private fun SummaryChip(label: String, value: String, modifier: Modifier = Modif
 private fun StreakStatCard(icon: ImageVector, tint: Color, label: String, value: String, modifier: Modifier = Modifier) {
     Surface(
         shape = RoundedCornerShape(14.dp),
-        color = StreakStatCardColor,
+        color = AppCardBackgroundColor,
         shadowElevation = 1.5.dp,
         modifier = modifier
     ) {

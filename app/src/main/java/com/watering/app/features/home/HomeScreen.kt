@@ -75,6 +75,7 @@ import com.watering.app.core.model.WaterEntry
 import com.watering.app.features.record.RecordSheet
 import com.watering.app.ui.theme.AppBackgroundGradient
 import com.watering.app.ui.theme.AppCardBackgroundColor
+import com.watering.app.ui.theme.AppUndoTextColor
 import com.watering.app.ui.theme.AquaCtaContentColor
 import com.watering.app.ui.theme.DrinkBadge
 
@@ -240,7 +241,7 @@ fun HomeScreen(
                         Text(
                             stringResource(R.string.home_undo_last),
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.error,
+                            color = AppUndoTextColor,
                             modifier = Modifier
                                 .clickable(onClick = { showUndoConfirmDialog = true })
                                 .semantics { role = Role.Button }

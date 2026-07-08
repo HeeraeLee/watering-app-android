@@ -39,6 +39,12 @@ val AppInfoBannerBackgroundColor: Color
 val AppInfoBannerBorderColor: Color
     @Composable get() = if (isSystemInDarkTheme()) Color(0xFFF5C860) else Color.Transparent
 
+// 홈 화면 "마지막 취소" 텍스트 색 (Fable UI 리뷰 화면별 findings — 홈)
+// 다크모드에서 기본 M3 error 색이 저대비로 보인다는 지적으로, 웹 목업 비교 후 소프트 로즈로 확정
+// (2026-07-08). 라이트 모드는 기존과 동일하게 테마 error 색 그대로 사용.
+val AppUndoTextColor: Color
+    @Composable get() = if (isSystemInDarkTheme()) Color(0xFFFFB4AB) else MaterialTheme.colorScheme.error
+
 // 파스텔 옵션 N 확정 적용 (#7CDAED 근처 변형 중 선택)
 private val WateringAqua = Color(0xFF5DCEE6)
 private val WateringAquaDark = Color(0xFF48CAE4)

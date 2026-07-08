@@ -28,6 +28,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.watering.app.R
 import com.watering.app.core.model.DrinkType
+import com.watering.app.ui.theme.AppCardBackgroundColor
 import com.watering.app.ui.theme.AquaCtaContentColor
 import com.watering.app.ui.theme.DrinkBadge
 
@@ -43,7 +44,10 @@ fun RecordSheet(
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        sheetState = sheetState
+        sheetState = sheetState,
+        // 다크모드 기본 컨테이너 색이 순검정에 가까워 홈의 딥 틸 배경과 이질감이 있던 문제 수정
+        // (Fable UI 리뷰 화면별 findings — 기록 시트). 앱 공용 카드 색으로 통일
+        containerColor = AppCardBackgroundColor
     ) {
         Column(
             modifier = Modifier
