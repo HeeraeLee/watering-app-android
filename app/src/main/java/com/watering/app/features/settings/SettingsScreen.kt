@@ -5,6 +5,7 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -265,7 +266,11 @@ fun SettingsScreen(
     }
 }
 
-private val SettingsAccentColor = Color(0xFF5A5A66)
+// 라이트모드 차콜 그레이(#5A5A66)는 다크모드 배경(딥 틸 그라디언트)에서 대비 1.74:1까지 떨어져
+// 거의 안 보이던 문제(2026-07-09) — 웹 목업 6안 비교 후 "골드"(연속 기록 카드 보더와 동일 계열)
+// 채택, 대비 7.51:1
+private val SettingsAccentColor: Color
+    @Composable get() = if (isSystemInDarkTheme()) Color(0xFFF5C860) else Color(0xFF5A5A66)
 
 @Composable
 private fun SettingsMenuRow(
