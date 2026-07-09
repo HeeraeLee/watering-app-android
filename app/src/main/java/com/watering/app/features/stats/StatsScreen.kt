@@ -126,6 +126,7 @@ fun StatsScreen(
                             tint = MaterialTheme.colorScheme.tertiary,
                             label = stringResource(R.string.label_current_streak),
                             value = stringResource(R.string.streak_days_value, uiState.currentStreak),
+                            lightBackground = Color(0xFFFBE9DD),
                             modifier = Modifier.weight(1f)
                         )
                         StreakStatCard(
@@ -133,6 +134,7 @@ fun StatsScreen(
                             tint = MaterialTheme.colorScheme.secondary,
                             label = stringResource(R.string.label_longest_streak),
                             value = stringResource(R.string.streak_days_value, uiState.longestStreak),
+                            lightBackground = Color(0xFFFBF0D6),
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -264,14 +266,24 @@ private fun SummaryChip(label: String, value: String, modifier: Modifier = Modif
     }
 }
 
-// 다크모드에서 바깥 SectionCard와 배경색(AppCardBackgroundColor)이 동일해 경계가 안 보이던 문제 —
-// 배경은 그대로 두고 앱 정보 배너와 같은 골드 보더(AppInfoBannerBorderColor, 라이트모드는 투명이라
-// 자동으로 무보더 유지)로 구분(2026-07-09, 웹 목업 6안 비교 후 "골드 보더" 채택)
+// 바깥 SectionCard와 배경색(AppCardBackgroundColor)이 동일해 경계가 안 보이던 문제(2026-07-09).
+// 다크모드는 배경 유지 + 앱 정보 배너와 같은 골드 보더(AppInfoBannerBorderColor)로 구분(웹 목업
+// 6안 중 "골드 보더" 채택). 라이트모드는 보더 대신 카드별로 다른 파스텔 배경(lightBackground)을
+// 써서 구분 — 현재 연속(살구빛)/최장 연속(골드빛)이 서로도 구분되도록(웹 목업 6안 중 "아이콘
+// 컬러 매칭" 채택)
 @Composable
-private fun StreakStatCard(icon: ImageVector, tint: Color, label: String, value: String, modifier: Modifier = Modifier) {
+private fun StreakStatCard(
+    icon: ImageVector,
+    tint: Color,
+    label: String,
+    value: String,
+    lightBackground: Color,
+    modifier: Modifier = Modifier
+) {
+    val isDark = isSystemInDarkTheme()
     Surface(
         shape = RoundedCornerShape(14.dp),
-        color = AppCardBackgroundColor,
+        color = if (isDark) AppCardBackgroundColor else lightBackground,
         border = BorderStroke(1.5.dp, AppInfoBannerBorderColor),
         shadowElevation = 1.5.dp,
         modifier = modifier
