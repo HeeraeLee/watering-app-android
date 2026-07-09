@@ -5,6 +5,7 @@ import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
@@ -32,6 +33,25 @@ class AuthService @Inject constructor(
 
     // activityContext는 반드시 Activity Context여야 한다 (Credential Manager 시스템 UI 표시용)
     suspend fun signIn(activityContext: Context): Result<FirebaseUser> = runCatching {
+        val firebaseCredential = fetchGoogleCredential(activityContext)
+        firebaseAuth.signInWithCredential(firebaseCredential).await().user
+            ?: error("로그인한 사용자 정보를 가져오지 못했습니다")
+    }
+
+    fun signOut() {
+        firebaseAuth.signOut()
+    }
+
+    // Firebase는 계정 삭제처럼 민감한 작업 전에 최근 로그인(recent login)을 요구한다 —
+    // 세션이 오래됐으면 delete()가 requires-recent-login 에러로 실패하므로, 항상 재인증부터 하고 삭제한다
+    suspend fun deleteAccount(activityContext: Context): Result<Unit> = runCatching {
+        val user = firebaseAuth.currentUser ?: error("로그인 상태가 아닙니다")
+        val firebaseCredential = fetchGoogleCredential(activityContext)
+        user.reauthenticate(firebaseCredential).await()
+        user.delete().await()
+    }
+
+    private suspend fun fetchGoogleCredential(activityContext: Context): AuthCredential {
         val googleIdOption = GetGoogleIdOption.Builder()
             .setFilterByAuthorizedAccounts(false)
             .setServerClientId(context.getString(R.string.default_web_client_id))
@@ -44,13 +64,6 @@ class AuthService @Inject constructor(
             .getCredential(activityContext, request)
             .credential
         val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
-        val firebaseCredential = GoogleAuthProvider.getCredential(googleIdTokenCredential.idToken, null)
-
-        firebaseAuth.signInWithCredential(firebaseCredential).await().user
-            ?: error("로그인한 사용자 정보를 가져오지 못했습니다")
-    }
-
-    fun signOut() {
-        firebaseAuth.signOut()
+        return GoogleAuthProvider.getCredential(googleIdTokenCredential.idToken, null)
     }
 }

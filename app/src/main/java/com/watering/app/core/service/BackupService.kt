@@ -71,6 +71,10 @@ class BackupService @Inject constructor(
         documentRef(uid).get().await().getLong(Fields.BACKED_UP_AT)
     }.getOrNull()
 
+    suspend fun deleteBackup(uid: String): Result<Unit> = runCatching {
+        documentRef(uid).delete().await()
+    }
+
     private fun documentRef(uid: String) = firestore.collection(COLLECTION).document(uid)
 
     internal suspend fun applyPayload(payload: BackupPayload) {

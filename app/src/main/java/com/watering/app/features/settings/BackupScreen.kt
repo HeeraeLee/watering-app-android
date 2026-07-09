@@ -65,6 +65,7 @@ fun BackupScreen(
     val backupUiState by backupViewModel.backupUiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     var showRestoreDialog by remember { mutableStateOf(false) }
+    var showDeleteAccountDialog by remember { mutableStateOf(false) }
 
     if (showRestoreDialog) {
         AlertDialog(
@@ -81,6 +82,27 @@ fun BackupScreen(
             },
             dismissButton = {
                 TextButton(onClick = { showRestoreDialog = false }) {
+                    Text(stringResource(R.string.settings_dialog_cancel))
+                }
+            }
+        )
+    }
+
+    if (showDeleteAccountDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteAccountDialog = false },
+            title = { Text(stringResource(R.string.settings_delete_account_confirm_title)) },
+            text = { Text(stringResource(R.string.settings_delete_account_confirm_body)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    backupViewModel.deleteAccountAndData(context)
+                    showDeleteAccountDialog = false
+                }) {
+                    Text(stringResource(R.string.settings_delete_account_confirm_button), color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteAccountDialog = false }) {
                     Text(stringResource(R.string.settings_dialog_cancel))
                 }
             }
@@ -109,7 +131,8 @@ fun BackupScreen(
                     onSignIn = { backupViewModel.signIn(context) },
                     onSignOut = backupViewModel::signOut,
                     onBackup = backupViewModel::backup,
-                    onRestoreClick = { showRestoreDialog = true }
+                    onRestoreClick = { showRestoreDialog = true },
+                    onDeleteAccountClick = { showDeleteAccountDialog = true }
                 )
             }
         }
@@ -123,7 +146,8 @@ private fun BackupSection(
     onSignIn: () -> Unit,
     onSignOut: () -> Unit,
     onBackup: () -> Unit,
-    onRestoreClick: () -> Unit
+    onRestoreClick: () -> Unit,
+    onDeleteAccountClick: () -> Unit
 ) {
     val infoColor = MaterialTheme.colorScheme.primary
     val isLoading = backupUiState is BackupUiState.Loading
@@ -202,6 +226,16 @@ private fun BackupSection(
                 ) {
                     Text(stringResource(R.string.settings_backup_restore))
                 }
+            }
+            TextButton(
+                onClick = onDeleteAccountClick,
+                enabled = !isLoading,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    stringResource(R.string.settings_delete_account_button),
+                    color = MaterialTheme.colorScheme.error
+                )
             }
         }
 

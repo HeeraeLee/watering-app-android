@@ -78,4 +78,17 @@ class BackupViewModel @Inject constructor(
                 .onFailure { _backupUiState.value = BackupUiState.Error(context.getString(R.string.backup_error_restore_failed)) }
         }
     }
+
+    // Firestore 백업 문서를 먼저 지운 뒤 Auth 계정을 삭제한다 — 순서를 바꾸면 계정 삭제 후
+    // 로그아웃 상태가 돼 보안 규칙(auth.uid == 문서 uid)에 막혀 백업 문서를 지울 수 없다
+    fun deleteAccountAndData(activityContext: Context) {
+        val uid = authService.currentUser.value?.uid ?: return
+        _backupUiState.value = BackupUiState.Loading
+        viewModelScope.launch {
+            backupService.deleteBackup(uid)
+                .mapCatching { authService.deleteAccount(activityContext).getOrThrow() }
+                .onSuccess { _backupUiState.value = BackupUiState.Idle }
+                .onFailure { _backupUiState.value = BackupUiState.Error(context.getString(R.string.backup_error_delete_account_failed)) }
+        }
+    }
 }
