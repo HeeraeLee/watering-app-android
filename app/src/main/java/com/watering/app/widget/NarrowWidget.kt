@@ -70,11 +70,12 @@ private fun NarrowWidgetContent(state: WidgetState) {
     val barTotal = (size.width - 146.dp).coerceAtLeast(8.dp)
     val barFill = (barTotal * rate).coerceAtLeast(0.dp)
 
-    // 목표 달성 시 다크모드 여부와 무관하게 테마 색 배경 + 흰 텍스트로 반전 — 다크모드의 기존(미달성) 스타일은 그대로 유지
-    val bgColor = if (isAchieved) accent else if (isDark) Color(0xEE0D1B2A) else Color.White
-    val textColor = if (isAchieved || isDark) Color.White else Color(0xFF0D1B2A)
-    val barTrack = if (isAchieved) Color.White.copy(alpha = 0.3f) else if (isDark) Color.White.copy(alpha = 0.15f) else accent.copy(alpha = 0.12f)
-    val foregroundAccent = if (isAchieved) Color.White else accent
+    // 목표 달성 시 다크모드 여부와 무관하게 테마 색 배경으로 반전 — 다크모드의 기존(미달성) 스타일은 그대로 유지
+    val achievedText = readableTextColor(accent)
+    val bgColor = if (isAchieved) accent else if (isDark) WidgetDarkBg else Color.White
+    val textColor = if (isAchieved) achievedText else if (isDark) Color.White else Color(0xFF0D1B2A)
+    val barTrack = if (isAchieved) achievedText.copy(alpha = 0.3f) else if (isDark) Color.White.copy(alpha = 0.15f) else accent.copy(alpha = 0.12f)
+    val foregroundAccent = if (isAchieved) achievedText else accent
 
     Row(
         modifier = GlanceModifier

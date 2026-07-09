@@ -41,8 +41,6 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.watering.app.R
 
-private val DarkBg = Color(0xEE0D1B2A)
-
 class RectangularWidget : GlanceAppWidget() {
     override val sizeMode = SizeMode.Exact
 
@@ -72,12 +70,13 @@ private fun RectangularWidgetContent(state: WidgetState) {
         else                         -> context.getString(R.string.widget_motivation_time_to_drink)
     }
 
-    // 목표 달성 시 다크모드 여부와 무관하게 테마 색 배경 + 흰 텍스트로 반전 — 다크모드의 기존(미달성) 스타일은 그대로 유지
-    val bgColor = if (isAchieved) accent else if (isDark) DarkBg else Color.White
-    val primaryText = if (isAchieved || isDark) Color.White else Color(0xFF0D1B2A)
-    val secondaryText = if (isAchieved) Color.White.copy(alpha = 0.7f) else if (isDark) Color.White.copy(alpha = 0.5f) else Color(0xFF888888)
-    val barTrack = if (isAchieved) Color.White.copy(alpha = 0.3f) else if (isDark) Color.White.copy(alpha = 0.15f) else accent.copy(alpha = 0.12f)
-    val foregroundAccent = if (isAchieved) Color.White else accent
+    // 목표 달성 시 다크모드 여부와 무관하게 테마 색 배경으로 반전 — 다크모드의 기존(미달성) 스타일은 그대로 유지
+    val achievedText = readableTextColor(accent)
+    val bgColor = if (isAchieved) accent else if (isDark) WidgetDarkBg else Color.White
+    val primaryText = if (isAchieved) achievedText else if (isDark) Color.White else Color(0xFF0D1B2A)
+    val secondaryText = if (isAchieved) achievedText.copy(alpha = 0.7f) else if (isDark) Color.White.copy(alpha = 0.5f) else Color(0xFF888888)
+    val barTrack = if (isAchieved) achievedText.copy(alpha = 0.3f) else if (isDark) Color.White.copy(alpha = 0.15f) else accent.copy(alpha = 0.12f)
+    val foregroundAccent = if (isAchieved) achievedText else accent
 
     Box(
         modifier = GlanceModifier
