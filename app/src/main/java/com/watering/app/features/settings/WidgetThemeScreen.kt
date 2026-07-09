@@ -235,7 +235,8 @@ private fun CardWidgetPreview(color: Color) {
             .height(220.dp)
             .clip(RoundedCornerShape(20.dp))
             .background(surfaceColor)
-            .padding(16.dp)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Center
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(

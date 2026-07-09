@@ -63,11 +63,13 @@ private fun CircularWidgetContent(state: WidgetState) {
     val trackWidth = (size.width - 20.dp) * 0.85f
     val barWidth = trackWidth * rate
 
-    // 목표 달성 시 다크모드 여부와 무관하게 테마 색 배경으로 반전 — 다크모드의 기존(미달성) 스타일은 그대로 유지
+    // 목표 달성 시 다크모드 여부와 무관하게 테마 색 배경으로 반전 — 다크모드의 기존(미달성) 스타일은 그대로 유지.
+    // 미달성 상태의 아이콘/숫자/진행바는 라이트·다크 공통으로 테마 색(accent)을 그대로 사용 —
+    // 다크모드라고 흰색으로 덮으면 위젯 테마 선택이 다크모드에서 전혀 티가 안 나는 문제가 있었음
     val bgColor = if (isAchieved) accent else if (isDark) WidgetDarkBg else Color.White
-    val textColor = if (isAchieved) readableTextColor(accent) else if (isDark) Color.White else accent
+    val textColor = if (isAchieved) readableTextColor(accent) else accent
     val barTrackColor = if (isAchieved) textColor.copy(alpha = 0.3f) else if (isDark) Color.White.copy(alpha = 0.3f) else accent.copy(alpha = 0.15f)
-    val barFillColor = if (isAchieved) textColor else if (isDark) Color.White else accent
+    val barFillColor = if (isAchieved) textColor else accent
 
     Box(
         modifier = GlanceModifier
