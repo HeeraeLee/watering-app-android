@@ -9,8 +9,6 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <!-- Health Connect — 물 마시기는 저장만 하므로 쓰기 권한만 선언(읽기는 쓰지 않음) -->
     <uses-permission android:name="android.permission.health.WRITE_HYDRATION" />
-    <!-- 스마트 목표 추천(Phase 3)에서 체중 읽기용 — 지금 함께 선언해 재심사 방지 -->
-    <uses-permission android:name="android.permission.health.READ_WEIGHT" />
 
     <!-- Firebase Analytics가 자동으로 추가하는 광고 식별자 권한 제거 — 앱은 광고/개인화 기능이 없고
          "광고 식별자 사용 안 함" 방침을 유지하므로 명시적으로 opt-out -->
