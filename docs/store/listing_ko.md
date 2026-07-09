@@ -91,7 +91,8 @@ Play Console 콘텐츠 등급 설문 별도 진행 필요 (건강 정보 수집 
 
 ## 아이콘
 
-`docs/store/play_store_icon_512.png` (512×512, `ic_launcher_icon.png` 원본 리사이즈)
+`docs/store/play_store_icon_512.png` (512×512, `app/src/main/ic_launcher-playstore.png` 원본 —
+v0.31.11에서 교체된 물방울 캐릭터 "CHEERS!" 런처 아이콘과 동일)
 
 ## 피처 그래픽 (1024×500)
 
