@@ -297,7 +297,10 @@ private fun AnnualHeatmap(days: List<DailyAchievement?>) {
                     Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
                         week.forEach { day ->
                             val color = when {
-                                day == null || day.totalCount <= 0 -> MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+                                // alpha 0.15는 다크모드 카드 배경(#1C4D49) 위에서 대비 1.18:1로 격자가
+                                // 거의 안 보이던 문제(2026-07-09) — BarChartRow의 배경 트랙과 동일한
+                                // 0.35로 통일
+                                day == null || day.totalCount <= 0 -> MaterialTheme.colorScheme.outline.copy(alpha = 0.35f)
                                 day.isAchieved -> GreenColor
                                 else -> AquaColor.copy(alpha = (0.3f + 0.7f * day.achievementRate).toFloat().coerceIn(0.3f, 1f))
                             }
@@ -318,7 +321,7 @@ private fun AnnualHeatmap(days: List<DailyAchievement?>) {
 @Composable
 private fun HeatmapLegend() {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        LegendSwatch(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f))
+        LegendSwatch(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f))
         Text(
             stringResource(R.string.smart_stats_legend_none),
             style = MaterialTheme.typography.labelSmall,
