@@ -1,5 +1,6 @@
 package com.watering.app.features.stats
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -46,6 +47,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.watering.app.R
 import com.watering.app.ui.theme.AppBackgroundGradient
 import com.watering.app.ui.theme.AppCardBackgroundColor
+import com.watering.app.ui.theme.AppInfoBannerBorderColor
 import com.watering.app.ui.theme.AppSummaryValueColor
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -262,11 +264,15 @@ private fun SummaryChip(label: String, value: String, modifier: Modifier = Modif
     }
 }
 
+// 다크모드에서 바깥 SectionCard와 배경색(AppCardBackgroundColor)이 동일해 경계가 안 보이던 문제 —
+// 배경은 그대로 두고 앱 정보 배너와 같은 골드 보더(AppInfoBannerBorderColor, 라이트모드는 투명이라
+// 자동으로 무보더 유지)로 구분(2026-07-09, 웹 목업 6안 비교 후 "골드 보더" 채택)
 @Composable
 private fun StreakStatCard(icon: ImageVector, tint: Color, label: String, value: String, modifier: Modifier = Modifier) {
     Surface(
         shape = RoundedCornerShape(14.dp),
         color = AppCardBackgroundColor,
+        border = BorderStroke(1.5.dp, AppInfoBannerBorderColor),
         shadowElevation = 1.5.dp,
         modifier = modifier
     ) {
