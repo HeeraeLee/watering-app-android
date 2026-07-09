@@ -24,6 +24,8 @@ private data class DrinkBadgeColors(val background: Color, val icon: Color)
 // 물은 라이트/다크 모두 하늘색(#CAF0F8) 배경 + 남색 아이콘 사용 — 다크모드 카드 배경(#1C4D49)과
 // 명도가 가까운 남색을 배경으로 쓰면 배지 윤곽이 묻혀 보이는 문제가 있어(Fable UI 리뷰 지적),
 // 라이트 모드와 동일하게 밝은 배경으로 통일함(2026-07-08).
+// 다크모드 커피/주스/우유 배지가 전부 짙은 브라운 계열로 겹쳐 보인다는 지적으로(2026-07-09),
+// 주스는 머스타드골드, 우유는 쿨그레이(무채색)로 분리 — 라이트 모드 색은 변경하지 않음
 private fun drinkBadgeColors(type: DrinkType, dark: Boolean): DrinkBadgeColors = when (type) {
     DrinkType.WATER -> if (dark) DrinkBadgeColors(Color(0xFFCAF0F8), Color(0xFF004F62))
         else DrinkBadgeColors(Color(0xFFCAF0F8), Color(0xFF003544))
@@ -31,9 +33,9 @@ private fun drinkBadgeColors(type: DrinkType, dark: Boolean): DrinkBadgeColors =
         else DrinkBadgeColors(Color(0xFFF0E1D3), Color(0xFF8A5A34))
     DrinkType.TEA -> if (dark) DrinkBadgeColors(Color(0xFF204334), Color(0xFF9BDCB4))
         else DrinkBadgeColors(Color(0xFFDCEEE0), Color(0xFF4C7A5D))
-    DrinkType.JUICE -> if (dark) DrinkBadgeColors(Color(0xFF5A3D14), Color(0xFFFFC978))
+    DrinkType.JUICE -> if (dark) DrinkBadgeColors(Color(0xFF5E4A0F), Color(0xFFFFDD70))
         else DrinkBadgeColors(Color(0xFFFCE6C8), Color(0xFFC7791E))
-    DrinkType.MILK -> if (dark) DrinkBadgeColors(Color(0xFF4A4432), Color(0xFFEFE6C9))
+    DrinkType.MILK -> if (dark) DrinkBadgeColors(Color(0xFF3A3D42), Color(0xFFE8ECEF))
         else DrinkBadgeColors(Color(0xFFF2ECDC), Color(0xFF9C8459))
     DrinkType.OTHER -> if (dark) DrinkBadgeColors(Color(0xFF3A2C52), Color(0xFFCBB5EE))
         else DrinkBadgeColors(Color(0xFFEAE1F5), Color(0xFF7B5EA7))
