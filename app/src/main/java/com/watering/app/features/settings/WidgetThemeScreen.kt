@@ -184,12 +184,14 @@ private fun WidgetPreviewCard(color: Color, shape: WidgetPreviewShape) {
     }
 }
 
+// 크기·모서리 반경은 실기기(Galaxy A25, One UI 1x1 셀) 실측값 기준 — 완전한 원이 아니라
+// 둥근 사각형(스퀴클)에 가까움. cornerRadius 24.dp는 CircularWidget.kt와 동일한 값을 그대로 사용
 @Composable
 private fun MiniWidgetPreview(color: Color) {
     Box(
         modifier = Modifier
-            .size(96.dp)
-            .clip(RoundedCornerShape(48.dp))
+            .size(width = 80.dp, height = 94.dp)
+            .clip(RoundedCornerShape(24.dp))
             .background(color),
         contentAlignment = Alignment.Center
     ) {
@@ -198,9 +200,9 @@ private fun MiniWidgetPreview(color: Color) {
                 painter = painterResource(R.drawable.ic_water_drop),
                 contentDescription = null,
                 tint = Color.White,
-                modifier = Modifier.size(20.dp)
+                modifier = Modifier.size(18.dp)
             )
-            Text("8", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 26.sp)
+            Text("8", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 28.sp)
             Spacer(Modifier.height(6.dp))
             Box(
                 modifier = Modifier
@@ -221,14 +223,17 @@ private fun MiniWidgetPreview(color: Color) {
     }
 }
 
+// 크기·모서리 반경은 실기기(Galaxy A25, One UI 2x2 셀) 실측값 기준 — 화면 전체 폭이 아니라
+// 가로보다 세로가 긴 카드. cornerRadius 20.dp는 RectangularWidget.kt와 동일한 값을 그대로 사용
 @Composable
 private fun CardWidgetPreview(color: Color) {
     val surfaceColor = if (isSystemInDarkTheme()) Color(0xFF0D1B2A) else Color.White
     val onSurface = if (isSystemInDarkTheme()) Color.White else Color(0xFF0D1B2A)
     Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
+            .width(190.dp)
+            .height(220.dp)
+            .clip(RoundedCornerShape(20.dp))
             .background(surfaceColor)
             .padding(16.dp)
     ) {
@@ -244,9 +249,9 @@ private fun CardWidgetPreview(color: Color) {
         }
         Spacer(Modifier.height(6.dp))
         Row(verticalAlignment = Alignment.Bottom) {
-            Text("6", fontSize = 32.sp, fontWeight = FontWeight.Bold, color = onSurface)
+            Text("6", fontSize = 38.sp, fontWeight = FontWeight.Bold, color = onSurface)
             Spacer(Modifier.width(4.dp))
-            Text(stringResource(R.string.glasses_with_slash, 8), fontSize = 13.sp, color = onSurface.copy(alpha = 0.6f))
+            Text(stringResource(R.string.glasses_with_slash, 8), fontSize = 14.sp, color = onSurface.copy(alpha = 0.6f))
         }
         Spacer(Modifier.height(6.dp))
         Box(
@@ -267,49 +272,52 @@ private fun CardWidgetPreview(color: Color) {
         Spacer(Modifier.height(6.dp))
         Text(
             stringResource(R.string.widget_motivation_almost_there),
-            fontSize = 12.sp,
+            fontSize = 11.5.sp,
             color = onSurface.copy(alpha = 0.6f)
         )
     }
 }
 
+// 크기·모서리 반경은 실기기(Galaxy A25, One UI 2x1 셀) 실측값 기준 — 가로:세로 비율 약 2:1.
+// cornerRadius 16.dp는 NarrowWidget.kt와 동일한 값을 그대로 사용
 @Composable
 private fun WideWidgetPreview(color: Color) {
     val surfaceColor = if (isSystemInDarkTheme()) Color(0xFF0D1B2A) else Color.White
     val onSurface = if (isSystemInDarkTheme()) Color.White else Color(0xFF0D1B2A)
     Row(
         modifier = Modifier
-            .fillMaxWidth()
+            .width(170.dp)
+            .height(86.dp)
             .clip(RoundedCornerShape(16.dp))
             .background(surfaceColor)
-            .padding(horizontal = 16.dp, vertical = 14.dp),
+            .padding(horizontal = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
             painter = painterResource(R.drawable.ic_water_drop),
             contentDescription = null,
             tint = color,
-            modifier = Modifier.size(20.dp)
+            modifier = Modifier.size(16.dp)
         )
-        Spacer(Modifier.width(8.dp))
-        Text("6", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = onSurface)
-        Spacer(Modifier.width(8.dp))
+        Spacer(Modifier.width(6.dp))
+        Text("6", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = onSurface)
+        Spacer(Modifier.width(6.dp))
         Box(
             modifier = Modifier
                 .weight(1f)
-                .height(6.dp)
-                .clip(RoundedCornerShape(3.dp))
+                .height(4.dp)
+                .clip(RoundedCornerShape(2.dp))
                 .background(color.copy(alpha = 0.15f))
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxHeight()
                     .fillMaxWidth(0.75f)
-                    .clip(RoundedCornerShape(3.dp))
+                    .clip(RoundedCornerShape(2.dp))
                     .background(color)
             )
         }
-        Spacer(Modifier.width(8.dp))
-        Text("75%", fontSize = 13.sp, color = onSurface.copy(alpha = 0.6f))
+        Spacer(Modifier.width(6.dp))
+        Text("75%", fontSize = 12.sp, color = onSurface.copy(alpha = 0.6f))
     }
 }
