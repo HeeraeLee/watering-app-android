@@ -192,14 +192,14 @@ fun SettingsScreen(
                     )
                 }
 
-                item { Spacer(Modifier.height(8.dp)) }
+                item { Spacer(Modifier.height(16.dp)) }
 
                 item {
                     WeightGoalRow(subtitle = weightGoalSubtitle, onClick = viewModel::openWeightGoalDialog)
                 }
 
-                item { Spacer(Modifier.height(8.dp)) }
-
+                // 체중 목표/CSV 내보내기 사이는 "더보기" 섹션 메뉴 행들과 같은 패턴으로 —
+                // 별도 Spacer 없이 각 Row 자체의 vertical padding(12dp)만으로 간격을 둠(2026-07-10)
                 item {
                     CsvExportRow(onClick = viewModel::exportCsv)
                 }
@@ -397,7 +397,7 @@ private fun CupSizeSetting(goal: Int, cupSize: Int, onCupSizeChange: (Int) -> Un
                 )
             }
         }
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(16.dp))
         GoalGlassesEquivalentRow(glasses = goal)
     }
 }
@@ -470,6 +470,12 @@ private fun WeightGoalDialogs(
         title = { Text(stringResource(R.string.settings_weight_goal_dialog_title)) },
         text = {
             Column {
+                Text(
+                    stringResource(R.string.settings_weight_goal_explanation),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.height(12.dp))
                 OutlinedTextField(
                     value = uiState.weightInput,
                     onValueChange = onWeightInputChange,

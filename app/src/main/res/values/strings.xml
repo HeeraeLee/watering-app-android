@@ -238,6 +238,7 @@
     <string name="settings_csv_export_subtitle">전체 물 마시기 기록을 CSV 파일로 저장하고 공유해요</string>
     <string name="settings_csv_export_error">CSV 내보내기에 실패했어요. 다시 시도해주세요</string>
     <string name="settings_weight_goal_dialog_title">몸무게로 목표 계산하기</string>
+    <string name="settings_weight_goal_explanation">몸무게에 따라 필요한 수분량이 달라져요. 체중 1kg당 약 33ml를 기준으로 나에게 맞는 목표를 계산해드려요</string>
     <string name="settings_weight_goal_input_label">몸무게 (kg)</string>
     <string name="settings_weight_goal_recommended">추천 목표: 하루 %1$d잔</string>
     <string name="settings_weight_goal_confirm_apply">적용</string>
@@ -253,8 +254,8 @@
     <string name="settings_hydration_sync_permission_denied_body">Health Connect 쓰기 권한을 허용하지 않으면 자동 저장을 켤 수 없어요. 다른 기능에는 영향이 없어요.</string>
     <string name="settings_health_connect_open_play_store">Play 스토어 열기</string>
     <string name="settings_health_connect_dialog_ok">확인</string>
-    <string name="settings_hydration_sync_other_app_title">다른 건강 앱에서 안 보이나요?</string>
-    <string name="settings_hydration_sync_other_app_body">탭하면 Health Connect 설정으로 이동해요</string>
+    <string name="settings_hydration_sync_other_app_title">왜 삼성 헬스에 안 보이나요?</string>
+    <string name="settings_hydration_sync_other_app_body">삼성 헬스가 최근 업데이트에서 수분 기능을 잠시 뺐어요. 복구 전까지는 Google Health 등 다른 앱으로 확인해보세요</string>
     <string name="settings_section_notification">알림 설정</string>
     <string name="settings_section_backup">백업 및 복원</string>
     <string name="settings_notification_switch_title">물 마시기 알림</string>

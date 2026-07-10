@@ -235,6 +235,7 @@
     <string name="settings_csv_export_subtitle">Save and share your full drinking history as a CSV file</string>
     <string name="settings_csv_export_error">Couldn\'t export CSV. Please try again</string>
     <string name="settings_weight_goal_dialog_title">Calculate Goal from Weight</string>
+    <string name="settings_weight_goal_explanation">Water needs vary by body weight. We calculate your personal goal based on about 33ml per kg of body weight</string>
     <string name="settings_weight_goal_input_label">Weight (kg)</string>
     <string name="settings_weight_goal_recommended">Recommended goal: %1$d glasses a day</string>
     <string name="settings_weight_goal_confirm_apply">Apply</string>
@@ -250,8 +251,8 @@
     <string name="settings_hydration_sync_permission_denied_body">Without Health Connect write permission, auto-save can\'t be turned on. This won\'t affect any other feature.</string>
     <string name="settings_health_connect_open_play_store">Open Play Store</string>
     <string name="settings_health_connect_dialog_ok">OK</string>
-    <string name="settings_hydration_sync_other_app_title">Not showing up in other health apps?</string>
-    <string name="settings_hydration_sync_other_app_body">Tap to open Health Connect settings</string>
+    <string name="settings_hydration_sync_other_app_title">Why isn\'t it showing in Samsung Health?</string>
+    <string name="settings_hydration_sync_other_app_body">Samsung Health temporarily removed hydration support in a recent update. Until it\'s restored, try another app like Google Health to check your data</string>
     <string name="settings_section_notification">Notifications</string>
     <string name="settings_section_backup">Backup &amp; Restore</string>
     <string name="settings_notification_switch_title">Water Reminders</string>
