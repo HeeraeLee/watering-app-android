@@ -255,7 +255,7 @@
     <string name="settings_health_connect_open_play_store">Play 스토어 열기</string>
     <string name="settings_health_connect_dialog_ok">확인</string>
     <string name="settings_hydration_sync_other_app_title">왜 삼성 헬스에 안 보이나요?</string>
-    <string name="settings_hydration_sync_other_app_body">삼성 헬스가 최근 업데이트에서 수분 기능을 잠시 뺐어요. 복구 전까지는 Google Health 등 다른 앱으로 확인해보세요</string>
+    <string name="settings_hydration_sync_other_app_body">삼성 헬스가 최근 업데이트에서 수분 기능을 잠시 뺐어요. 복구 전까지는 Google Health 등 다른 앱으로 확인해보세요!</string>
     <string name="settings_section_notification">알림 설정</string>
     <string name="settings_section_backup">백업 및 복원</string>
     <string name="settings_notification_switch_title">물 마시기 알림</string>

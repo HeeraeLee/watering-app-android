@@ -14,6 +14,22 @@
       },
       "oauth_client": [
         {
+          "client_id": "158413884060-1majhn6gnu4tqjf1finpku1bsgeht41i.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.watering.app",
+            "certificate_hash": "069c7ae6b1fc5f611e9121151d74e3b47a48ee34"
+          }
+        },
+        {
+          "client_id": "158413884060-odfgq97btej7ae37jn4r613en3ulrip8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.watering.app",
+            "certificate_hash": "7a24a5530835f5d62b1ccab6bb1c3186a14d4eb0"
+          }
+        },
+        {
           "client_id": "158413884060-b2a6b6ci9hv66bbu2qgpbqp2u0mk6uj2.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -42,6 +58,14 @@
         }
       },
       "oauth_client": [
+        {
+          "client_id": "158413884060-kroa1oe7dkke56kfldqih72s2p4db44c.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.watering.app.debug",
+            "certificate_hash": "643c30edfca668a2a3b4dd1645941f79d4d5b207"
+          }
+        },
         {
           "client_id": "158413884060-b2a6b6ci9hv66bbu2qgpbqp2u0mk6uj2.apps.googleusercontent.com",
           "client_type": 3

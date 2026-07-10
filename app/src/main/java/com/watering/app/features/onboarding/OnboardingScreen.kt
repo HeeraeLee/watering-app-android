@@ -174,7 +174,11 @@ fun OnboardingScreen(
                     )
                 }
 
-                Spacer(Modifier.height(48.dp))
+                // 버튼이 화면 맨 아래에 거의 붙어 보인다는 피드백으로 하단 여백을 넓혀 버튼을
+                // 위로 올림(웹 목업 3안 중 "C. 최소 변경" 채택) — 버튼 위치는 이 하단 Spacer
+                // 값에 의해서만 결정됨(weight(1f) 콘텐츠 Box가 나머지 공간을 흡수하는 구조라
+                // 버튼~콘텐츠 사이 Spacer(32dp)를 건드려도 화면상 버튼 위치는 안 바뀜)
+                Spacer(Modifier.height(80.dp))
             }
         }
     }
