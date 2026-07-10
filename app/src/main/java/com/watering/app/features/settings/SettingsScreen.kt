@@ -72,7 +72,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.watering.app.R
 import com.watering.app.ui.theme.AppBackgroundGradient
-import com.watering.app.ui.theme.GoalGlassesEquivalentBadge
+import com.watering.app.ui.theme.GoalGlassesEquivalentRow
 import com.watering.app.ui.theme.SettingsMenuTileBackgroundColor
 import com.watering.app.ui.theme.SettingsMenuTileIconColor
 
@@ -398,7 +398,7 @@ private fun CupSizeSetting(goal: Int, cupSize: Int, onCupSizeChange: (Int) -> Un
             }
         }
         Spacer(Modifier.height(8.dp))
-        GoalGlassesEquivalentBadge(glasses = goal)
+        GoalGlassesEquivalentRow(glasses = goal)
     }
 }
 

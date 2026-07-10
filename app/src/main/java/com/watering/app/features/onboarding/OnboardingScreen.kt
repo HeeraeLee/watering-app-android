@@ -47,7 +47,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -57,6 +56,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.watering.app.R
 import com.watering.app.ui.theme.AppBackgroundGradient
 import com.watering.app.ui.theme.AquaCtaContentColor
+import com.watering.app.ui.theme.GoalGlassesEquivalentRow
 
 @Composable
 fun OnboardingScreen(
@@ -382,31 +382,7 @@ private fun GoalPage(
 
         Spacer(Modifier.height(16.dp))
 
-        GlassesEquivalentInline(glasses = goal)
-    }
-}
-
-// 온보딩만의 "N잔에 해당해요" 표기 — 설정 화면(GoalGlassesEquivalentBadge, 틴트 카드)과 달리
-// 앱 아이콘(ic_water_drop) + 텍스트 조합으로 통일(웹 목업 10안 중 "E" 채택, 2026-07-10).
-// 라이트 모드 텍스트는 라벨과 동일하게 AquaCtaContentColor, 다크 모드는 primary — "하루 목표"
-// 라벨과 같은 다크모드 분기 패턴을 그대로 따름
-@Composable
-private fun GlassesEquivalentInline(glasses: Int) {
-    val color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else AquaCtaContentColor
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(
-            painter = painterResource(R.drawable.ic_water_drop),
-            contentDescription = null,
-            tint = color,
-            modifier = Modifier.size(16.dp)
-        )
-        Spacer(Modifier.width(6.dp))
-        Text(
-            text = stringResource(R.string.onboarding_goal_glasses_equivalent, glasses),
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = color
-        )
+        GoalGlassesEquivalentRow(glasses = goal)
     }
 }
 
