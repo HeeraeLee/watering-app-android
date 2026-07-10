@@ -100,7 +100,6 @@
     <string name="content_description_goal_decrease">목표 감소</string>
     <string name="content_description_goal_increase">목표 증가</string>
     <string name="glasses_with_slash">/ %1$d잔</string>
-    <string name="glasses_count">%1$d잔</string>
     <string name="streak_days_value">%1$d일</string>
     <string name="feature_streak_protection_title">연속 기록 보호</string>
     <string name="feature_streak_protection_description">한 달에 하루 놓쳐도 연속 기록이 유지되고, 60·100·365일 전용 마일스톤 타이틀도 잠금 해제돼요</string>
@@ -158,8 +157,9 @@
     <string name="onboarding_feature_notification">맞춤형 수분 섭취 알림</string>
     <string name="onboarding_feature_streak">연속 기록으로 동기부여</string>
     <string name="onboarding_goal_title">목표를 설정해요</string>
-    <string name="onboarding_goal_subtitle">하루에 몇 잔을 마실지 정해보세요.</string>
-    <string name="onboarding_daily_total">하루 총 %1$dml 목표</string>
+    <string name="onboarding_goal_subtitle">하루에 얼마나 마실지 정해보세요.</string>
+    <string name="onboarding_goal_ml">%1$dml</string>
+    <string name="onboarding_goal_glasses_equivalent">%1$d잔에 해당해요</string>
     <string name="onboarding_notification_title">알림을 설정해요</string>
     <string name="onboarding_notification_subtitle">수분 섭취를 잊지 않도록\n알려드릴게요.</string>
     <string name="onboarding_notification_hint">알림 간격은 설정에서 언제든지 변경할 수 있어요.</string>
@@ -337,9 +337,10 @@
     <string name="widget_theme_gray_mono">그레이모노</string>
     <string name="settings_section_widget_theme">위젯 테마</string>
     <string name="feature_widget_theme_description">위젯을 원하는 색상 테마로 꾸며보세요</string>
-    <string name="settings_widget_theme_guide">선택한 색상이 위젯에 바로 적용돼요</string>
+    <string name="settings_widget_theme_guide">원하는 색상을 고르고 적용하기를 눌러주세요</string>
     <string name="settings_widget_theme_preview_label">%1$s 위젯 미리보기</string>
     <string name="widget_shape_mini">미니형</string>
     <string name="widget_shape_card">카드형</string>
     <string name="widget_shape_wide">가로형</string>
+    <string name="widget_theme_apply_button">적용하기</string>
 </resources>

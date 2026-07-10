@@ -97,7 +97,6 @@
     <string name="content_description_goal_decrease">Decrease goal</string>
     <string name="content_description_goal_increase">Increase goal</string>
     <string name="glasses_with_slash">/ %1$d glasses</string>
-    <string name="glasses_count">%1$d glasses</string>
     <string name="streak_days_value">%1$d days</string>
     <string name="feature_streak_protection_title">Streak Protection</string>
     <string name="feature_streak_protection_description">Your streak stays safe even if you miss a day each month, and unlocks exclusive 60/100/365-day milestone titles</string>
@@ -155,8 +154,9 @@
     <string name="onboarding_feature_notification">Personalized hydration reminders</string>
     <string name="onboarding_feature_streak">Stay motivated with streaks</string>
     <string name="onboarding_goal_title">Set your goal</string>
-    <string name="onboarding_goal_subtitle">Decide how many glasses to drink each day.</string>
-    <string name="onboarding_daily_total">Daily total: %1$dml</string>
+    <string name="onboarding_goal_subtitle">Decide how much to drink each day.</string>
+    <string name="onboarding_goal_ml">%1$dml</string>
+    <string name="onboarding_goal_glasses_equivalent">Equal to %1$d glasses</string>
     <string name="onboarding_notification_title">Set up notifications</string>
     <string name="onboarding_notification_subtitle">We\'ll remind you\nso you don\'t forget to hydrate.</string>
     <string name="onboarding_notification_hint">You can change the reminder interval anytime in Settings.</string>
@@ -327,9 +327,10 @@
     <string name="widget_theme_gray_mono">Gray Mono</string>
     <string name="settings_section_widget_theme">Widget Theme</string>
     <string name="feature_widget_theme_description">Customize your widget with your favorite color theme</string>
-    <string name="settings_widget_theme_guide">The selected color applies to your widget right away</string>
+    <string name="settings_widget_theme_guide">Pick a color, then tap Apply to update your widget</string>
     <string name="settings_widget_theme_preview_label">%1$s widget preview</string>
     <string name="widget_shape_mini">Mini</string>
     <string name="widget_shape_card">Card</string>
     <string name="widget_shape_wide">Wide</string>
+    <string name="widget_theme_apply_button">Apply</string>
 </resources>

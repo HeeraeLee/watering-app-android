@@ -28,6 +28,13 @@ val AppBackgroundGradient: Brush
 val AppCardBackgroundColor: Color
     @Composable get() = if (isSystemInDarkTheme()) Color(0xFF1C4D49) else Color(0xFFFDFAF4)
 
+// 위젯 테마 화면의 미리보기 카드 전용 배경 — AppCardBackgroundColor(연한 크림)가 화면 배경
+// 그라데이션(라벤더→크림)과 명도 차이가 거의 없어 카드 경계가 흐려 보인다는 피드백으로,
+// 웹 목업 6안 비교 후 "소프트 민트"로 확정(2026-07-10). 다크모드는 기존 값으로 이미 배경과
+// 잘 구분되어 변경하지 않음
+val WidgetPreviewCardBackgroundColor: Color
+    @Composable get() = if (isSystemInDarkTheme()) Color(0xFF1C4D49) else Color(0xFFE4F5F0)
+
 // 설정 화면의 안내 배너(건강 연동/백업) 공용 배경 (웹 목업 비교 후 소프트 옐로우로 확정)
 // 2026-07-08: 다크모드 값이 옐로우를 단순히 어둡게 낮춘 올리브-갈색이라 딥 틸 다크 팔레트와 충돌한다는
 // 피드백(Fable UI 리뷰)으로, 웹 목업 13안 비교 후 "틸 채우기 + 골드 보더"로 변경 — 배경은

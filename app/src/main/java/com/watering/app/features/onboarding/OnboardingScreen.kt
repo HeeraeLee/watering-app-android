@@ -5,6 +5,7 @@ import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -46,6 +47,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -283,6 +285,10 @@ private fun GoalPage(
     onCupSizeChange: (Int) -> Unit
 ) {
     val cupSizes = listOf(150, 200, 250, 300, 350, 500)
+    // "하루 목표"/"컵 크기" 라벨 색 — 다크모드 분기 없이 AquaCtaContentColor(진남색)만 쓰면
+    // 다크 배경(딥 틸)과 명도가 거의 같아 텍스트가 안 보이던 버그 수정(2026-07-10, 실기기 확인).
+    // 웹 목업 6안 비교 후 다크모드는 onSurfaceVariant(서브타이틀과 같은 톤)로 확정, 라이트는 기존 유지
+    val labelColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.onSurfaceVariant else AquaCtaContentColor
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -308,15 +314,18 @@ private fun GoalPage(
 
         // 하루 목표 +/- 선택
         // 라벨 색: 파스텔 아쿠아 primary가 라벤더~크림 배경 위에서 저대비(Fable UI 리뷰 findings,
-        // 2026-07-08) — 웹 목업 비교 후 기존 확립된 진남색(AquaCtaContentColor)으로 통일
+        // 2026-07-08) — 웹 목업 비교 후 기존 확립된 진남색(AquaCtaContentColor)으로 통일 (라이트 모드)
         Text(
             text = stringResource(R.string.label_daily_goal),
             style = MaterialTheme.typography.labelLarge,
-            color = AquaCtaContentColor
+            color = labelColor
         )
 
         Spacer(Modifier.height(12.dp))
 
+        // ml이 주역, 잔 수는 보조 정보 — +/- 한 번의 증감폭이 선택된 컵 크기와 같아서
+        // (goal은 여전히 "잔 수"로 저장/계산되고, 화면에는 goal * cupSize를 ml로 보여줌)
+        // 항상 컵 크기의 정확한 배수가 되어 반올림 오차 없이 "N잔에 해당해요"를 보여줄 수 있음
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(
                 onClick = { onGoalChange(goal - 1) },
@@ -326,12 +335,12 @@ private fun GoalPage(
                 Icon(Icons.Default.Remove, contentDescription = stringResource(R.string.content_description_goal_decrease))
             }
             Text(
-                text = stringResource(R.string.glasses_count, goal),
+                text = stringResource(R.string.onboarding_goal_ml, goal * cupSize),
                 style = MaterialTheme.typography.headlineLarge,
                 color = MaterialTheme.colorScheme.primary,
                 textAlign = TextAlign.Center,
                 maxLines = 1,
-                modifier = Modifier.widthIn(min = 96.dp)
+                modifier = Modifier.widthIn(min = 140.dp)
             )
             IconButton(
                 onClick = { onGoalChange(goal + 1) },
@@ -350,7 +359,7 @@ private fun GoalPage(
         Text(
             text = stringResource(R.string.label_cup_size),
             style = MaterialTheme.typography.labelLarge,
-            color = AquaCtaContentColor,
+            color = labelColor,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth()
         )
@@ -373,10 +382,30 @@ private fun GoalPage(
 
         Spacer(Modifier.height(16.dp))
 
+        GlassesEquivalentInline(glasses = goal)
+    }
+}
+
+// 온보딩만의 "N잔에 해당해요" 표기 — 설정 화면(GoalGlassesEquivalentBadge, 틴트 카드)과 달리
+// 앱 아이콘(ic_water_drop) + 텍스트 조합으로 통일(웹 목업 10안 중 "E" 채택, 2026-07-10).
+// 라이트 모드 텍스트는 라벨과 동일하게 AquaCtaContentColor, 다크 모드는 primary — "하루 목표"
+// 라벨과 같은 다크모드 분기 패턴을 그대로 따름
+@Composable
+private fun GlassesEquivalentInline(glasses: Int) {
+    val color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else AquaCtaContentColor
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(
+            painter = painterResource(R.drawable.ic_water_drop),
+            contentDescription = null,
+            tint = color,
+            modifier = Modifier.size(16.dp)
+        )
+        Spacer(Modifier.width(6.dp))
         Text(
-            text = stringResource(R.string.onboarding_daily_total, goal * cupSize),
+            text = stringResource(R.string.onboarding_goal_glasses_equivalent, glasses),
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            fontWeight = FontWeight.SemiBold,
+            color = color
         )
     }
 }

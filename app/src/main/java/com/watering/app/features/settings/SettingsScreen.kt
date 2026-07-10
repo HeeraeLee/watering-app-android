@@ -72,6 +72,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.watering.app.R
 import com.watering.app.ui.theme.AppBackgroundGradient
+import com.watering.app.ui.theme.GoalGlassesEquivalentBadge
 import com.watering.app.ui.theme.SettingsMenuTileBackgroundColor
 import com.watering.app.ui.theme.SettingsMenuTileIconColor
 
@@ -176,6 +177,7 @@ fun SettingsScreen(
                 item {
                     DailyGoalSetting(
                         goal = settings.dailyGoal,
+                        cupSize = settings.cupSize,
                         onGoalChange = viewModel::updateDailyGoal
                     )
                 }
@@ -184,6 +186,7 @@ fun SettingsScreen(
 
                 item {
                     CupSizeSetting(
+                        goal = settings.dailyGoal,
                         cupSize = settings.cupSize,
                         onCupSizeChange = viewModel::updateCupSize
                     )
@@ -336,8 +339,11 @@ private fun SectionDivider() {
     HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 }
 
+// ml이 주역, 잔 수는 CupSizeSetting 아래 보조 텍스트로 표시 — 온보딩 목표 설정 화면과
+// 동일한 패턴으로 통일(2026-07-10). goal(잔 수)이 여전히 저장 단위라 +/- 한 번의 증감폭은
+// 선택된 컵 크기와 같음
 @Composable
-private fun DailyGoalSetting(goal: Int, onGoalChange: (Int) -> Unit) {
+private fun DailyGoalSetting(goal: Int, cupSize: Int, onGoalChange: (Int) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -355,12 +361,12 @@ private fun DailyGoalSetting(goal: Int, onGoalChange: (Int) -> Unit) {
                 Icon(Icons.Default.Remove, contentDescription = stringResource(R.string.content_description_goal_decrease), tint = MaterialTheme.colorScheme.onSurface)
             }
             Text(
-                text = stringResource(R.string.glasses_count, goal),
+                text = stringResource(R.string.onboarding_goal_ml, goal * cupSize),
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.primary,
                 textAlign = TextAlign.Center,
                 maxLines = 1,
-                modifier = Modifier.widthIn(min = 80.dp)
+                modifier = Modifier.widthIn(min = 110.dp)
             )
             IconButton(
                 onClick = { onGoalChange(goal + 1) },
@@ -375,7 +381,7 @@ private fun DailyGoalSetting(goal: Int, onGoalChange: (Int) -> Unit) {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun CupSizeSetting(cupSize: Int, onCupSizeChange: (Int) -> Unit) {
+private fun CupSizeSetting(goal: Int, cupSize: Int, onCupSizeChange: (Int) -> Unit) {
     val cupSizes = listOf(150, 200, 250, 300, 350, 500)
 
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
@@ -391,6 +397,8 @@ private fun CupSizeSetting(cupSize: Int, onCupSizeChange: (Int) -> Unit) {
                 )
             }
         }
+        Spacer(Modifier.height(8.dp))
+        GoalGlassesEquivalentBadge(glasses = goal)
     }
 }
 

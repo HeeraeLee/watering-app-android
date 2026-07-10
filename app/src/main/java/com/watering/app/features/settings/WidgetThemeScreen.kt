@@ -16,13 +16,17 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -52,7 +56,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.watering.app.R
 import com.watering.app.core.model.WidgetTheme
 import com.watering.app.ui.theme.AppBackgroundGradient
-import com.watering.app.ui.theme.AppCardBackgroundColor
+import com.watering.app.ui.theme.WidgetPreviewCardBackgroundColor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,6 +65,11 @@ fun WidgetThemeScreen(
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
+    // 스와치 탭은 이 화면 안에서만 값을 임시로 들고 있다가(draftTheme) "적용하기"를 눌러야
+    // viewModel.updateWidgetTheme()가 호출돼 실제 위젯에 반영됨(2026-07-10, 즉시 적용 → 지연 적용).
+    // 화면을 벗어나면 이 상태는 자동 소멸하므로 미적용 선택은 별도 처리 없이 조용히 폐기됨.
+    var draftTheme by remember(settings.widgetTheme) { mutableStateOf(settings.widgetTheme) }
+    val hasPendingChange = draftTheme != settings.widgetTheme
 
     Box(modifier = Modifier.fillMaxSize().background(AppBackgroundGradient)) {
         Scaffold(
@@ -75,15 +84,42 @@ fun WidgetThemeScreen(
                     },
                     colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
                 )
+            },
+            bottomBar = {
+                WidgetThemeApplyBar(
+                    enabled = hasPendingChange,
+                    onApply = { viewModel.updateWidgetTheme(draftTheme) }
+                )
             }
         ) { padding ->
-            Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .verticalScroll(rememberScrollState())
+            ) {
                 WidgetThemeSetting(
-                    selectedTheme = settings.widgetTheme,
-                    onSelectTheme = viewModel::updateWidgetTheme
+                    draftTheme = draftTheme,
+                    onDraftThemeChange = { draftTheme = it }
                 )
             }
         }
+    }
+}
+
+// 3버튼 내비게이션 기기에서 버튼이 시스템 내비게이션 바에 가려 탭이 안 먹히던 문제로
+// navigationBarsPadding 추가(2026-07-10, 실기기 확인)
+@Composable
+private fun WidgetThemeApplyBar(enabled: Boolean, onApply: () -> Unit) {
+    Button(
+        onClick = onApply,
+        enabled = enabled,
+        modifier = Modifier
+            .fillMaxWidth()
+            .navigationBarsPadding()
+            .padding(horizontal = 16.dp, vertical = 12.dp)
+    ) {
+        Text(stringResource(R.string.widget_theme_apply_button))
     }
 }
 
@@ -110,8 +146,8 @@ private enum class WidgetPreviewShape(@StringRes val labelRes: Int) {
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun WidgetThemeSetting(
-    selectedTheme: WidgetTheme,
-    onSelectTheme: (WidgetTheme) -> Unit
+    draftTheme: WidgetTheme,
+    onDraftThemeChange: (WidgetTheme) -> Unit
 ) {
     var previewShape by remember { mutableStateOf(WidgetPreviewShape.MINI) }
 
@@ -127,7 +163,7 @@ private fun WidgetThemeSetting(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             WidgetTheme.entries.forEach { theme ->
-                val isSelected = theme == selectedTheme
+                val isSelected = theme == draftTheme
                 Box(
                     modifier = Modifier
                         .size(40.dp)
@@ -138,7 +174,7 @@ private fun WidgetThemeSetting(
                             color = theme.accentColor.ringColor(),
                             shape = CircleShape
                         )
-                        .clickable { onSelectTheme(theme) }
+                        .clickable { onDraftThemeChange(theme) }
                 )
             }
         }
@@ -154,7 +190,8 @@ private fun WidgetThemeSetting(
             }
         }
         Spacer(Modifier.height(16.dp))
-        WidgetPreviewCard(color = selectedTheme.accentColor, shape = previewShape)
+        WidgetPreviewCard(color = draftTheme.accentColor, shape = previewShape)
+        Spacer(Modifier.height(16.dp))
     }
 }
 
@@ -162,7 +199,7 @@ private fun WidgetThemeSetting(
 private fun WidgetPreviewCard(color: Color, shape: WidgetPreviewShape) {
     Surface(
         shape = RoundedCornerShape(20.dp),
-        color = AppCardBackgroundColor,
+        color = WidgetPreviewCardBackgroundColor,
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(
@@ -186,37 +223,44 @@ private fun WidgetPreviewCard(color: Color, shape: WidgetPreviewShape) {
 
 // 크기·모서리 반경은 실기기(Galaxy A25, One UI 1x1 셀) 실측값 기준 — 완전한 원이 아니라
 // 둥근 사각형(스퀴클)에 가까움. cornerRadius 24.dp는 CircularWidget.kt와 동일한 값을 그대로 사용
+//
+// 목표 미달성(평상시) 상태를 그대로 미리보여줌 — 배경은 테마색이 아니라 흰색/다크 배경이고
+// 아이콘·숫자·진행바가 테마색을 띠는 CircularWidget.kt의 실제 렌더링과 동일하게 맞춤.
+// (예전엔 목표 달성 상태처럼 배경 전체가 테마색 + 흰 아이콘으로 고정되어 있어 실제 위젯과
+// 색이 다르게 보이는 버그가 있었음, 2026-07-10)
 @Composable
 private fun MiniWidgetPreview(color: Color) {
+    val bgColor = if (isSystemInDarkTheme()) Color(0xFF0D1B2A) else Color.White
+    val barTrackColor = if (isSystemInDarkTheme()) Color.White.copy(alpha = 0.3f) else color.copy(alpha = 0.15f)
     Box(
         modifier = Modifier
             .size(width = 80.dp, height = 94.dp)
             .clip(RoundedCornerShape(24.dp))
-            .background(color),
+            .background(bgColor),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(
                 painter = painterResource(R.drawable.ic_water_drop),
                 contentDescription = null,
-                tint = Color.White,
+                tint = color,
                 modifier = Modifier.size(18.dp)
             )
-            Text("8", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 28.sp)
+            Text("8", color = color, fontWeight = FontWeight.Bold, fontSize = 28.sp)
             Spacer(Modifier.height(6.dp))
             Box(
                 modifier = Modifier
                     .width(48.dp)
                     .height(3.dp)
                     .clip(RoundedCornerShape(2.dp))
-                    .background(Color.White.copy(alpha = 0.4f))
+                    .background(barTrackColor)
             ) {
                 Box(
                     modifier = Modifier
                         .fillMaxHeight()
                         .width(36.dp)
                         .clip(RoundedCornerShape(2.dp))
-                        .background(Color.White)
+                        .background(color)
                 )
             }
         }
