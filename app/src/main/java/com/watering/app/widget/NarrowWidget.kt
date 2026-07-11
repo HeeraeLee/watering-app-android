@@ -41,11 +41,13 @@ import androidx.glance.unit.ColorProvider
 import com.watering.app.R
 
 // 잔수·퍼센트 텍스트를 고정 폭으로 둬야 배경 채움 폭 계산이 자릿수와 무관하게 항상 정확하다
+// (이 값 자체는 scale=1일 때 기준. RectangularWidget.kt/CircularWidget.kt와 동일하게 요소를
+// 숨기는 대신 실측 크기 비율로 통째로 스케일링해서 어떤 폭이 와도 잘리지 않게 함)
 private val CountTextWidth = 64.dp
 private val PercentTextWidth = 50.dp
-// 이 폭 미만이면 퍼센트 텍스트를 숨김 (아이콘16+여백4+잔수64+퍼센트50+좌우패딩28=162dp가 실제 최소 필요 폭)
-// 진행률 자체는 배경 채움으로 계속 보이므로 퍼센트를 숨겨도 정보 손실은 최소화됨
-private val FullContentMinWidth = 162.dp
+// 이 크기에서 아이콘+잔수+퍼센트가 여유 있게 맞도록 디자인됨(162dp가 실제 최소 필요 폭)
+private val ReferenceWidth = 180.dp
+private val ReferenceHeight = 44.dp
 
 class NarrowWidget : GlanceAppWidget() {
     override val sizeMode = SizeMode.Exact
@@ -68,8 +70,14 @@ private fun NarrowWidgetContent(state: WidgetState) {
     val isAchieved = state.achievementRate >= 1.0
     val accent = state.theme.accentColor
     val rate = state.achievementRate.coerceIn(0.0, 1.0).toFloat()
-    val showPercent = size.width >= FullContentMinWidth
     val fillWidth = (size.width * rate).coerceIn(0.dp, size.width)
+
+    // 기종/런처 그리드에 따라 2x1에 실제 배정되는 크기가 제각각이라 아이콘·폰트·간격을 전부
+    // 실측 크기 비율로 스케일링 — RectangularWidget.kt/CircularWidget.kt와 동일한 접근
+    val scale = minOf(
+        size.width.value / ReferenceWidth.value,
+        size.height.value / ReferenceHeight.value
+    ).coerceIn(0.45f, 1.2f)
 
     // 목표 달성 시 다크모드 여부와 무관하게 테마 색 배경으로 반전 — 다크모드의 기존(미달성) 스타일은 그대로 유지
     val achievedText = readableTextColor(accent)
@@ -99,38 +107,36 @@ private fun NarrowWidgetContent(state: WidgetState) {
         Row(
             modifier = GlanceModifier
                 .fillMaxSize()
-                .padding(horizontal = 14.dp),
+                .padding(horizontal = 14.dp * scale),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
                 provider = ImageProvider(R.drawable.ic_water_drop),
                 contentDescription = null,
-                modifier = GlanceModifier.size(16.dp),
+                modifier = GlanceModifier.size(16.dp * scale),
                 colorFilter = ColorFilter.tint(ColorProvider(foregroundAccent))
             )
-            Spacer(GlanceModifier.width(4.dp))
+            Spacer(GlanceModifier.width(4.dp * scale))
             Text(
                 text = "${state.totalCount} / ${state.goal}",
-                modifier = GlanceModifier.width(CountTextWidth),
+                modifier = GlanceModifier.width(CountTextWidth * scale),
                 style = TextStyle(
                     color = ColorProvider(textColor),
-                    fontSize = 22.sp,
+                    fontSize = (22f * scale).sp,
                     fontWeight = FontWeight.Bold
                 )
             )
             Spacer(GlanceModifier.defaultWeight())
-            if (showPercent) {
-                Text(
-                    text = "${(rate * 100).toInt()}%",
-                    modifier = GlanceModifier.width(PercentTextWidth),
-                    style = TextStyle(
-                        color = ColorProvider(foregroundAccent),
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Medium,
-                        textAlign = TextAlign.End
-                    )
+            Text(
+                text = "${(rate * 100).toInt()}%",
+                modifier = GlanceModifier.width(PercentTextWidth * scale),
+                style = TextStyle(
+                    color = ColorProvider(foregroundAccent),
+                    fontSize = (18f * scale).sp,
+                    fontWeight = FontWeight.Medium,
+                    textAlign = TextAlign.End
                 )
-            }
+            )
         }
     }
 }
