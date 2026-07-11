@@ -7,7 +7,9 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -52,6 +54,11 @@ fun RecordSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                // 직접 입력 필드 포커스로 키패드가 열리면 시트 윈도우 높이가 키패드만큼 줄어드는데,
+                // 내용이 그 높이보다 길면 스크롤 불가능한 Column은 마지막 자식(입력 필드/버튼)의
+                // 높이 제약을 최소 높이 아래로 짓눌러 입력한 숫자가 클리핑돼 안 보이던 버그 수정 —
+                // 스크롤 가능하게 해 자식들이 고유 높이를 유지하도록 함 (SM-A256N 등 고밀도 기기 재현)
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
                 .padding(bottom = 36.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
