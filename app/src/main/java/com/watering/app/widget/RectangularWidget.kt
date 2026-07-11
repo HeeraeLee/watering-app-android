@@ -14,6 +14,7 @@ import androidx.glance.GlanceModifier
 import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
+import androidx.glance.LocalSize
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
@@ -44,6 +45,10 @@ import com.watering.app.R
 
 private val CupWidth = 64.dp
 private val CupHeight = 96.dp
+// 이 크기에서 컵+텍스트가 딱 맞게 디자인됨 — 실제 배정 크기가 이보다 작거나 크면
+// scale 비율만큼 컵·폰트·간격을 전부 같은 비율로 줄이거나 키워서 항상 비율대로 다 보이게 함
+private val ReferenceWidth = 220.dp
+private val ReferenceHeight = 200.dp
 
 class RectangularWidget : GlanceAppWidget() {
     override val sizeMode = SizeMode.Exact
@@ -60,6 +65,7 @@ class RectangularWidgetReceiver : GlanceAppWidgetReceiver() {
 @Composable
 private fun RectangularWidgetContent(state: WidgetState) {
     val context = LocalContext.current
+    val size = LocalSize.current
     val isDark = (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
             Configuration.UI_MODE_NIGHT_YES
     val isAchieved = state.achievementRate >= 1.0
@@ -79,11 +85,25 @@ private fun RectangularWidgetContent(state: WidgetState) {
     val secondaryText = if (isAchieved) achievedText.copy(alpha = 0.7f) else if (isDark) Color.White.copy(alpha = 0.5f) else Color(0xFF888888)
     val foregroundAccent = if (isAchieved) achievedText else accent
 
+    // 기종/런처 그리드에 따라 2x2에 실제 배정되는 크기가 제각각이라(선언한 minWidth/Height는
+    // 최소값일 뿐, 실측 크기와 다를 수 있음) 컵·폰트·간격을 전부 실측 크기 비율로 스케일링 —
+    // 특정 요소를 숨기는 대신 항상 같은 비율로 축소/확대되므로 어떤 크기가 와도 잘리지 않음.
+    // 위쪽으로는 1.2배까지만 허용(태블릿 등 과도하게 큰 위젯 호스트에서 텍스트가 지나치게
+    // 커지는 것 방지), 아래쪽은 0.45배까지 허용(비정상적으로 작은 크기가 오는 극단적 상황 대비)
+    val scale = minOf(
+        size.width.value / ReferenceWidth.value,
+        size.height.value / ReferenceHeight.value
+    ).coerceIn(0.45f, 1.2f)
+    val cupWidth = CupWidth * scale
+    val cupHeight = CupHeight * scale
+    val cardPadding = 18.dp * scale
+    val cupGap = 18.dp * scale
+
     // 얇은 진행바 대신 컵 모양 그래픽 자체가 채워지는 형태 — Glance는 SVG/Canvas 클리핑을
     // Composable에서 직접 지원하지 않아 비트맵으로 미리 그려서 Image에 담아 넣는다
     val density = context.resources.displayMetrics.density
-    val cupWidthPx = (CupWidth.value * density).toInt()
-    val cupHeightPx = (CupHeight.value * density).toInt()
+    val cupWidthPx = (cupWidth.value * density).toInt()
+    val cupHeightPx = (cupHeight.value * density).toInt()
     val fillColorArgb = foregroundAccent.toArgb()
     val cupBitmap = remember(rate, fillColorArgb, cupWidthPx, cupHeightPx) {
         createCupBitmap(cupWidthPx, cupHeightPx, rate, fillColorArgb, fillColorArgb)
@@ -98,7 +118,7 @@ private fun RectangularWidgetContent(state: WidgetState) {
             .clickable(actionRunCallback<AddWaterAction>())
     ) {
         Column(
-            modifier = GlanceModifier.fillMaxSize().padding(18.dp),
+            modifier = GlanceModifier.fillMaxSize().padding(cardPadding),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(
@@ -108,13 +128,13 @@ private fun RectangularWidgetContent(state: WidgetState) {
                 Image(
                     provider = ImageProvider(R.drawable.ic_water_drop),
                     contentDescription = null,
-                    modifier = GlanceModifier.size(16.dp),
+                    modifier = GlanceModifier.size(16.dp * scale),
                     colorFilter = ColorFilter.tint(ColorProvider(foregroundAccent))
                 )
-                Spacer(GlanceModifier.width(6.dp))
+                Spacer(GlanceModifier.width(6.dp * scale))
                 Text(
                     text = context.getString(R.string.widget_total_ml_today, state.totalMl),
-                    style = TextStyle(color = ColorProvider(foregroundAccent), fontSize = 15.sp)
+                    style = TextStyle(color = ColorProvider(foregroundAccent), fontSize = (15f * scale).sp)
                 )
             }
             Spacer(GlanceModifier.defaultWeight())
@@ -126,31 +146,31 @@ private fun RectangularWidgetContent(state: WidgetState) {
                     Image(
                         provider = ImageProvider(cupBitmap),
                         contentDescription = null,
-                        modifier = GlanceModifier.width(CupWidth).height(CupHeight)
+                        modifier = GlanceModifier.width(cupWidth).height(cupHeight)
                     )
-                    Spacer(GlanceModifier.width(18.dp))
+                    Spacer(GlanceModifier.width(cupGap))
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Row(verticalAlignment = Alignment.Bottom) {
                             Text(
                                 text = "${state.totalCount}",
                                 style = TextStyle(
                                     color = ColorProvider(primaryText),
-                                    fontSize = 40.sp,
+                                    fontSize = (40f * scale).sp,
                                     fontWeight = FontWeight.Bold
                                 )
                             )
-                            Spacer(GlanceModifier.width(4.dp))
+                            Spacer(GlanceModifier.width(4.dp * scale))
                             Text(
                                 text = context.getString(R.string.glasses_with_slash, state.goal),
-                                style = TextStyle(color = ColorProvider(secondaryText), fontSize = 16.sp)
+                                style = TextStyle(color = ColorProvider(secondaryText), fontSize = (16f * scale).sp)
                             )
                         }
-                        Spacer(GlanceModifier.height(4.dp))
+                        Spacer(GlanceModifier.height(4.dp * scale))
                         Text(
                             text = "${(rate * 100).toInt()}%",
                             style = TextStyle(
                                 color = ColorProvider(foregroundAccent),
-                                fontSize = 22.sp,
+                                fontSize = (22f * scale).sp,
                                 fontWeight = FontWeight.Bold
                             )
                         )
@@ -160,7 +180,7 @@ private fun RectangularWidgetContent(state: WidgetState) {
             Spacer(GlanceModifier.defaultWeight())
             Text(
                 text = motivationText,
-                style = TextStyle(color = ColorProvider(secondaryText), fontSize = 14.sp, textAlign = TextAlign.Center),
+                style = TextStyle(color = ColorProvider(secondaryText), fontSize = (14f * scale).sp, textAlign = TextAlign.Center),
                 modifier = GlanceModifier.fillMaxWidth()
             )
         }
