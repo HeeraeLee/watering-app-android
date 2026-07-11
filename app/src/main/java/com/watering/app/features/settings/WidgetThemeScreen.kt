@@ -1,6 +1,7 @@
 package com.watering.app.features.settings
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -45,10 +46,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.clipPath
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -224,62 +232,64 @@ private fun WidgetPreviewCard(color: Color, shape: WidgetPreviewShape) {
 // 크기·모서리 반경은 실기기(Galaxy A25, One UI 1x1 셀) 실측값 기준 — 완전한 원이 아니라
 // 둥근 사각형(스퀴클)에 가까움. cornerRadius 24.dp는 CircularWidget.kt와 동일한 값을 그대로 사용
 //
-// 목표 미달성(평상시) 상태를 그대로 미리보여줌 — 배경은 테마색이 아니라 흰색/다크 배경이고
-// 아이콘·숫자·진행바가 테마색을 띠는 CircularWidget.kt의 실제 렌더링과 동일하게 맞춤.
-// (예전엔 목표 달성 상태처럼 배경 전체가 테마색 + 흰 아이콘으로 고정되어 있어 실제 위젯과
-// 색이 다르게 보이는 버그가 있었음, 2026-07-10)
+// 2026-07-11 리디자인: 얇은 가로 바 대신 배경 자체가 진행률만큼 아래→위로 채워지는 CircularWidget.kt의
+// 실제 렌더링(세로 채움, track/fill 모두 accent를 배경색과 블렌딩한 톤)과 동일하게 맞춤
 @Composable
 private fun MiniWidgetPreview(color: Color) {
-    val bgColor = if (isSystemInDarkTheme()) Color(0xFF0D1B2A) else Color.White
-    val barTrackColor = if (isSystemInDarkTheme()) Color.White.copy(alpha = 0.3f) else color.copy(alpha = 0.15f)
+    val isDark = isSystemInDarkTheme()
+    val baseBg = if (isDark) Color(0xFF0D1B2A) else Color.White
+    val trackColor = lerp(baseBg, color, 0.12f)
+    val fillColor = lerp(baseBg, color, 0.35f)
+    val rate = 0.75f // 미리보기 예시 진행률
     Box(
         modifier = Modifier
             .size(width = 80.dp, height = 94.dp)
             .clip(RoundedCornerShape(24.dp))
-            .background(bgColor),
-        contentAlignment = Alignment.Center
+            .background(trackColor)
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(rate)
+                .align(Alignment.BottomCenter)
+                .background(fillColor)
+        )
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
             Icon(
                 painter = painterResource(R.drawable.ic_water_drop),
                 contentDescription = null,
                 tint = color,
-                modifier = Modifier.size(18.dp)
+                modifier = Modifier.size(22.dp)
             )
-            Text("8", color = color, fontWeight = FontWeight.Bold, fontSize = 28.sp)
-            Spacer(Modifier.height(6.dp))
-            Box(
-                modifier = Modifier
-                    .width(48.dp)
-                    .height(3.dp)
-                    .clip(RoundedCornerShape(2.dp))
-                    .background(barTrackColor)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .width(36.dp)
-                        .clip(RoundedCornerShape(2.dp))
-                        .background(color)
-                )
-            }
+            Spacer(Modifier.height(4.dp))
+            Text("8", color = color, fontWeight = FontWeight.Bold, fontSize = 34.sp)
         }
     }
 }
 
 // 크기·모서리 반경은 실기기(Galaxy A25, One UI 2x2 셀) 실측값 기준 — 화면 전체 폭이 아니라
 // 가로보다 세로가 긴 카드. cornerRadius 20.dp는 RectangularWidget.kt와 동일한 값을 그대로 사용
+//
+// 2026-07-11 리디자인: 얇은 바 + "워터링" 라벨 대신, 리터럴 컵 채움 그래픽 + "오늘 총 OOOml"
+// 표시로 바뀐 RectangularWidget.kt의 실제 렌더링과 동일하게 맞춤
 @Composable
 private fun CardWidgetPreview(color: Color) {
-    val surfaceColor = if (isSystemInDarkTheme()) Color(0xFF0D1B2A) else Color.White
-    val onSurface = if (isSystemInDarkTheme()) Color.White else Color(0xFF0D1B2A)
+    val isDark = isSystemInDarkTheme()
+    val surfaceColor = if (isDark) Color(0xFF0D1B2A) else Color.White
+    val onSurface = if (isDark) Color.White else Color(0xFF0D1B2A)
+    val onSurfaceSecondary = onSurface.copy(alpha = 0.6f)
+    val rate = 0.75f // 미리보기 예시 진행률 (6/8잔)
     Column(
         modifier = Modifier
             .width(190.dp)
             .height(220.dp)
             .clip(RoundedCornerShape(20.dp))
             .background(surfaceColor)
-            .padding(16.dp),
+            .padding(18.dp),
         verticalArrangement = Arrangement.Center
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -289,80 +299,114 @@ private fun CardWidgetPreview(color: Color) {
                 tint = color,
                 modifier = Modifier.size(16.dp)
             )
-            Spacer(Modifier.width(4.dp))
-            Text(stringResource(R.string.widget_app_label), color = color, fontSize = 13.sp)
+            Spacer(Modifier.width(6.dp))
+            Text(stringResource(R.string.widget_total_ml_today, 1500), color = color, fontSize = 15.sp)
         }
-        Spacer(Modifier.height(6.dp))
-        Row(verticalAlignment = Alignment.Bottom) {
-            Text("6", fontSize = 38.sp, fontWeight = FontWeight.Bold, color = onSurface)
-            Spacer(Modifier.width(4.dp))
-            Text(stringResource(R.string.glasses_with_slash, 8), fontSize = 14.sp, color = onSurface.copy(alpha = 0.6f))
-        }
-        Spacer(Modifier.height(6.dp))
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(4.dp)
-                .clip(RoundedCornerShape(2.dp))
-                .background(color.copy(alpha = 0.15f))
+        Spacer(Modifier.weight(1f))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth(0.75f)
-                    .clip(RoundedCornerShape(2.dp))
-                    .background(color)
+            CupGraphic(
+                rate = rate,
+                color = color,
+                modifier = Modifier.size(width = 64.dp, height = 96.dp)
             )
+            Spacer(Modifier.width(18.dp))
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Row(verticalAlignment = Alignment.Bottom) {
+                    Text("6", fontSize = 40.sp, fontWeight = FontWeight.Bold, color = onSurface)
+                    Spacer(Modifier.width(4.dp))
+                    Text(stringResource(R.string.glasses_with_slash, 8), fontSize = 16.sp, color = onSurfaceSecondary)
+                }
+                Spacer(Modifier.height(4.dp))
+                Text("75%", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = color)
+            }
         }
-        Spacer(Modifier.height(6.dp))
+        Spacer(Modifier.weight(1f))
         Text(
             stringResource(R.string.widget_motivation_almost_there),
-            fontSize = 11.5.sp,
-            color = onSurface.copy(alpha = 0.6f)
+            fontSize = 14.sp,
+            color = onSurfaceSecondary,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center
         )
+    }
+}
+
+// RectangularWidget.kt(CupBitmap.kt)와 동일한 좌표계(70x104, 위가 넓고 아래가 좁은 유리잔 형태)로
+// 그리는 미리보기용 컵 그래픽 — 위젯 쪽은 Glance 제약으로 android.graphics.Bitmap에 미리 그리지만,
+// 여기는 일반 Compose라 Canvas + clipPath로 바로 그림
+@Composable
+private fun CupGraphic(rate: Float, color: Color, modifier: Modifier = Modifier) {
+    Canvas(modifier = modifier) {
+        val sx = size.width / 70f
+        val sy = size.height / 104f
+        val path = Path().apply {
+            moveTo(9f * sx, 4f * sy)
+            lineTo(61f * sx, 4f * sy)
+            lineTo(54f * sx, 98f * sy)
+            quadraticTo(54f * sx, 102f * sy, 50f * sx, 102f * sy)
+            lineTo(20f * sx, 102f * sy)
+            quadraticTo(16f * sx, 102f * sy, 16f * sx, 98f * sy)
+            close()
+        }
+        val fillTop = 4f * sy + (1f - rate) * (100f - 4f) * sy
+        clipPath(path) {
+            drawRect(
+                color = color.copy(alpha = 0.85f),
+                topLeft = Offset(0f, fillTop),
+                size = Size(size.width, size.height - fillTop)
+            )
+        }
+        drawPath(path = path, color = color, style = Stroke(width = 3f * sx))
     }
 }
 
 // 크기·모서리 반경은 실기기(Galaxy A25, One UI 2x1 셀) 실측값 기준 — 가로:세로 비율 약 2:1.
 // cornerRadius 16.dp는 NarrowWidget.kt와 동일한 값을 그대로 사용
+//
+// 2026-07-11 리디자인: 얇은 바 대신 배경 자체가 진행률만큼 좌→우로 채워지는 NarrowWidget.kt의
+// 실제 렌더링과 동일하게 맞춤(폭이 부족할 때 퍼센트를 숨기는 반응형 로직은 고정 크기 미리보기라
+// 재현하지 않고, 항상 다 보이는 상태로 표시)
 @Composable
 private fun WideWidgetPreview(color: Color) {
-    val surfaceColor = if (isSystemInDarkTheme()) Color(0xFF0D1B2A) else Color.White
-    val onSurface = if (isSystemInDarkTheme()) Color.White else Color(0xFF0D1B2A)
-    Row(
+    val isDark = isSystemInDarkTheme()
+    val baseBg = if (isDark) Color(0xFF0D1B2A) else Color.White
+    val trackColor = lerp(baseBg, color, 0.12f)
+    val fillColor = lerp(baseBg, color, 0.35f)
+    val onSurface = if (isDark) Color.White else Color(0xFF0D1B2A)
+    val rate = 0.75f // 미리보기 예시 진행률
+    Box(
         modifier = Modifier
             .width(170.dp)
             .height(86.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(surfaceColor)
-            .padding(horizontal = 14.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .background(trackColor)
     ) {
-        Icon(
-            painter = painterResource(R.drawable.ic_water_drop),
-            contentDescription = null,
-            tint = color,
-            modifier = Modifier.size(16.dp)
-        )
-        Spacer(Modifier.width(6.dp))
-        Text("6", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = onSurface)
-        Spacer(Modifier.width(6.dp))
         Box(
             modifier = Modifier
-                .weight(1f)
-                .height(4.dp)
-                .clip(RoundedCornerShape(2.dp))
-                .background(color.copy(alpha = 0.15f))
+                .fillMaxHeight()
+                .fillMaxWidth(rate)
+                .background(fillColor)
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth(0.75f)
-                    .clip(RoundedCornerShape(2.dp))
-                    .background(color)
+            Icon(
+                painter = painterResource(R.drawable.ic_water_drop),
+                contentDescription = null,
+                tint = color,
+                modifier = Modifier.size(16.dp)
             )
+            Spacer(Modifier.width(4.dp))
+            Text("6", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = onSurface)
+            Spacer(Modifier.weight(1f))
+            Text("75%", fontSize = 18.sp, fontWeight = FontWeight.Medium, color = color)
         }
-        Spacer(Modifier.width(6.dp))
-        Text("75%", fontSize = 12.sp, color = onSurface.copy(alpha = 0.6f))
     }
 }
