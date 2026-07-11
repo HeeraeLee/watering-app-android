@@ -3,7 +3,9 @@ package com.watering.app.widget
 import android.content.Context
 import android.content.res.Configuration
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.ColorFilter
@@ -12,7 +14,6 @@ import androidx.glance.GlanceModifier
 import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
-import androidx.glance.LocalSize
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
@@ -26,7 +27,6 @@ import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.Row
 import androidx.glance.layout.Spacer
-import androidx.glance.layout.fillMaxHeight
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
@@ -37,9 +37,13 @@ import androidx.glance.semantics.contentDescription
 import androidx.glance.semantics.semantics
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
+import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.watering.app.R
+
+private val CupWidth = 64.dp
+private val CupHeight = 96.dp
 
 class RectangularWidget : GlanceAppWidget() {
     override val sizeMode = SizeMode.Exact
@@ -56,13 +60,11 @@ class RectangularWidgetReceiver : GlanceAppWidgetReceiver() {
 @Composable
 private fun RectangularWidgetContent(state: WidgetState) {
     val context = LocalContext.current
-    val size = LocalSize.current
     val isDark = (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
             Configuration.UI_MODE_NIGHT_YES
     val isAchieved = state.achievementRate >= 1.0
     val accent = state.theme.accentColor
     val rate = state.achievementRate.coerceIn(0.0, 1.0).toFloat()
-    val barWidth = (size.width - 32.dp) * rate
     val motivationText = when {
         isAchieved                   -> context.getString(R.string.label_goal_achieved_banner)
         state.achievementRate >= 0.7 -> context.getString(R.string.widget_motivation_almost_there)
@@ -75,8 +77,17 @@ private fun RectangularWidgetContent(state: WidgetState) {
     val bgColor = if (isAchieved) accent else if (isDark) WidgetDarkBg else Color.White
     val primaryText = if (isAchieved) achievedText else if (isDark) Color.White else Color(0xFF0D1B2A)
     val secondaryText = if (isAchieved) achievedText.copy(alpha = 0.7f) else if (isDark) Color.White.copy(alpha = 0.5f) else Color(0xFF888888)
-    val barTrack = if (isAchieved) achievedText.copy(alpha = 0.3f) else if (isDark) Color.White.copy(alpha = 0.15f) else accent.copy(alpha = 0.12f)
     val foregroundAccent = if (isAchieved) achievedText else accent
+
+    // 얇은 진행바 대신 컵 모양 그래픽 자체가 채워지는 형태 — Glance는 SVG/Canvas 클리핑을
+    // Composable에서 직접 지원하지 않아 비트맵으로 미리 그려서 Image에 담아 넣는다
+    val density = context.resources.displayMetrics.density
+    val cupWidthPx = (CupWidth.value * density).toInt()
+    val cupHeightPx = (CupHeight.value * density).toInt()
+    val fillColorArgb = foregroundAccent.toArgb()
+    val cupBitmap = remember(rate, fillColorArgb, cupWidthPx, cupHeightPx) {
+        createCupBitmap(cupWidthPx, cupHeightPx, rate, fillColorArgb, fillColorArgb)
+    }
 
     Box(
         modifier = GlanceModifier
@@ -87,7 +98,7 @@ private fun RectangularWidgetContent(state: WidgetState) {
             .clickable(actionRunCallback<AddWaterAction>())
     ) {
         Column(
-            modifier = GlanceModifier.fillMaxSize().padding(16.dp),
+            modifier = GlanceModifier.fillMaxSize().padding(18.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(
@@ -100,62 +111,57 @@ private fun RectangularWidgetContent(state: WidgetState) {
                     modifier = GlanceModifier.size(16.dp),
                     colorFilter = ColorFilter.tint(ColorProvider(foregroundAccent))
                 )
-                Spacer(GlanceModifier.width(4.dp))
+                Spacer(GlanceModifier.width(6.dp))
                 Text(
-                    text = context.getString(R.string.widget_app_label),
-                    style = TextStyle(color = ColorProvider(foregroundAccent), fontSize = 13.sp)
+                    text = context.getString(R.string.widget_total_ml_today, state.totalMl),
+                    style = TextStyle(color = ColorProvider(foregroundAccent), fontSize = 15.sp)
                 )
             }
-            Spacer(GlanceModifier.height(6.dp))
-            Row(
-                modifier = GlanceModifier.fillMaxWidth(),
-                verticalAlignment = Alignment.Bottom
-            ) {
-                Text(
-                    text = "${state.totalCount}",
-                    style = TextStyle(
-                        color = ColorProvider(primaryText),
-                        fontSize = 38.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                )
-                Spacer(GlanceModifier.width(5.dp))
-                Text(
-                    text = context.getString(R.string.glasses_with_slash, state.goal),
-                    style = TextStyle(color = ColorProvider(secondaryText), fontSize = 14.sp)
-                )
-                Spacer(GlanceModifier.defaultWeight())
-                Text(
-                    text = "${(rate * 100).toInt()}%",
-                    style = TextStyle(
-                        color = ColorProvider(foregroundAccent),
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                )
-            }
-            Spacer(GlanceModifier.height(10.dp))
+            Spacer(GlanceModifier.defaultWeight())
             Box(
-                modifier = GlanceModifier
-                    .fillMaxWidth()
-                    .height(5.dp)
-                    .cornerRadius(3.dp)
-                    .background(ColorProvider(barTrack))
+                modifier = GlanceModifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
             ) {
-                if (rate > 0f) {
-                    Box(
-                        modifier = GlanceModifier
-                            .width(barWidth)
-                            .fillMaxHeight()
-                            .cornerRadius(3.dp)
-                            .background(ColorProvider(foregroundAccent))
-                    ) {}
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Image(
+                        provider = ImageProvider(cupBitmap),
+                        contentDescription = null,
+                        modifier = GlanceModifier.width(CupWidth).height(CupHeight)
+                    )
+                    Spacer(GlanceModifier.width(18.dp))
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Row(verticalAlignment = Alignment.Bottom) {
+                            Text(
+                                text = "${state.totalCount}",
+                                style = TextStyle(
+                                    color = ColorProvider(primaryText),
+                                    fontSize = 40.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            )
+                            Spacer(GlanceModifier.width(4.dp))
+                            Text(
+                                text = context.getString(R.string.glasses_with_slash, state.goal),
+                                style = TextStyle(color = ColorProvider(secondaryText), fontSize = 16.sp)
+                            )
+                        }
+                        Spacer(GlanceModifier.height(4.dp))
+                        Text(
+                            text = "${(rate * 100).toInt()}%",
+                            style = TextStyle(
+                                color = ColorProvider(foregroundAccent),
+                                fontSize = 22.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        )
+                    }
                 }
             }
-            Spacer(GlanceModifier.height(8.dp))
+            Spacer(GlanceModifier.defaultWeight())
             Text(
                 text = motivationText,
-                style = TextStyle(color = ColorProvider(secondaryText), fontSize = 13.sp)
+                style = TextStyle(color = ColorProvider(secondaryText), fontSize = 14.sp, textAlign = TextAlign.Center),
+                modifier = GlanceModifier.fillMaxWidth()
             )
         }
     }

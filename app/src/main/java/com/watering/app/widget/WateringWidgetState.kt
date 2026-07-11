@@ -23,7 +23,8 @@ data class WidgetState(
     val totalCount: Int = 0,
     val goal: Int = 8,
     val achievementRate: Double = 0.0,
-    val theme: WidgetTheme = WidgetTheme.DEFAULT
+    val theme: WidgetTheme = WidgetTheme.DEFAULT,
+    val totalMl: Int = 0
 )
 
 // Glance는 세션이 재사용될 때 provideGlance()를 다시 호출하지 않으므로,
@@ -69,7 +70,8 @@ suspend fun loadWidgetState(context: Context): WidgetState {
             totalCount = record.totalCount,
             goal = goal,
             achievementRate = record.totalCount.toDouble() / goal,
-            theme = settings.widgetTheme
+            theme = settings.widgetTheme,
+            totalMl = record.entries.sumOf { it.amount }
         ).also { WidgetStateCache.lastKnownGood = it }
     } catch (e: Exception) {
         WidgetStateCache.lastKnownGood ?: WidgetState()

@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.res.Configuration
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.ColorFilter
@@ -25,12 +26,11 @@ import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.Spacer
-import androidx.glance.layout.fillMaxHeight
 import androidx.glance.layout.fillMaxSize
+import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
 import androidx.glance.layout.size
-import androidx.glance.layout.width
 import androidx.glance.semantics.contentDescription
 import androidx.glance.semantics.semantics
 import androidx.glance.text.FontWeight
@@ -60,25 +60,35 @@ private fun CircularWidgetContent(state: WidgetState) {
     val isAchieved = state.achievementRate >= 1.0
     val accent = state.theme.accentColor
     val rate = state.achievementRate.coerceIn(0.0, 1.0).toFloat()
-    val trackWidth = (size.width - 20.dp) * 0.85f
-    val barWidth = trackWidth * rate
+    val fillHeight = (size.height * rate).coerceIn(0.dp, size.height)
 
     // 목표 달성 시 다크모드 여부와 무관하게 테마 색 배경으로 반전 — 다크모드의 기존(미달성) 스타일은 그대로 유지.
-    // 미달성 상태의 아이콘/숫자/진행바는 라이트·다크 공통으로 테마 색(accent)을 그대로 사용 —
-    // 다크모드라고 흰색으로 덮으면 위젯 테마 선택이 다크모드에서 전혀 티가 안 나는 문제가 있었음
-    val bgColor = if (isAchieved) accent else if (isDark) WidgetDarkBg else Color.White
-    val textColor = if (isAchieved) readableTextColor(accent) else accent
-    val barTrackColor = if (isAchieved) textColor.copy(alpha = 0.3f) else if (isDark) Color.White.copy(alpha = 0.3f) else accent.copy(alpha = 0.15f)
-    val barFillColor = if (isAchieved) textColor else accent
+    // 위젯 배경 자체를 진행률 채움(아래→위, "컵에 물 차오르는" 느낌)으로 사용 —
+    // track/fill 모두 accent를 baseBg와 블렌딩한 톤이라 다크모드에서도 텍스트 대비가 유지됨
+    val achievedText = readableTextColor(accent)
+    val baseBg = if (isDark) WidgetDarkBg else Color.White
+    val trackColor = if (isAchieved) accent else lerp(baseBg, accent, 0.12f)
+    val fillColor = if (isAchieved) accent else lerp(baseBg, accent, 0.35f)
+    val textColor = if (isAchieved) achievedText else accent
 
     Box(
         modifier = GlanceModifier
             .fillMaxSize()
-            .background(ColorProvider(bgColor))
+            .background(ColorProvider(trackColor))
             .cornerRadius(24.dp)
             .semantics { contentDescription = context.getString(R.string.widget_talkback_hint, state.totalCount, state.goal) }
             .clickable(actionRunCallback<AddWaterAction>())
     ) {
+        Column(modifier = GlanceModifier.fillMaxSize()) {
+            Spacer(GlanceModifier.height((size.height - fillHeight).coerceAtLeast(0.dp)))
+            Box(
+                modifier = GlanceModifier
+                    .fillMaxWidth()
+                    .height(fillHeight)
+                    .background(ColorProvider(fillColor))
+            ) {}
+        }
+
         Column(
             modifier = GlanceModifier.fillMaxSize().padding(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -87,36 +97,18 @@ private fun CircularWidgetContent(state: WidgetState) {
             Image(
                 provider = ImageProvider(R.drawable.ic_water_drop),
                 contentDescription = null,
-                modifier = GlanceModifier.size(18.dp),
+                modifier = GlanceModifier.size(22.dp),
                 colorFilter = ColorFilter.tint(ColorProvider(textColor))
             )
-            Spacer(GlanceModifier.height(2.dp))
+            Spacer(GlanceModifier.height(4.dp))
             Text(
                 text = "${state.totalCount}",
                 style = TextStyle(
                     color = ColorProvider(textColor),
-                    fontSize = 28.sp,
+                    fontSize = 34.sp,
                     fontWeight = FontWeight.Bold
                 )
             )
-            Spacer(GlanceModifier.height(6.dp))
-            Box(
-                modifier = GlanceModifier
-                    .width(trackWidth)
-                    .height(4.dp)
-                    .cornerRadius(2.dp)
-                    .background(ColorProvider(barTrackColor))
-            ) {
-                if (rate > 0f) {
-                    Box(
-                        modifier = GlanceModifier
-                            .width(barWidth)
-                            .fillMaxHeight()
-                            .cornerRadius(2.dp)
-                            .background(ColorProvider(barFillColor))
-                    ) {}
-                }
-            }
         }
     }
 }
