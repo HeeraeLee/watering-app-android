@@ -47,6 +47,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -72,6 +73,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.watering.app.R
 import com.watering.app.ui.theme.AppBackgroundGradient
+import com.watering.app.ui.theme.AppCardBackgroundColor
 import com.watering.app.ui.theme.GoalGlassesEquivalentRow
 import com.watering.app.ui.theme.SettingsMenuTileBackgroundColor
 import com.watering.app.ui.theme.SettingsMenuTileIconColor
@@ -344,36 +346,48 @@ private fun SectionDivider() {
 // 선택된 컵 크기와 같음
 @Composable
 private fun DailyGoalSetting(goal: Int, cupSize: Int, onGoalChange: (Int) -> Unit) {
-    Row(
+    // 다른 설정 항목들과 똑같은 평범한 Row라 눈에 안 띈다는 owner 피드백으로, 홈 화면
+    // StreakCard와 동일한 카드 스타일(흰 배경+그림자)만 적용해 시각적으로 튀게 함
+    // (웹 목업 6안 중 B안의 카드+그림자만 채택, 아이콘 뱃지는 제외)
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = AppCardBackgroundColor,
+        shadowElevation = 3.dp,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+            .padding(horizontal = 16.dp, vertical = 6.dp)
     ) {
-        Text(stringResource(R.string.label_daily_goal), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(
-                onClick = { onGoalChange(goal - 1) },
-                enabled = goal > 1,
-                modifier = Modifier.size(48.dp)
-            ) {
-                Icon(Icons.Default.Remove, contentDescription = stringResource(R.string.content_description_goal_decrease), tint = MaterialTheme.colorScheme.onSurface)
-            }
-            Text(
-                text = stringResource(R.string.onboarding_goal_ml, goal * cupSize),
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.primary,
-                textAlign = TextAlign.Center,
-                maxLines = 1,
-                modifier = Modifier.widthIn(min = 110.dp)
-            )
-            IconButton(
-                onClick = { onGoalChange(goal + 1) },
-                enabled = goal < 20,
-                modifier = Modifier.size(48.dp)
-            ) {
-                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.content_description_goal_increase), tint = MaterialTheme.colorScheme.onSurface)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(stringResource(R.string.label_daily_goal), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(
+                    onClick = { onGoalChange(goal - 1) },
+                    enabled = goal > 1,
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Icon(Icons.Default.Remove, contentDescription = stringResource(R.string.content_description_goal_decrease), tint = MaterialTheme.colorScheme.onSurface)
+                }
+                Text(
+                    text = stringResource(R.string.onboarding_goal_ml, goal * cupSize),
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    modifier = Modifier.widthIn(min = 110.dp)
+                )
+                IconButton(
+                    onClick = { onGoalChange(goal + 1) },
+                    enabled = goal < 20,
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = stringResource(R.string.content_description_goal_increase), tint = MaterialTheme.colorScheme.onSurface)
+                }
             }
         }
     }
