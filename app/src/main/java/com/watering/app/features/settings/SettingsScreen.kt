@@ -403,7 +403,12 @@ private val TumblerBottlePresets = listOf(
 @Composable
 private fun CupSizeSetting(goal: Int, cupSize: Int, onCupSizeChange: (Int) -> Unit) {
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-        Text(stringResource(R.string.label_cup_size), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
+        Text(
+            stringResource(R.string.label_cup_size),
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
         CupSizeGroup(stringResource(R.string.cup_size_group_daily), DailyCupPresets, cupSize, onCupSizeChange)
         CupSizeGroup(stringResource(R.string.cup_size_group_cafe), CafeCupPresets, cupSize, onCupSizeChange)
         CupSizeGroup(stringResource(R.string.cup_size_group_tumbler), TumblerBottlePresets, cupSize, onCupSizeChange)
@@ -411,6 +416,9 @@ private fun CupSizeSetting(goal: Int, cupSize: Int, onCupSizeChange: (Int) -> Un
         GoalGlassesEquivalentRow(glasses = goal)
     }
 }
+
+// 그룹 라벨 좌측 컬러 바 — 칩 선택색(selectedChipColors)과 동일한 연보라로 통일
+private val CupSizeGroupBarColor = Color(0xFF9B87D9)
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -420,12 +428,24 @@ private fun CupSizeGroup(
     cupSize: Int,
     onCupSizeChange: (Int) -> Unit
 ) {
-    Text(
-        title,
-        style = MaterialTheme.typography.labelSmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.padding(top = 10.dp, bottom = 6.dp)
-    )
+    ) {
+        Box(
+            modifier = Modifier
+                .width(3.dp)
+                .height(14.dp)
+                .background(CupSizeGroupBarColor)
+        )
+        Spacer(Modifier.width(8.dp))
+        Text(
+            title,
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+    }
     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         presets.forEach { preset ->
             FilterChip(
