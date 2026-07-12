@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -60,14 +61,14 @@ fun RecordSheet(
                 // 스크롤 가능하게 해 자식들이 고유 높이를 유지하도록 함 (SM-A256N 등 고밀도 기기 재현)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
-                .padding(bottom = 36.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
+                .padding(bottom = 36.dp)
         ) {
             Text(
                 text = stringResource(R.string.record_sheet_title),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
+            Spacer(Modifier.height(12.dp))
 
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(stringResource(R.string.record_drink_type_label), style = MaterialTheme.typography.labelLarge,
@@ -77,6 +78,7 @@ fun RecordSheet(
                     onSelect = viewModel::selectDrinkType
                 )
             }
+            Spacer(Modifier.height(12.dp))
 
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(stringResource(R.string.record_amount_label), style = MaterialTheme.typography.labelLarge,
@@ -91,6 +93,7 @@ fun RecordSheet(
                     onCustomTextChange = viewModel::enterCustomAmount
                 )
             }
+            Spacer(Modifier.height(20.dp))
 
             Button(
                 onClick = {
@@ -180,5 +183,16 @@ private fun AmountSelector(
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
+    } else {
+        // 칩 자체는 ml 숫자만 유지하고, 선택된 사이즈가 어떤 컵/텀블러에 해당하는지만
+        // 한 줄 설명으로 보여줌(웹 목업 C안 채택, 2026-07-12)
+        amountLabelRes(selectedAmount)?.let { labelRes ->
+            Text(
+                text = stringResource(R.string.record_amount_size_hint, stringResource(labelRes)),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(top = 6.dp)
+            )
+        }
     }
 }

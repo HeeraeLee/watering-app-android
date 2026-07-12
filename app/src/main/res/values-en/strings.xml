@@ -155,6 +155,7 @@
     <string name="record_amount_label">Amount</string>
     <string name="record_button">Log %1$s %2$s %3$dml</string>
     <string name="record_custom_input">Custom</string>
+    <string name="record_amount_size_hint">%1$s size</string>
 
     <!-- Onboarding -->
     <string name="onboarding_next">Next</string>

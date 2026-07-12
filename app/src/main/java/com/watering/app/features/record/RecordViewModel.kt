@@ -2,6 +2,7 @@ package com.watering.app.features.record
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.watering.app.R
 import com.watering.app.core.data.SettingsRepository
 import com.watering.app.core.model.DrinkType
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,6 +28,20 @@ fun presetAmountsFor(drinkType: DrinkType): List<Int> = when (drinkType) {
     DrinkType.COFFEE, DrinkType.TEA -> listOf(355, 473, 591, 710) // 스벅 톨/그란데/벤티/메가커피
     DrinkType.JUICE, DrinkType.MILK -> listOf(200, 355, 473, 500)
     DrinkType.OTHER -> listOf(200, 355, 473, 500, 710)
+}
+
+// 칩 자체는 ml 숫자만 유지하고, 선택된 값에 대한 설명만 별도 한 줄로 보여주기 위한 매핑
+// (웹 목업 C안 채택, 2026-07-12) — 설정 화면 컵 크기와 동일한 문자열 리소스 재사용
+fun amountLabelRes(ml: Int): Int? = when (ml) {
+    190 -> R.string.cup_size_paper_cup
+    200 -> R.string.cup_size_regular_glass
+    355 -> R.string.cup_size_starbucks_tall
+    473 -> R.string.cup_size_starbucks_grande
+    591 -> R.string.cup_size_starbucks_venti
+    710 -> R.string.cup_size_megacoffee
+    500 -> R.string.cup_size_water_bottle
+    887 -> R.string.cup_size_stanley_quencher
+    else -> null
 }
 
 @HiltViewModel
