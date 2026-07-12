@@ -177,19 +177,11 @@ fun SettingsScreen(
                 item { SectionHeader(stringResource(R.string.settings_section_recording)) }
 
                 item {
-                    DailyGoalSetting(
+                    // TODO: A안(RecordingSettingsCard) vs C안(RecordingSettingsList) 비교 중 — 지금은 C안 표시
+                    RecordingSettingsList(
                         goal = settings.dailyGoal,
                         cupSize = settings.cupSize,
-                        onGoalChange = viewModel::updateDailyGoal
-                    )
-                }
-
-                item { Spacer(Modifier.height(8.dp)) }
-
-                item {
-                    CupSizeSetting(
-                        goal = settings.dailyGoal,
-                        cupSize = settings.cupSize,
+                        onGoalChange = viewModel::updateDailyGoal,
                         onCupSizeChange = viewModel::updateCupSize
                     )
                 }
@@ -341,6 +333,72 @@ private fun SectionDivider() {
     HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 }
 
+// "기록 설정"(하루 목표+컵 크기) 가독성 개선 웹 목업 4안 중 A안(올인원 카드) 채택 시도 —
+// 두 설정을 하나의 연보라 톤 카드로 묶고 구분선으로 나눔. C안(구분선 리스트)과 실기기에서
+// 비교해보고 owner가 최종 선택 예정
+private val RecordingCardBackgroundColor = Color(0xFFFAF8FF)
+
+@Composable
+private fun RecordingSettingsCard(
+    goal: Int,
+    cupSize: Int,
+    onGoalChange: (Int) -> Unit,
+    onCupSizeChange: (Int) -> Unit
+) {
+    Surface(
+        shape = RoundedCornerShape(18.dp),
+        color = RecordingCardBackgroundColor,
+        shadowElevation = 2.dp,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            DailyGoalSetting(goal = goal, cupSize = cupSize, onGoalChange = onGoalChange)
+            HorizontalDivider(modifier = Modifier.padding(vertical = 14.dp), color = Color(0xFFE8E1F5))
+            CupSizeSetting(goal = goal, cupSize = cupSize, onCupSizeChange = onCupSizeChange)
+        }
+    }
+}
+
+// C안(구분선 리스트)에서는 이 카드+그림자 없이 Row 내용만 재사용해야 해서 내용을 분리
+@Composable
+private fun DailyGoalRow(goal: Int, cupSize: Int, onGoalChange: (Int) -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 20.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(stringResource(R.string.label_daily_goal), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconButton(
+                onClick = { onGoalChange(goal - 1) },
+                enabled = goal > 1,
+                modifier = Modifier.size(48.dp)
+            ) {
+                Icon(Icons.Default.Remove, contentDescription = stringResource(R.string.content_description_goal_decrease), tint = MaterialTheme.colorScheme.onSurface)
+            }
+            Text(
+                text = stringResource(R.string.onboarding_goal_ml, goal * cupSize),
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.primary,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                modifier = Modifier.widthIn(min = 110.dp)
+            )
+            IconButton(
+                onClick = { onGoalChange(goal + 1) },
+                enabled = goal < 20,
+                modifier = Modifier.size(48.dp)
+            ) {
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.content_description_goal_increase), tint = MaterialTheme.colorScheme.onSurface)
+            }
+        }
+    }
+}
+
 // ml이 주역, 잔 수는 CupSizeSetting 아래 보조 텍스트로 표시 — 온보딩 목표 설정 화면과
 // 동일한 패턴으로 통일(2026-07-10). goal(잔 수)이 여전히 저장 단위라 +/- 한 번의 증감폭은
 // 선택된 컵 크기와 같음
@@ -353,41 +411,36 @@ private fun DailyGoalSetting(goal: Int, cupSize: Int, onGoalChange: (Int) -> Uni
         shape = RoundedCornerShape(16.dp),
         color = AppCardBackgroundColor,
         shadowElevation = 3.dp,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        DailyGoalRow(goal = goal, cupSize = cupSize, onGoalChange = onGoalChange)
+    }
+}
+
+// "기록 설정" 가독성 개선 웹 목업 4안 중 C안(구분선 기반 리스트, iOS 설정 앱 그룹 테이블 느낌) —
+// 하나의 흰 카드 안에 하루 목표/컵 크기를 얇은 구분선으로만 나눔(각 행 자체엔 그림자 없음).
+// A안(RecordingSettingsCard)과 실기기에서 비교 후 owner가 최종 선택 예정
+@Composable
+private fun RecordingSettingsList(
+    goal: Int,
+    cupSize: Int,
+    onGoalChange: (Int) -> Unit,
+    onCupSizeChange: (Int) -> Unit
+) {
+    // C안(구분선 리스트) 구조 + A안(연보라 톤) 배경색 조합 — owner 요청으로 두 안을 섞음
+    Surface(
+        shape = RoundedCornerShape(14.dp),
+        color = RecordingCardBackgroundColor,
+        shadowElevation = 2.dp,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 6.dp)
+            .padding(horizontal = 16.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(stringResource(R.string.label_daily_goal), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(
-                    onClick = { onGoalChange(goal - 1) },
-                    enabled = goal > 1,
-                    modifier = Modifier.size(48.dp)
-                ) {
-                    Icon(Icons.Default.Remove, contentDescription = stringResource(R.string.content_description_goal_decrease), tint = MaterialTheme.colorScheme.onSurface)
-                }
-                Text(
-                    text = stringResource(R.string.onboarding_goal_ml, goal * cupSize),
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    textAlign = TextAlign.Center,
-                    maxLines = 1,
-                    modifier = Modifier.widthIn(min = 110.dp)
-                )
-                IconButton(
-                    onClick = { onGoalChange(goal + 1) },
-                    enabled = goal < 20,
-                    modifier = Modifier.size(48.dp)
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = stringResource(R.string.content_description_goal_increase), tint = MaterialTheme.colorScheme.onSurface)
-                }
+        Column {
+            DailyGoalRow(goal = goal, cupSize = cupSize, onGoalChange = onGoalChange)
+            HorizontalDivider(color = Color(0xFFE8E1F5))
+            Box(modifier = Modifier.padding(20.dp)) {
+                CupSizeSetting(goal = goal, cupSize = cupSize, onCupSizeChange = onCupSizeChange)
             }
         }
     }
@@ -414,19 +467,26 @@ private val TumblerBottlePresets = listOf(
     CupSizePreset(887, R.string.cup_size_stanley_quencher)
 )
 
+// 줄간격 웹 목업 6안 중 C안(넉넉하게) 채택 — 타이틀↔첫 그룹, 그룹↔그룹 간격 모두 16dp로 통일
+private val CupSizeGroupGap = 16.dp
+private val CupSizeGroupTitleToChipsGap = 4.dp
+
 @Composable
 private fun CupSizeSetting(goal: Int, cupSize: Int, onCupSizeChange: (Int) -> Unit) {
-    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+    Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             stringResource(R.string.label_cup_size),
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface
         )
+        Spacer(Modifier.height(CupSizeGroupGap))
         CupSizeGroup(stringResource(R.string.cup_size_group_daily), DailyCupPresets, cupSize, onCupSizeChange)
+        Spacer(Modifier.height(CupSizeGroupGap))
         CupSizeGroup(stringResource(R.string.cup_size_group_cafe), CafeCupPresets, cupSize, onCupSizeChange)
+        Spacer(Modifier.height(CupSizeGroupGap))
         CupSizeGroup(stringResource(R.string.cup_size_group_tumbler), TumblerBottlePresets, cupSize, onCupSizeChange)
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(14.dp))
         GoalGlassesEquivalentRow(glasses = goal)
     }
 }
@@ -444,7 +504,7 @@ private fun CupSizeGroup(
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(top = 10.dp, bottom = 6.dp)
+        modifier = Modifier.padding(bottom = CupSizeGroupTitleToChipsGap)
     ) {
         Box(
             modifier = Modifier
