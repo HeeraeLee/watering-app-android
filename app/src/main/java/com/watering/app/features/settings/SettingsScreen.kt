@@ -439,7 +439,7 @@ private fun RecordingSettingsList(
         Column {
             DailyGoalRow(goal = goal, cupSize = cupSize, onGoalChange = onGoalChange)
             HorizontalDivider(color = Color(0xFFE8E1F5))
-            Box(modifier = Modifier.padding(20.dp)) {
+            Box(modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 20.dp)) {
                 CupSizeSetting(goal = goal, cupSize = cupSize, onCupSizeChange = onCupSizeChange)
             }
         }
