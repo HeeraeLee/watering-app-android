@@ -20,6 +20,15 @@ data class RecordUiState(
     val customAmountText: String = "200"
 )
 
+// 음료 종류에 따라 관련 있는 규격만 보여줌(웹 목업 "4안" 채택, 2026-07-12) — 설정 화면
+// 컵 크기(CupSizeSetting)에 쓴 것과 동일한 실제 브랜드 규격 값을 재사용
+fun presetAmountsFor(drinkType: DrinkType): List<Int> = when (drinkType) {
+    DrinkType.WATER -> listOf(190, 200, 500, 887)          // 종이컵/물컵/생수/스탠리 퀜처
+    DrinkType.COFFEE, DrinkType.TEA -> listOf(355, 473, 591, 710) // 스벅 톨/그란데/벤티/메가커피
+    DrinkType.JUICE, DrinkType.MILK -> listOf(200, 355, 473, 500)
+    DrinkType.OTHER -> listOf(200, 355, 473, 500, 710)
+}
+
 @HiltViewModel
 class RecordViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository
@@ -28,8 +37,6 @@ class RecordViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(RecordUiState())
     val uiState: StateFlow<RecordUiState> = _uiState.asStateFlow()
 
-    val presetAmounts = listOf(100, 150, 200, 250, 350, 500)
-
     init {
         viewModelScope.launch {
             val cupSize = settingsRepository.userSettings.first().cupSize
@@ -37,8 +44,18 @@ class RecordViewModel @Inject constructor(
         }
     }
 
+    // 음료 종류를 바꾸면 그 종류에 맞는 첫 번째 프리셋으로 양도 같이 갱신 — 안 맞는 이전 종류의
+    // 프리셋 값이 그대로 남아있지 않도록
     fun selectDrinkType(type: DrinkType) {
-        _uiState.update { it.copy(selectedDrinkType = type) }
+        val defaultAmount = presetAmountsFor(type).first()
+        _uiState.update {
+            it.copy(
+                selectedDrinkType = type,
+                selectedAmount = defaultAmount,
+                isCustomAmount = false,
+                customAmountText = defaultAmount.toString()
+            )
+        }
     }
 
     fun selectPresetAmount(amount: Int) {

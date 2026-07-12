@@ -82,7 +82,7 @@ fun RecordSheet(
                 Text(stringResource(R.string.record_amount_label), style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
                 AmountSelector(
-                    presets = viewModel.presetAmounts,
+                    presets = presetAmountsFor(uiState.selectedDrinkType),
                     selectedAmount = uiState.selectedAmount,
                     isCustom = uiState.isCustomAmount,
                     customText = uiState.customAmountText,
