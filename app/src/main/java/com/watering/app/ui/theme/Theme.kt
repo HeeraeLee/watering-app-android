@@ -32,10 +32,14 @@ val AppCardBackgroundColor: Color
 // 그라데이션(라벤더→크림)과 명도 차이가 거의 없어 카드 경계가 흐려 보인다는 피드백으로,
 // 웹 목업 6안 비교 후 "소프트 민트"로 확정(2026-07-10). 이후 흰 배경 위젯이 민트 카드에
 // 묻혀 보인다는 피드백으로, 웹 목업 5안 비교 후 "웜 그레이 베이지"로 재변경(2026-07-11) —
-// 중립 톤이라 위젯 자체의 테마 색이 더 도드라져 보임. 다크모드는 기존 값으로 이미 배경과
-// 잘 구분되어 변경하지 않음
+// 그런데 이것도 "아이보리 느낌이라 별로"라는 피드백으로, 웹 목업 6안 비교 후 "화이트 카드 +
+// 점선 보더"로 재변경(2026-07-12, `WidgetPreviewCardBorderColor`와 함께 적용). 다크모드는
+// 기존 값으로 이미 배경과 잘 구분되어 변경하지 않음
 val WidgetPreviewCardBackgroundColor: Color
-    @Composable get() = if (isSystemInDarkTheme()) Color(0xFF1C4D49) else Color(0xFFECE6DD)
+    @Composable get() = if (isSystemInDarkTheme()) Color(0xFF1C4D49) else Color(0xFFFAFAFA)
+
+val WidgetPreviewCardBorderColor: Color
+    @Composable get() = if (isSystemInDarkTheme()) Color.Transparent else Color(0xFFD8D8D8)
 
 // 설정 화면의 안내 배너(건강 연동/백업) 공용 배경 (웹 목업 비교 후 소프트 옐로우로 확정)
 // 2026-07-08: 다크모드 값이 옐로우를 단순히 어둡게 낮춘 올리브-갈색이라 딥 틸 다크 팔레트와 충돌한다는

@@ -46,10 +46,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.lerp
@@ -57,6 +60,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -65,6 +69,7 @@ import com.watering.app.R
 import com.watering.app.core.model.WidgetTheme
 import com.watering.app.ui.theme.AppBackgroundGradient
 import com.watering.app.ui.theme.WidgetPreviewCardBackgroundColor
+import com.watering.app.ui.theme.WidgetPreviewCardBorderColor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -203,12 +208,27 @@ private fun WidgetThemeSetting(
     }
 }
 
+// 웹 목업 6안 중 "화이트 카드 + 점선 보더" 채택(2026-07-12) — Compose의 Modifier.border는
+// 실선만 지원해 drawBehind로 직접 점선 사각형을 그림
+private fun Modifier.dashedBorder(color: Color, cornerRadius: Dp, strokeWidth: Dp = 1.5.dp) = drawBehind {
+    drawRoundRect(
+        color = color,
+        style = Stroke(
+            width = strokeWidth.toPx(),
+            pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 6f), 0f)
+        ),
+        cornerRadius = CornerRadius(cornerRadius.toPx())
+    )
+}
+
 @Composable
 private fun WidgetPreviewCard(color: Color, shape: WidgetPreviewShape) {
     Surface(
         shape = RoundedCornerShape(20.dp),
         color = WidgetPreviewCardBackgroundColor,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .dashedBorder(WidgetPreviewCardBorderColor, 20.dp)
     ) {
         Column(
             modifier = Modifier.padding(16.dp).fillMaxWidth(),
