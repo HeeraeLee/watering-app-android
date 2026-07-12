@@ -94,6 +94,17 @@
     <string name="label_goal_achieved_banner">Goal achieved! 🎉</string>
     <string name="label_daily_goal">Daily Goal</string>
     <string name="label_cup_size">Cup Size</string>
+    <string name="cup_size_group_daily">Everyday Cups</string>
+    <string name="cup_size_group_cafe">Cafe Sizes</string>
+    <string name="cup_size_group_tumbler">Tumblers &amp; Bottles</string>
+    <string name="cup_size_paper_cup">Paper Cup</string>
+    <string name="cup_size_regular_glass">Regular Glass</string>
+    <string name="cup_size_starbucks_tall">Starbucks Tall</string>
+    <string name="cup_size_starbucks_grande">Starbucks Grande</string>
+    <string name="cup_size_starbucks_venti">Starbucks Venti</string>
+    <string name="cup_size_megacoffee">Mega Coffee</string>
+    <string name="cup_size_water_bottle">Water Bottle</string>
+    <string name="cup_size_stanley_quencher">Stanley Quencher</string>
     <string name="content_description_goal_decrease">Decrease goal</string>
     <string name="content_description_goal_increase">Increase goal</string>
     <string name="glasses_with_slash">/ %1$d glasses</string>

@@ -379,26 +379,67 @@ private fun DailyGoalSetting(goal: Int, cupSize: Int, onGoalChange: (Int) -> Uni
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
+// 실제 유명 텀블러/카페/생활 컵 용량에 앵커링한 프리셋 — 임의의 라운드 숫자 대신 사용자가
+// "우리 집 컵/자주 쓰는 텀블러랑 똑같네"라고 알아볼 수 있게 함(웹 목업 8안 비교 후 F안 채택:
+// 카테고리 그룹화). 출처: 종이컵 6.5oz(190ml), 일반 유리 물컵 200ml 안팎, 스타벅스 톨/그란데/
+// 벤티 12·16·20oz(355/473/591ml), 메가커피 아이스 24oz(710ml), 생수 500ml, 스탠리 퀜처 30oz(887ml)
+private data class CupSizePreset(val ml: Int, @androidx.annotation.StringRes val nameRes: Int)
+
+private val DailyCupPresets = listOf(
+    CupSizePreset(190, R.string.cup_size_paper_cup),
+    CupSizePreset(200, R.string.cup_size_regular_glass)
+)
+private val CafeCupPresets = listOf(
+    CupSizePreset(355, R.string.cup_size_starbucks_tall),
+    CupSizePreset(473, R.string.cup_size_starbucks_grande),
+    CupSizePreset(591, R.string.cup_size_starbucks_venti),
+    CupSizePreset(710, R.string.cup_size_megacoffee)
+)
+private val TumblerBottlePresets = listOf(
+    CupSizePreset(500, R.string.cup_size_water_bottle),
+    CupSizePreset(887, R.string.cup_size_stanley_quencher)
+)
+
 @Composable
 private fun CupSizeSetting(goal: Int, cupSize: Int, onCupSizeChange: (Int) -> Unit) {
-    val cupSizes = listOf(150, 200, 250, 300, 350, 500)
-
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
         Text(stringResource(R.string.label_cup_size), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
+        CupSizeGroup(stringResource(R.string.cup_size_group_daily), DailyCupPresets, cupSize, onCupSizeChange)
+        CupSizeGroup(stringResource(R.string.cup_size_group_cafe), CafeCupPresets, cupSize, onCupSizeChange)
+        CupSizeGroup(stringResource(R.string.cup_size_group_tumbler), TumblerBottlePresets, cupSize, onCupSizeChange)
         Spacer(Modifier.height(8.dp))
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            cupSizes.forEach { size ->
-                FilterChip(
-                    selected = cupSize == size,
-                    onClick = { onCupSizeChange(size) },
-                    label = { Text("${size}ml") },
-                    colors = selectedChipColors()
-                )
-            }
-        }
-        Spacer(Modifier.height(16.dp))
         GoalGlassesEquivalentRow(glasses = goal)
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun CupSizeGroup(
+    title: String,
+    presets: List<CupSizePreset>,
+    cupSize: Int,
+    onCupSizeChange: (Int) -> Unit
+) {
+    Text(
+        title,
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(top = 10.dp, bottom = 6.dp)
+    )
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        presets.forEach { preset ->
+            FilterChip(
+                selected = cupSize == preset.ml,
+                onClick = { onCupSizeChange(preset.ml) },
+                label = {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("${preset.ml}ml", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold)
+                        Text(stringResource(preset.nameRes), style = MaterialTheme.typography.labelSmall)
+                    }
+                },
+                colors = selectedChipColors()
+            )
+        }
     }
 }
 

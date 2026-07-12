@@ -97,6 +97,17 @@
     <string name="label_goal_achieved_banner">목표 달성! 🎉</string>
     <string name="label_daily_goal">하루 목표</string>
     <string name="label_cup_size">컵 크기</string>
+    <string name="cup_size_group_daily">일상 컵</string>
+    <string name="cup_size_group_cafe">카페 사이즈</string>
+    <string name="cup_size_group_tumbler">텀블러 · 물병</string>
+    <string name="cup_size_paper_cup">종이컵</string>
+    <string name="cup_size_regular_glass">일반 물컵</string>
+    <string name="cup_size_starbucks_tall">스벅 톨</string>
+    <string name="cup_size_starbucks_grande">스벅 그란데</string>
+    <string name="cup_size_starbucks_venti">스벅 벤티</string>
+    <string name="cup_size_megacoffee">메가커피</string>
+    <string name="cup_size_water_bottle">생수 한 병</string>
+    <string name="cup_size_stanley_quencher">스탠리 퀜처</string>
     <string name="content_description_goal_decrease">목표 감소</string>
     <string name="content_description_goal_increase">목표 증가</string>
     <string name="glasses_with_slash">/ %1$d잔</string>
