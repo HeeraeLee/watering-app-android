@@ -442,7 +442,6 @@ private fun CupSizeGroup(
         Text(
             title,
             style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface
         )
     }
