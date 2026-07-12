@@ -79,15 +79,11 @@ class SettingsViewModel @Inject constructor(
         ) == PackageManager.PERMISSION_GRANTED
     }
 
-    fun updateDailyGoal(goal: Int) {
-        if (goal !in DAILY_GOAL_RANGE) return
-        update(refreshWidget = true) { it.copy(dailyGoal = goal) }
-    }
+    fun updateDailyGoal(goal: Int) = update(refreshWidget = true) { it.copy(dailyGoal = goal) }
 
     // 몸무게 기반 목표가 적용된 상태(weightKg 존재)라면 컵 크기가 바뀌어도 목표 수분량(ml)이
     // 유지되도록 잔 수를 다시 계산한다. 그렇지 않으면 기존 잔 수 그대로 컵 크기만 바뀐다.
     fun updateCupSize(size: Int) {
-        if (size !in CUP_SIZE_RANGE) return
         val weightKg = settings.value.weightKg
         update(refreshWidget = weightKg != null) { s ->
             if (weightKg != null) {
@@ -239,12 +235,5 @@ class SettingsViewModel @Inject constructor(
                 notificationService.cancelReminders()
             }
         }
-    }
-
-    companion object {
-        // 컵 크기 직접 입력 허용 범위(ml) — recommendedGoalCups가 cupSize로 나누므로 0/음수 방지 필수
-        val CUP_SIZE_RANGE = 50..2000
-        // 하루 목표(잔수) 직접 입력 허용 범위 — 기존 +/- 버튼의 enabled 조건(goal>1, goal<20)과 동일
-        val DAILY_GOAL_RANGE = 1..20
     }
 }

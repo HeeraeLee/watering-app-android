@@ -52,23 +52,19 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -348,12 +344,6 @@ private fun SectionDivider() {
 // 선택된 컵 크기와 같음
 @Composable
 private fun DailyGoalSetting(goal: Int, cupSize: Int, onGoalChange: (Int) -> Unit) {
-    // ml 숫자를 탭하면 잔수를 직접 입력하는 다이얼로그가 열림 — WeightGoalDialogs와 동일한
-    // AlertDialog+OutlinedTextField 패턴 재사용. 체중 계산 같은 비동기 로직이 없어 ViewModel이
-    // 아니라 로컬 상태로 관리(컵 크기 직접 입력과 동일한 판단)
-    var showGoalDialog by remember { mutableStateOf(false) }
-    var goalInput by remember { mutableStateOf(goal.toString()) }
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -376,12 +366,7 @@ private fun DailyGoalSetting(goal: Int, cupSize: Int, onGoalChange: (Int) -> Uni
                 color = MaterialTheme.colorScheme.primary,
                 textAlign = TextAlign.Center,
                 maxLines = 1,
-                modifier = Modifier
-                    .widthIn(min = 110.dp)
-                    .clickable {
-                        goalInput = goal.toString()
-                        showGoalDialog = true
-                    }
+                modifier = Modifier.widthIn(min = 110.dp)
             )
             IconButton(
                 onClick = { onGoalChange(goal + 1) },
@@ -392,68 +377,12 @@ private fun DailyGoalSetting(goal: Int, cupSize: Int, onGoalChange: (Int) -> Uni
             }
         }
     }
-
-    if (showGoalDialog) {
-        DailyGoalInputDialog(
-            goalInput = goalInput,
-            onGoalInputChange = { goalInput = it.filter(Char::isDigit).take(2) },
-            onDismiss = { showGoalDialog = false },
-            onApply = {
-                goalInput.toIntOrNull()?.let { onGoalChange(it) }
-                showGoalDialog = false
-            }
-        )
-    }
-}
-
-@Composable
-private fun DailyGoalInputDialog(
-    goalInput: String,
-    onGoalInputChange: (String) -> Unit,
-    onDismiss: () -> Unit,
-    onApply: () -> Unit
-) {
-    val value = goalInput.toIntOrNull()
-    val isValid = value != null && value in SettingsViewModel.DAILY_GOAL_RANGE
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.settings_daily_goal_dialog_title)) },
-        text = {
-            OutlinedTextField(
-                value = goalInput,
-                onValueChange = onGoalInputChange,
-                label = { Text(stringResource(R.string.settings_daily_goal_input_label)) },
-                isError = goalInput.isNotEmpty() && !isValid,
-                supportingText = { Text(stringResource(R.string.settings_daily_goal_custom_range)) },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
-            )
-        },
-        confirmButton = {
-            TextButton(onClick = onApply, enabled = isValid) {
-                Text(stringResource(R.string.settings_weight_goal_confirm_apply))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.settings_dialog_cancel))
-            }
-        }
-    )
 }
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun CupSizeSetting(goal: Int, cupSize: Int, onCupSizeChange: (Int) -> Unit) {
     val cupSizes = listOf(150, 200, 250, 300, 350, 500)
-    // 저장된 값이 프리셋 밖이면(이전에 직접 입력한 값) 처음부터 "직접 입력" 칩이 선택된 상태로 보이게
-    var isCustom by rememberSaveable { mutableStateOf(cupSize !in cupSizes) }
-    var customText by rememberSaveable { mutableStateOf(if (cupSize in cupSizes) "" else cupSize.toString()) }
-    val focusManager = LocalFocusManager.current
-    val customValue = customText.toIntOrNull()
-    val isCustomValid = customValue != null && customValue in SettingsViewModel.CUP_SIZE_RANGE
 
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
         Text(stringResource(R.string.label_cup_size), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
@@ -461,38 +390,12 @@ private fun CupSizeSetting(goal: Int, cupSize: Int, onCupSizeChange: (Int) -> Un
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             cupSizes.forEach { size ->
                 FilterChip(
-                    selected = !isCustom && cupSize == size,
-                    onClick = { isCustom = false; onCupSizeChange(size) },
+                    selected = cupSize == size,
+                    onClick = { onCupSizeChange(size) },
                     label = { Text("${size}ml") },
                     colors = selectedChipColors()
                 )
             }
-            FilterChip(
-                selected = isCustom,
-                onClick = { isCustom = !isCustom },
-                label = { Text(stringResource(R.string.record_custom_input)) },
-                colors = selectedChipColors()
-            )
-        }
-        if (isCustom) {
-            Spacer(Modifier.height(8.dp))
-            OutlinedTextField(
-                value = customText,
-                onValueChange = { customText = it.filter(Char::isDigit).take(4) },
-                label = { Text(stringResource(R.string.record_custom_input)) },
-                suffix = { Text("ml") },
-                isError = customText.isNotEmpty() && !isCustomValid,
-                supportingText = { Text(stringResource(R.string.settings_cup_size_custom_range)) },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
-                keyboardActions = KeyboardActions(onDone = {
-                    if (isCustomValid) {
-                        onCupSizeChange(customValue!!)
-                        focusManager.clearFocus()
-                    }
-                }),
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
-            )
         }
         Spacer(Modifier.height(16.dp))
         GoalGlassesEquivalentRow(glasses = goal)

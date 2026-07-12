@@ -97,7 +97,6 @@
     <string name="label_goal_achieved_banner">목표 달성! 🎉</string>
     <string name="label_daily_goal">하루 목표</string>
     <string name="label_cup_size">컵 크기</string>
-    <string name="settings_cup_size_custom_range">50~2000ml 사이로 입력해주세요</string>
     <string name="content_description_goal_decrease">목표 감소</string>
     <string name="content_description_goal_increase">목표 증가</string>
     <string name="glasses_with_slash">/ %1$d잔</string>
@@ -245,9 +244,6 @@
     <string name="settings_weight_goal_confirm_apply">적용</string>
     <string name="settings_weight_goal_applied_snackbar">%1$skg 기준 하루 목표를 %2$d잔으로 설정했어요</string>
     <string name="settings_weight_goal_last_input">마지막 입력: %1$skg → 하루 %2$d잔</string>
-    <string name="settings_daily_goal_dialog_title">목표 잔수 설정</string>
-    <string name="settings_daily_goal_input_label">잔수</string>
-    <string name="settings_daily_goal_custom_range">1~20잔 사이로 입력해주세요</string>
     <string name="settings_section_recording">기록 설정</string>
     <string name="settings_section_health">건강 연동</string>
     <string name="settings_hydration_sync_title">물 마시기 자동 저장</string>
