@@ -336,7 +336,16 @@ private fun SectionDivider() {
 // "기록 설정"(하루 목표+컵 크기) 가독성 개선 웹 목업 4안 중 A안(올인원 카드) 채택 시도 —
 // 두 설정을 하나의 연보라 톤 카드로 묶고 구분선으로 나눔. C안(구분선 리스트)과 실기기에서
 // 비교해보고 owner가 최종 선택 예정
-private val RecordingCardBackgroundColor = Color(0xFFFAF8FF)
+// 다크모드 미대응 발견(2026-07-13, owner 제보) — 라이트 전용 하드코딩 색이라 다크모드에서도
+// 안 바뀌던 문제. 다른 카드들(AppCardBackgroundColor 등)과 동일한 다크 톤(딥 틸)으로 통일
+private val RecordingCardBackgroundColor: Color
+    @Composable get() = if (isSystemInDarkTheme()) Color(0xFF1C4D49) else Color(0xFFFAF8FF)
+
+// 카드 내부 구분선(하루 목표/컵 크기 사이) — 기본 MaterialTheme 구분선(회색)은 다크 틸 카드
+// 위에서 톤이 안 맞고 붕 떠 보인다는 owner 피드백(2026-07-13)으로 카드 톤에 맞춘 전용 색 지정.
+// 라이트는 기존 연보라 유지, 다크는 저투명도 화이트로 카드 배경에 자연스럽게 스며들게 함
+private val RecordingCardDividerColor: Color
+    @Composable get() = if (isSystemInDarkTheme()) Color.White.copy(alpha = 0.14f) else Color(0xFFE8E1F5)
 
 @Composable
 private fun RecordingSettingsCard(
@@ -355,7 +364,7 @@ private fun RecordingSettingsCard(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             DailyGoalSetting(goal = goal, cupSize = cupSize, onGoalChange = onGoalChange)
-            HorizontalDivider(modifier = Modifier.padding(vertical = 14.dp), color = Color(0xFFE8E1F5))
+            HorizontalDivider(modifier = Modifier.padding(vertical = 14.dp), color = RecordingCardDividerColor)
             CupSizeSetting(goal = goal, cupSize = cupSize, onCupSizeChange = onCupSizeChange)
         }
     }
@@ -438,7 +447,7 @@ private fun RecordingSettingsList(
     ) {
         Column {
             DailyGoalRow(goal = goal, cupSize = cupSize, onGoalChange = onGoalChange)
-            HorizontalDivider(color = Color(0xFFE8E1F5))
+            HorizontalDivider(color = RecordingCardDividerColor)
             Box(modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 20.dp)) {
                 CupSizeSetting(goal = goal, cupSize = cupSize, onCupSizeChange = onCupSizeChange)
             }
