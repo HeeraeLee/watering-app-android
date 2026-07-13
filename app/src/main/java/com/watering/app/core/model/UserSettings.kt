@@ -15,6 +15,7 @@ data class UserSettings(
     val healthConnectEnabled: Boolean = false,
     val weightKg: Double? = null,          // 체중 기반 목표 계산용, 사용자가 직접 입력
     val isOnboardingDone: Boolean = false,
-    val reviewRequested: Boolean = false,  // 인앱 리뷰 요청 1회 제한용
+    val lastReviewRequestedAtMillis: Long? = null, // 인앱 리뷰 마지막 요청 시각(쿨다운 기준)
+    val reviewRequestCount: Int = 0,               // 인앱 리뷰 요청 누적 횟수(평생 최대치 제한용)
     val widgetTheme: WidgetTheme = WidgetTheme.DEFAULT
 )

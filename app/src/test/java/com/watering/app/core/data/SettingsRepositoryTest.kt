@@ -54,10 +54,10 @@ class SettingsRepositoryTest {
 
     @Test
     fun markReviewRequested_dataStore에위임한다() = runTest {
-        coEvery { dataStore.markReviewRequested() } returns Unit
+        coEvery { dataStore.markReviewRequested(1_000L) } returns Unit
 
-        repository.markReviewRequested()
+        repository.markReviewRequested(1_000L)
 
-        coVerify { dataStore.markReviewRequested() }
+        coVerify { dataStore.markReviewRequested(1_000L) }
     }
 }

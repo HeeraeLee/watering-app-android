@@ -100,6 +100,10 @@ fun HomeScreen(
     var showRecordSheet by remember { mutableStateOf(false) }
     var showUndoConfirmDialog by remember { mutableStateOf(false) }
 
+    LaunchedEffect(Unit) {
+        activity?.let { viewModel.onHomeScreenOpened(it) }
+    }
+
     val undoActionLabel = stringResource(R.string.home_snackbar_undo_action)
     LaunchedEffect(snackbarMessage) {
         snackbarMessage?.let { msg ->

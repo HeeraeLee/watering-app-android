@@ -20,6 +20,7 @@ class AnalyticsService @Inject constructor(
         const val EVENT_PURCHASE_SUCCESS = "purchase_success"
         const val EVENT_PURCHASE_CANCELLED = "purchase_cancelled"
         const val EVENT_PURCHASE_FAILED = "purchase_failed"
+        const val EVENT_REVIEW_FLOW_REQUESTED = "review_flow_requested"
 
         const val PARAM_AMOUNT_ML = "amount_ml"
         const val PARAM_DRINK_TYPE = "drink_type"
@@ -30,6 +31,7 @@ class AnalyticsService @Inject constructor(
         const val PARAM_NOTIFICATION_ENABLED = "notification_enabled"
         const val PARAM_PRODUCT_ID = "product_id"
         const val PARAM_ERROR_CODE = "error_code"
+        const val PARAM_REVIEW_TRIGGER = "trigger"
 
         const val USER_PROPERTY_IS_PREMIUM = "is_premium"
     }
@@ -97,6 +99,13 @@ class AnalyticsService @Inject constructor(
             putString(PARAM_ERROR_CODE, errorCode)
         }
         analytics.logEvent(EVENT_PURCHASE_FAILED, bundle)
+    }
+
+    fun logReviewFlowRequested(trigger: String) {
+        val bundle = Bundle().apply {
+            putString(PARAM_REVIEW_TRIGGER, trigger)
+        }
+        analytics.logEvent(EVENT_REVIEW_FLOW_REQUESTED, bundle)
     }
 
     fun setPremiumUserProperty(isPremium: Boolean) {

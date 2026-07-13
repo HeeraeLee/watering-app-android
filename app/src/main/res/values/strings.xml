@@ -317,6 +317,7 @@
     <string name="settings_privacy_policy">개인정보처리방침</string>
     <string name="privacy_policy_url">https://sites.google.com/view/watering-privacy/%ED%99%88</string>
     <string name="settings_send_feedback">의견 보내기</string>
+    <string name="settings_rate_app">앱 평가하기</string>
     <string name="app_info_version">버전 %1$s (%2$d)</string>
     <string name="support_email" translatable="false">wateringapp.help@gmail.com</string>
 

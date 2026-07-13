@@ -14,5 +14,5 @@ class SettingsRepository @Inject constructor(
 
     suspend fun updateSettings(settings: UserSettings) = dataStore.updateSettings(settings)
     suspend fun completeOnboarding() = dataStore.completeOnboarding()
-    suspend fun markReviewRequested() = dataStore.markReviewRequested()
+    suspend fun markReviewRequested(atMillis: Long) = dataStore.markReviewRequested(atMillis)
 }

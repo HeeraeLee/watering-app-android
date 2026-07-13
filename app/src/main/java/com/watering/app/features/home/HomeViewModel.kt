@@ -124,9 +124,13 @@ class HomeViewModel @Inject constructor(
     fun dismissAchievement(activity: Activity? = null) {
         val achievement = _pendingAchievement.value
         _pendingAchievement.value = null
-        if (achievement == Achievement.STREAK_7 && activity != null) {
+        if (achievement?.isStreakBased == true && activity != null) {
             viewModelScope.launch { reviewService.requestReviewIfEligible(activity) }
         }
+    }
+
+    fun onHomeScreenOpened(activity: Activity) {
+        viewModelScope.launch { reviewService.requestReviewIfEligible(activity) }
     }
 
     fun undoLastEntry() {

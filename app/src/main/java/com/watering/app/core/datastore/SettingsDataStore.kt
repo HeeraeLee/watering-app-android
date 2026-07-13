@@ -61,12 +61,17 @@ class SettingsDataStore @Inject constructor(
         }
     }
 
-    suspend fun markReviewRequested() {
+    suspend fun markReviewRequested(atMillis: Long) {
         editSafely { prefs ->
             val current = prefs[Keys.USER_SETTINGS]
                 ?.let { runCatching { json.decodeFromString<UserSettings>(it) }.getOrNull() }
                 ?: UserSettings()
-            prefs[Keys.USER_SETTINGS] = json.encodeToString(current.copy(reviewRequested = true))
+            prefs[Keys.USER_SETTINGS] = json.encodeToString(
+                current.copy(
+                    lastReviewRequestedAtMillis = atMillis,
+                    reviewRequestCount = current.reviewRequestCount + 1
+                )
+            )
         }
     }
 }

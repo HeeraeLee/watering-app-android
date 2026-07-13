@@ -1,6 +1,8 @@
 package com.watering.app.features.settings
 
+import android.app.Activity
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
@@ -39,6 +41,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.watering.app.BuildConfig
 import com.watering.app.R
 import com.watering.app.ui.theme.AppBackgroundGradient
@@ -55,10 +58,17 @@ private fun Context.sendSupportEmail(subject: String) {
     }
 }
 
+private fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppInfoScreen(onBack: () -> Unit) {
+fun AppInfoScreen(onBack: () -> Unit, viewModel: AppInfoViewModel = hiltViewModel()) {
     val context = LocalContext.current
+    val activity = context.findActivity()
     val privacyPolicyUrl = stringResource(R.string.privacy_policy_url)
     val feedbackSubject = stringResource(R.string.settings_feedback_email_subject)
 
@@ -118,6 +128,20 @@ fun AppInfoScreen(onBack: () -> Unit) {
                         fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.clickable {
                             context.sendSupportEmail(subject = feedbackSubject)
+                        }
+                    )
+                    Text(
+                        " · ",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        stringResource(R.string.settings_rate_app),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.clickable {
+                            activity?.let { viewModel.requestManualReview(it) }
                         }
                     )
                 }

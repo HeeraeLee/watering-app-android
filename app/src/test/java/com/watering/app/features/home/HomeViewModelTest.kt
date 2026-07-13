@@ -153,20 +153,22 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun dismissAchievement_STREAK_7이고activity가있으면리뷰요청한다() = runTest(mainDispatcherRule.testDispatcher) {
-        val viewModel = createViewModel()
-        setPendingAchievement(viewModel, Achievement.STREAK_7)
-        val activity = mockk<Activity>()
-        coEvery { reviewService.requestReviewIfEligible(activity) } returns Unit
+    fun dismissAchievement_연속기록업적이고activity가있으면리뷰요청한다() = runTest(mainDispatcherRule.testDispatcher) {
+        Achievement.entries.filter { it.isStreakBased }.forEach { achievement ->
+            val viewModel = createViewModel()
+            setPendingAchievement(viewModel, achievement)
+            val activity = mockk<Activity>()
+            coEvery { reviewService.requestReviewIfEligible(activity) } returns Unit
 
-        viewModel.dismissAchievement(activity)
+            viewModel.dismissAchievement(activity)
 
-        assertNull(viewModel.pendingAchievement.value)
-        coVerify { reviewService.requestReviewIfEligible(activity) }
+            assertNull(viewModel.pendingAchievement.value)
+            coVerify { reviewService.requestReviewIfEligible(activity) }
+        }
     }
 
     @Test
-    fun dismissAchievement_STREAK_7이어도activity가없으면리뷰요청안한다() = runTest(mainDispatcherRule.testDispatcher) {
+    fun dismissAchievement_연속기록업적이어도activity가없으면리뷰요청안한다() = runTest(mainDispatcherRule.testDispatcher) {
         val viewModel = createViewModel()
         setPendingAchievement(viewModel, Achievement.STREAK_7)
 
@@ -177,14 +179,27 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun dismissAchievement_STREAK_7이아니면리뷰요청안한다() = runTest(mainDispatcherRule.testDispatcher) {
+    fun dismissAchievement_연속기록업적이아니면리뷰요청안한다() = runTest(mainDispatcherRule.testDispatcher) {
+        Achievement.entries.filter { !it.isStreakBased }.forEach { achievement ->
+            val viewModel = createViewModel()
+            setPendingAchievement(viewModel, achievement)
+            val activity = mockk<Activity>()
+
+            viewModel.dismissAchievement(activity)
+
+            coVerify(exactly = 0) { reviewService.requestReviewIfEligible(any()) }
+        }
+    }
+
+    @Test
+    fun onHomeScreenOpened_리뷰요청여부를reviewService에위임한다() = runTest(mainDispatcherRule.testDispatcher) {
         val viewModel = createViewModel()
-        setPendingAchievement(viewModel, Achievement.GOAL_ACHIEVED)
         val activity = mockk<Activity>()
+        coEvery { reviewService.requestReviewIfEligible(activity) } returns Unit
 
-        viewModel.dismissAchievement(activity)
+        viewModel.onHomeScreenOpened(activity)
 
-        coVerify(exactly = 0) { reviewService.requestReviewIfEligible(any()) }
+        coVerify { reviewService.requestReviewIfEligible(activity) }
     }
 
     @Test
