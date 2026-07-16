@@ -107,6 +107,33 @@ class SettingsViewModelTest {
         verify { notificationService.scheduleReminders(slot.captured) }
     }
 
+    @Test
+    fun updateDailyGoal_목표가바뀌면streak도동기화한다() = runTest(mainDispatcherRule.testDispatcher) {
+        val viewModel = createViewModel(UserSettings(dailyGoal = 8))
+
+        viewModel.settings.test {
+            awaitItem()
+            viewModel.updateDailyGoal(6)
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        coVerify { waterService.syncStreakForGoalChange(6) }
+    }
+
+    @Test
+    fun updateNotificationEnabled_목표가안바뀌면streak동기화를호출하지않는다() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val viewModel = createViewModel(UserSettings(dailyGoal = 8, notificationEnabled = true))
+
+            viewModel.settings.test {
+                awaitItem()
+                viewModel.updateNotificationEnabled(false)
+                cancelAndIgnoreRemainingEvents()
+            }
+
+            coVerify(exactly = 0) { waterService.syncStreakForGoalChange(any()) }
+        }
+
     private fun todayRecordOf(entries: List<WaterEntry>) =
         DayRecord(dateKey = "2026-07-16", entries = entries)
 

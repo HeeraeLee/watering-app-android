@@ -172,6 +172,21 @@ class WaterServiceTest {
     }
 
     @Test
+    fun syncStreakForGoalChange_오늘기록에새목표를대입해streak을갱신한다() = runTest {
+        val today = recordWithEntry() // dateKey="2026-07-02", entries 1개
+        every { repository.todayRecord } returns flowOf(today)
+        val currentStreak = StreakInfo(currentStreak = 3)
+        every { repository.streakInfo } returns flowOf(currentStreak)
+        val recordWithNewGoal = today.copy(goal = 1)
+        val updatedStreak = currentStreak.copy(currentStreak = 4)
+        coEvery { repository.updateStreak(recordWithNewGoal, currentStreak) } returns updatedStreak
+
+        service.syncStreakForGoalChange(1)
+
+        coVerify { repository.updateStreak(recordWithNewGoal, currentStreak) }
+    }
+
+    @Test
     fun currentTodayRecord_repository의todayRecord첫값을그대로반환한다() = runTest {
         val record = recordWithEntry()
         every { repository.todayRecord } returns flowOf(record)

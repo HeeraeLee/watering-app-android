@@ -34,7 +34,10 @@ class NotificationWorker @AssistedInject constructor(
         // 알림 시간대 외 또는 목표 달성 시 skip
         val now = LocalTime.now().hour
         if (now < settings.notificationStart || now >= settings.notificationEnd) return Result.success()
-        if (record.isAchieved) return Result.success()
+        // record.isAchieved(마지막 기록 시점의 옛 goal)로 skip을 판정하면 아래 본문에 쓰는
+        // settings.dailyGoal(현재)과 서로 다른 목표를 기준으로 삼게 돼, 목표를 바꾼 직후
+        // skip 여부와 본문 진행률이 서로 모순될 수 있었음 — 항상 최신 settings.dailyGoal 하나로 통일
+        if (record.totalCount >= settings.dailyGoal) return Result.success()
 
         // Android 13+ 권한 확인
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

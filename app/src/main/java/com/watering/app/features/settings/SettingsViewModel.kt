@@ -271,13 +271,20 @@ class SettingsViewModel @Inject constructor(
 
     private fun update(refreshWidget: Boolean = false, transform: (UserSettings) -> UserSettings) {
         viewModelScope.launch {
-            val updated = transform(settings.value)
+            val previous = settings.value
+            val updated = transform(previous)
             settingsRepository.updateSettings(updated)
             if (refreshWidget) widgetUpdater.updateAll()
             if (updated.notificationEnabled) {
                 notificationService.scheduleReminders(updated)
             } else {
                 notificationService.cancelReminders()
+            }
+            // 목표가 바뀐 경우에만 동기화 — updateDailyGoal/applyCupSizeChange/applyWeightGoal
+            // 세 경로 모두 여기로 모이므로 한 곳에서 처리(오늘 즉시 달성으로 바뀌었는데 streak이
+            // 안 따라오던 모순 수정)
+            if (updated.dailyGoal != previous.dailyGoal) {
+                waterService.syncStreakForGoalChange(updated.dailyGoal)
             }
         }
     }

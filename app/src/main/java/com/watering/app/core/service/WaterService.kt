@@ -87,6 +87,15 @@ class WaterService @Inject constructor(
     // 한 번 읽어야 해서 추가(2026-07-16). 지속 구독이 아니므로 Flow 대신 suspend 함수로 노출.
     suspend fun currentTodayRecord(): DayRecord = repository.todayRecord.first()
 
+    // Home 화면은 오늘 record.goal을 항상 최신 settings.dailyGoal로 덮어써서 보여주므로(item①과
+    // 동일한 패턴), 목표를 낮추면 화면엔 그 자리에서 "달성!"이 뜨지만 streak은 addWater/undo
+    // 경로에서만 갱신돼 그대로 남아있는 모순이 있었음 — 설정에서 목표가 바뀔 때마다 호출해 동기화한다.
+    suspend fun syncStreakForGoalChange(newGoal: Int) {
+        val today = repository.todayRecord.first()
+        val current = repository.streakInfo.first()
+        repository.updateStreak(today.copy(goal = newGoal), current)
+    }
+
     suspend fun clearAllData() {
         repository.clearAllData()
         widgetUpdater.updateAll()
