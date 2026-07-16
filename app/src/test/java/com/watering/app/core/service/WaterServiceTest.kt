@@ -172,6 +172,38 @@ class WaterServiceTest {
     }
 
     @Test
+    fun resetTodayForMidnightRollover_stale하면초기화하고streak을되돌린뒤위젯을갱신한다() = runTest {
+        every { settingsRepository.userSettings } returns
+            MutableStateFlow(UserSettings(dailyGoal = 12, healthConnectEnabled = false))
+        val currentStreak = StreakInfo(currentStreak = 3, lastAchievedDateKey = "2026-07-02")
+        every { repository.streakInfo } returns MutableStateFlow(currentStreak)
+        val fresh = DayRecord(dateKey = "2026-07-03", goal = 12)
+        coEvery { repository.resetTodayIfStale(12) } returns fresh
+        coEvery { repository.rollbackStreakAfterUndo(fresh, currentStreak) } returns
+            currentStreak.copy(currentStreak = 2)
+
+        service.resetTodayForMidnightRollover()
+
+        coVerifyOrder {
+            repository.resetTodayIfStale(12)
+            repository.rollbackStreakAfterUndo(fresh, currentStreak)
+            widgetUpdater.updateAll()
+        }
+    }
+
+    @Test
+    fun resetTodayForMidnightRollover_이미오늘날짜라stale하지않으면아무것도안한다() = runTest {
+        every { settingsRepository.userSettings } returns
+            MutableStateFlow(UserSettings(dailyGoal = 12, healthConnectEnabled = false))
+        coEvery { repository.resetTodayIfStale(12) } returns null
+
+        service.resetTodayForMidnightRollover()
+
+        coVerify(exactly = 0) { repository.rollbackStreakAfterUndo(any(), any()) }
+        coVerify(exactly = 0) { widgetUpdater.updateAll() }
+    }
+
+    @Test
     fun syncStreakForGoalChange_오늘기록에새목표를대입해streak을갱신한다() = runTest {
         val today = recordWithEntry() // dateKey="2026-07-02", entries 1개
         every { repository.todayRecord } returns flowOf(today)

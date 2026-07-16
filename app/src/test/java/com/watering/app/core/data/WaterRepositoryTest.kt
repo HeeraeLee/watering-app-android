@@ -266,6 +266,26 @@ class WaterRepositoryTest {
     }
 
     @Test
+    fun resetTodayIfStale_dataStore위임하고결과를그대로반환한다() = runTest {
+        val blank = DayRecord(dateKey = todayKey, goal = 8)
+        coEvery { dataStore.resetTodayRecordIfStale(8) } returns blank
+
+        val result = repository.resetTodayIfStale(8)
+
+        assertEquals(blank, result)
+        coVerify { dataStore.resetTodayRecordIfStale(8) }
+    }
+
+    @Test
+    fun resetTodayIfStale_dataStore가null을반환하면그대로null을반환한다() = runTest {
+        coEvery { dataStore.resetTodayRecordIfStale(8) } returns null
+
+        val result = repository.resetTodayIfStale(8)
+
+        assertEquals(null, result)
+    }
+
+    @Test
     fun clearAllData_dataStore위임하고완료된다() = runTest {
         coEvery { dataStore.clearAllData() } returns Unit
 

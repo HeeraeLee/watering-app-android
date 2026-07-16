@@ -181,6 +181,31 @@ class WaterDataStore @Inject constructor(
         return blank
     }
 
+    // 자정 롤오버 워커 전용 — 기기가 꺼져있다 늦게 켜지면 밀린 워커가 실제 자정보다 한참 뒤에
+    // 실행될 수 있는데, 그 사이 위젯/앱에서 이미 오늘 날짜로 기록이 시작됐다면(addEntry의 자정
+    // 자동 롤오버로 자연히 새 하루가 시작된 경우) 그 기록을 지우면 안 된다. TODAY_RECORD가 이미
+    // 오늘 날짜면 손대지 않고, 아직 어제 날짜에 머물러 있을 때만 새 빈 레코드로 교체한다 —
+    // 사용자가 명시적으로 요청하는 resetTodayRecord()(컵 크기 변경 "초기화")는 항상 무조건
+    // 초기화해야 하므로 이 조건부 버전과 별도로 유지한다(2026-07-16, 자정 리셋 지연 시 당일
+    // 기록 소실 버그 수정).
+    suspend fun resetTodayRecordIfStale(goal: Int): DayRecord? {
+        val todayKey = LocalDate.now(clock).format(formatter)
+        var blank: DayRecord? = null
+        editSafely { prefs ->
+            val current = prefs[Keys.TODAY_RECORD]
+                ?.let { runCatching { json.decodeFromString<DayRecord>(it) }.getOrNull() }
+            if (current?.dateKey == todayKey) return@editSafely
+            val fresh = DayRecord(dateKey = todayKey, goal = goal)
+            prefs[Keys.TODAY_RECORD] = json.encodeToString(fresh)
+            blank = fresh
+        }
+        blank?.let {
+            archiveTodayToHistory(it)
+            archiveToAnnualHistory(it)
+        }
+        return blank
+    }
+
     suspend fun clearAllData() {
         editSafely { it.clear() }
     }

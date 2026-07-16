@@ -18,7 +18,7 @@ class MidnightResetWorker @AssistedInject constructor(
 
     override suspend fun doWork(): Result {
         return try {
-            waterService.resetToday()
+            waterService.resetTodayForMidnightRollover()
             notificationService.scheduleMidnightReset()
             Log.d("MidnightReset", "자정 초기화 완료, 다음 자정 작업 등록됨")
             Result.success()

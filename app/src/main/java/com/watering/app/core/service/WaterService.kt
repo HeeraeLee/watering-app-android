@@ -72,13 +72,28 @@ class WaterService @Inject constructor(
     suspend fun rollbackStreakAfterUndo(record: DayRecord, current: StreakInfo): StreakInfo =
         repository.rollbackStreakAfterUndo(record, current)
 
-    // 오늘 이미 목표를 달성해 streak이 올라간 상태였다면, 초기화로 오늘이 다시 미달성이 되므로
-    // undo와 동일하게 되돌린다(MidnightResetWorker의 자정 롤오버 호출에서는 초기화 대상 날짜가
-    // streak.lastAchievedDateKey와 다르므로 자연히 아무 동작도 하지 않음).
+    // 사용자가 명시적으로 요청한 초기화(컵 크기 변경 다이얼로그의 "초기화") 전용 — 항상 무조건
+    // 오늘 기록을 지운다. 자정 롤오버에는 이 함수를 쓰지 않는다(resetTodayForMidnightRollover
+    // 참고) — 자정 워커가 지연 실행되면 그 사이 이미 기록된 오늘 데이터까지 지워버리는 문제가
+    // 있었음(2026-07-16). 오늘 이미 목표를 달성해 streak이 올라간 상태였다면, 초기화로 오늘이
+    // 다시 미달성이 되므로 undo와 동일하게 되돌린다.
     suspend fun resetToday() {
         val goal = settingsRepository.userSettings.first().dailyGoal
         val currentStreak = repository.streakInfo.first()
         val updated = repository.resetToday(goal)
+        repository.rollbackStreakAfterUndo(updated, currentStreak)
+        widgetUpdater.updateAll()
+    }
+
+    // MidnightResetWorker 전용 — 기기가 꺼져있다 늦게 켜지면 이 워커가 실제 자정보다 한참 뒤에
+    // 실행될 수 있다. 그 사이 위젯/앱에서 이미 오늘 날짜로 기록이 시작됐다면(addEntry의 자정
+    // 자동 롤오버로 자연히 새 하루가 시작된 경우) 그 기록을 지우면 안 되므로, resetToday()와
+    // 달리 TODAY_RECORD가 아직 어제 날짜에 머물러 있을 때만(=진짜 stale할 때만) 초기화한다
+    // (2026-07-16, 자정 리셋 지연 시 당일 기록 소실 버그 수정).
+    suspend fun resetTodayForMidnightRollover() {
+        val goal = settingsRepository.userSettings.first().dailyGoal
+        val updated = repository.resetTodayIfStale(goal) ?: return
+        val currentStreak = repository.streakInfo.first()
         repository.rollbackStreakAfterUndo(updated, currentStreak)
         widgetUpdater.updateAll()
     }
