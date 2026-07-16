@@ -75,6 +75,29 @@ class SmartStatsViewModelTest {
     }
 
     @Test
+    fun uiState_목표를올려도과거날짜의월간통계는기록당시목표기준으로유지된다() = runTest(mainDispatcherRule.testDispatcher) {
+        // 10일 전 goal=8로 8잔 채워 달성했었는데, 오늘 목표를 10으로 올린 상황
+        val pastKey = todayDate.minusDays(10).format(formatter)
+        val history = mapOf(
+            pastKey to DayRecord(dateKey = pastKey, entries = List(8) { entryAt(10, 9) }, goal = 8)
+        )
+        val today = DayRecord(dateKey = todayKey, entries = List(5) { entryAt(0, 9) }, goal = 10)
+        val viewModel = createViewModel(
+            history = history,
+            today = today,
+            settings = UserSettings(dailyGoal = 10, notificationStart = 8, notificationEnd = 22)
+        )
+
+        viewModel.uiState.test {
+            val state = awaitItem()
+            val pastStat = state.monthStats.first { it.dateKey == pastKey }
+            assertEquals(8, pastStat.goal) // 현재 설정(10)이 아닌 기록 당시 목표(8) 유지
+            val todayStat = state.monthStats.last()
+            assertEquals(10, todayStat.goal) // 오늘은 항상 최신 설정 반영
+        }
+    }
+
+    @Test
     fun uiState_데이터가부족하면인사이트는데이터부족상태다() = runTest(mainDispatcherRule.testDispatcher) {
         val viewModel = createViewModel()
 

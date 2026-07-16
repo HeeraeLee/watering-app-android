@@ -54,7 +54,9 @@ class SmartStatsViewModel @Inject constructor(
                 dateKey = record.dateKey,
                 label = "",
                 count = record.totalCount,
-                goal = settings.dailyGoal,
+                // 오늘은 항상 최신 목표(위젯 경로와 동일), 과거는 기록 당시 저장된 목표를 그대로 사용 —
+                // 목표를 바꿔도 이미 지난 날의 달성 여부가 소급 재판정되지 않도록 함
+                goal = if (record.dateKey == today.dateKey) settings.dailyGoal else record.goal,
                 isToday = index == monthRecords.lastIndex
             )
         }

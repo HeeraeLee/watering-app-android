@@ -124,6 +124,36 @@ class StatsViewModelTest {
     }
 
     @Test
+    fun uiState_목표를올려도과거날짜의달성여부는기록당시목표기준으로유지된다() = runTest(mainDispatcherRule.testDispatcher) {
+        // 어제 goal=8로 8잔 채워 달성했었는데, 오늘 목표를 10으로 올린 상황
+        val todayRecord = DayRecord(dateKey = todayKey, entries = entries(5), goal = 10)
+        val history = mapOf(
+            yesterdayKey to DayRecord(dateKey = yesterdayKey, entries = entries(8), goal = 8)
+        )
+        val viewModel = createViewModel(todayRecord, history, settings = UserSettings(dailyGoal = 10))
+
+        viewModel.uiState.test {
+            val state = awaitItem()
+            val yesterdayStat = state.weekStats.first { it.dateKey == yesterdayKey }
+            assertEquals(8, yesterdayStat.goal) // 현재 설정(10)이 아닌 기록 당시 목표(8) 유지
+            assertTrue(yesterdayStat.count >= yesterdayStat.goal) // 여전히 달성 상태
+        }
+    }
+
+    @Test
+    fun uiState_오늘의목표는기록여부와무관하게항상최신설정을따른다() = runTest(mainDispatcherRule.testDispatcher) {
+        // 오늘 아직 기록 전(goal 기본값 8)인데 방금 설정에서 목표를 12로 올린 상황
+        val todayRecord = DayRecord(dateKey = todayKey, entries = emptyList(), goal = 8)
+        val viewModel = createViewModel(todayRecord, history = emptyMap(), settings = UserSettings(dailyGoal = 12))
+
+        viewModel.uiState.test {
+            val state = awaitItem()
+            val todayStat = state.weekStats.last()
+            assertEquals(12, todayStat.goal) // record.goal(8)이 아닌 최신 설정(12) 반영
+        }
+    }
+
+    @Test
     fun uiState_streak정보를그대로전달한다() = runTest(mainDispatcherRule.testDispatcher) {
         val todayRecord = DayRecord(dateKey = todayKey, entries = emptyList(), goal = 8)
         val viewModel = createViewModel(

@@ -62,7 +62,9 @@ class StatsViewModel @Inject constructor(
                 dateKey = key,
                 label = dayLabels[date.dayOfWeek.value % 7],
                 count = record?.totalCount ?: 0,
-                goal = settings.dailyGoal,
+                // 오늘은 항상 최신 목표(위젯 경로와 동일), 과거는 기록 당시 저장된 목표를 그대로 사용 —
+                // 목표를 바꿔도 이미 지난 날의 달성 여부가 소급 재판정되지 않도록 함
+                goal = if (key == today.dateKey) settings.dailyGoal else (record?.goal ?: settings.dailyGoal),
                 isToday = offset == 0
             )
         }
