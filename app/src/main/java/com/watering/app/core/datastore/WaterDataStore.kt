@@ -111,6 +111,10 @@ class WaterDataStore @Inject constructor(
             updated = current.copy(entries = current.entries.dropLast(1), goal = goal)
             prefs[Keys.TODAY_RECORD] = json.encodeToString(updated)
         }
+        // addEntry와 동일하게 취소 후 상태도 즉시 재아카이빙 — 안 하면 자정 이후 히스토리/연간
+        // 집계/CSV에 취소 전 값이 영구히 남는 버그가 있었음
+        archiveTodayToHistory(updated)
+        archiveToAnnualHistory(updated)
         return updated
     }
 

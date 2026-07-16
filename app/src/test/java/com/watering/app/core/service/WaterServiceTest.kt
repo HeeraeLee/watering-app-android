@@ -140,6 +140,18 @@ class WaterServiceTest {
     }
 
     @Test
+    fun rollbackStreakAfterUndo_repository로그대로위임한다() = runTest {
+        val record = DayRecord(dateKey = "2026-07-02")
+        val current = StreakInfo(currentStreak = 4)
+        val rolledBack = current.copy(currentStreak = 3)
+        coEvery { repository.rollbackStreakAfterUndo(record, current) } returns rolledBack
+
+        val result = service.rollbackStreakAfterUndo(record, current)
+
+        assertEquals(rolledBack, result)
+    }
+
+    @Test
     fun resetToday_repository초기화하고위젯을갱신한다() = runTest {
         service.resetToday()
 

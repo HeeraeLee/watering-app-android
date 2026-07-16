@@ -170,6 +170,91 @@ class WaterRepositoryTest {
     }
 
     @Test
+    fun rollbackStreakAfterUndo_취소후에도여전히달성상태면_아무것도안한다() = runTest {
+        val stillAchieved = achievedRecord() // goal=0, entries=0개 → 항상 달성
+        val current = StreakInfo(currentStreak = 5, lastAchievedDateKey = todayKey)
+
+        val result = repository.rollbackStreakAfterUndo(stillAchieved, current)
+
+        assertSame(current, result)
+        coVerify(exactly = 0) { dataStore.saveStreakInfo(any()) }
+    }
+
+    @Test
+    fun rollbackStreakAfterUndo_streak이오늘달성으로갱신된게아니면_아무것도안한다() = runTest {
+        // lastAchievedDateKey가 오늘이 아니므로, 이 취소는 애초에 streak을 올린 원인이 아니었음
+        val notAchieved = DayRecord(dateKey = todayKey, entries = emptyList(), goal = 1)
+        val current = StreakInfo(currentStreak = 5, lastAchievedDateKey = yesterdayKey)
+
+        val result = repository.rollbackStreakAfterUndo(notAchieved, current)
+
+        assertSame(current, result)
+        coVerify(exactly = 0) { dataStore.saveStreakInfo(any()) }
+    }
+
+    @Test
+    fun rollbackStreakAfterUndo_어제도달성상태였으면_streak를1줄이고어제날짜로되돌린다() = runTest {
+        val notAchieved = DayRecord(dateKey = todayKey, entries = emptyList(), goal = 1)
+        val current = StreakInfo(currentStreak = 4, longestStreak = 10, lastAchievedDateKey = todayKey)
+        every { dataStore.getAnnualHistory() } returns MutableStateFlow(
+            mapOf(yesterdayKey to DailyAchievement(dateKey = yesterdayKey, totalCount = 8, goal = 8))
+        )
+
+        val result = repository.rollbackStreakAfterUndo(notAchieved, current)
+
+        assertEquals(3, result.currentStreak)
+        assertEquals(10, result.longestStreak) // 최장 기록과 값이 달랐으니 그대로 유지
+        assertEquals(yesterdayKey, result.lastAchievedDateKey)
+        coVerify { dataStore.saveStreakInfo(result) }
+    }
+
+    @Test
+    fun rollbackStreakAfterUndo_이번갱신이막최장기록을세운것이었으면_최장기록도함께되돌린다() = runTest {
+        val notAchieved = DayRecord(dateKey = todayKey, entries = emptyList(), goal = 1)
+        val current = StreakInfo(currentStreak = 6, longestStreak = 6, lastAchievedDateKey = todayKey)
+        every { dataStore.getAnnualHistory() } returns MutableStateFlow(
+            mapOf(yesterdayKey to DailyAchievement(dateKey = yesterdayKey, totalCount = 8, goal = 8))
+        )
+
+        val result = repository.rollbackStreakAfterUndo(notAchieved, current)
+
+        assertEquals(5, result.currentStreak)
+        assertEquals(5, result.longestStreak)
+    }
+
+    @Test
+    fun rollbackStreakAfterUndo_이틀전달성으로보호가쓰였던갱신이면_보호플래그도되돌린다() = runTest {
+        val notAchieved = DayRecord(dateKey = todayKey, entries = emptyList(), goal = 1)
+        val current = StreakInfo(
+            currentStreak = 11,
+            longestStreak = 11,
+            lastAchievedDateKey = todayKey,
+            protectionUsedThisMonth = true,
+            protectionUsedMonthKey = currentMonthKey
+        )
+        every { dataStore.getAnnualHistory() } returns MutableStateFlow(
+            mapOf(twoDaysAgoKey to DailyAchievement(dateKey = twoDaysAgoKey, totalCount = 8, goal = 8))
+        )
+
+        val result = repository.rollbackStreakAfterUndo(notAchieved, current)
+
+        assertEquals(10, result.currentStreak)
+        assertEquals(twoDaysAgoKey, result.lastAchievedDateKey)
+        assertEquals(false, result.protectionUsedThisMonth)
+    }
+
+    @Test
+    fun rollbackStreakAfterUndo_streak이1이었으면_0으로되돌아간다() = runTest {
+        val notAchieved = DayRecord(dateKey = todayKey, entries = emptyList(), goal = 1)
+        val current = StreakInfo(currentStreak = 1, longestStreak = 1, lastAchievedDateKey = todayKey)
+        every { dataStore.getAnnualHistory() } returns MutableStateFlow(emptyMap())
+
+        val result = repository.rollbackStreakAfterUndo(notAchieved, current)
+
+        assertEquals(0, result.currentStreak)
+    }
+
+    @Test
     fun resetToday_dataStore위임하고완료된다() = runTest {
         coEvery { dataStore.resetTodayRecord() } returns Unit
 

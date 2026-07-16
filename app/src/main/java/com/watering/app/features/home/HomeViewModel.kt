@@ -135,7 +135,9 @@ class HomeViewModel @Inject constructor(
 
     fun undoLastEntry() {
         viewModelScope.launch {
-            waterService.undoLastEntry(uiState.value.settings.dailyGoal)
+            val current = uiState.value
+            val updated = waterService.undoLastEntry(current.settings.dailyGoal)
+            waterService.rollbackStreakAfterUndo(updated, current.streak)
             _snackbarMessage.value = null
             analyticsService.logRecordUndo()
         }

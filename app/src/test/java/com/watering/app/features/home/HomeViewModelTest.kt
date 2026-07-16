@@ -218,6 +218,23 @@ class HomeViewModelTest {
     }
 
     @Test
+    fun undoLastEntry_취소된기록으로streak롤백을시도한다() = runTest(mainDispatcherRule.testDispatcher) {
+        // 취소로 목표 미달성이 된 오늘 기록 — 이미 올라간 streak을 되돌려야 하는 상황
+        val undoneRecord = DayRecord(dateKey = "2026-07-02", goal = 8, entries = emptyList())
+        val viewModel = createViewModel()
+        coEvery { waterService.undoLastEntry(8) } returns undoneRecord
+
+        viewModel.uiState.test {
+            awaitItem()
+            viewModel.undoLastEntry()
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        // uiState의 streak(취소 시점 기준 값)을 그대로 넘겨 롤백을 요청하는지 확인
+        coVerify { waterService.rollbackStreakAfterUndo(undoneRecord, streak) }
+    }
+
+    @Test
     fun clearSnackbar_메시지를비운다() = runTest(mainDispatcherRule.testDispatcher) {
         val viewModel = createViewModel()
 

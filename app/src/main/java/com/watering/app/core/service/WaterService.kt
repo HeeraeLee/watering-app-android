@@ -69,6 +69,9 @@ class WaterService @Inject constructor(
     suspend fun updateStreak(record: DayRecord, current: StreakInfo): StreakInfo =
         repository.updateStreak(record, current)
 
+    suspend fun rollbackStreakAfterUndo(record: DayRecord, current: StreakInfo): StreakInfo =
+        repository.rollbackStreakAfterUndo(record, current)
+
     suspend fun resetToday() {
         repository.resetToday()
         widgetUpdater.updateAll()
