@@ -35,6 +35,14 @@ sealed interface WeightGoalUiState {
     data class Editing(val weightInput: String, val recommendedCups: Int?) : WeightGoalUiState
 }
 
+// 컵 크기 변경 확인 다이얼로그 상태 — entries.size는 기록 당시 ml과 무관하게 개수만 세서, 컵
+// 크기를 바꾸면 이미 기록한 항목이 새 크기 기준으로 섞여 보이는 문제가 있어(2026-07-16, owner
+// 제보) 오늘 기록이 있을 때는 바로 적용하지 않고 사용자에게 초기화/유지를 먼저 물어본다.
+sealed interface CupSizeChangeUiState {
+    data object Idle : CupSizeChangeUiState
+    data class Confirming(val newSize: Int, val todayTotalMl: Int, val todayCount: Int) : CupSizeChangeUiState
+}
+
 sealed interface HydrationSyncUiState {
     data object Idle : HydrationSyncUiState
     data object NeedsPermission : HydrationSyncUiState
@@ -81,18 +89,55 @@ class SettingsViewModel @Inject constructor(
 
     fun updateDailyGoal(goal: Int) = update(refreshWidget = true) { it.copy(dailyGoal = goal) }
 
-    // 몸무게 기반 목표가 적용된 상태(weightKg 존재)라면 컵 크기가 바뀌어도 목표 수분량(ml)이
-    // 유지되도록 잔 수를 다시 계산한다. 그렇지 않으면 기존 잔 수 그대로 컵 크기만 바뀐다.
-    fun updateCupSize(size: Int) {
-        val weightKg = settings.value.weightKg
-        update(refreshWidget = weightKg != null) { s ->
-            if (weightKg != null) {
-                s.copy(cupSize = size, dailyGoal = StatsInsightService.recommendedGoalCups(weightKg, size))
+    private val _cupSizeChangeUiState = MutableStateFlow<CupSizeChangeUiState>(CupSizeChangeUiState.Idle)
+    val cupSizeChangeUiState: StateFlow<CupSizeChangeUiState> = _cupSizeChangeUiState.asStateFlow()
+
+    // 컵 크기 변경 요청 — 오늘 이미 기록이 있으면 확인 다이얼로그를 먼저 띄운다(2026-07-16, owner
+    // 제보: entries.size는 기록 당시 ml과 무관하게 개수만 세서, 컵 크기를 바꾸면 이미 기록한 항목이
+    // 새 크기 기준으로 섞여 보이는 문제가 있었음). 기록이 없거나 크기가 실제로 안 바뀌면 바로 적용.
+    fun requestCupSizeChange(newSize: Int) {
+        if (newSize == settings.value.cupSize) return
+        viewModelScope.launch {
+            val todayEntries = waterService.currentTodayRecord().entries
+            if (todayEntries.isEmpty()) {
+                applyCupSizeChange(newSize, resetTodayFirst = false)
             } else {
-                s.copy(cupSize = size)
+                _cupSizeChangeUiState.value = CupSizeChangeUiState.Confirming(
+                    newSize = newSize,
+                    todayTotalMl = todayEntries.sumOf { it.amount },
+                    todayCount = todayEntries.size
+                )
             }
         }
     }
+
+    fun confirmCupSizeChange(resetToday: Boolean) {
+        val state = _cupSizeChangeUiState.value as? CupSizeChangeUiState.Confirming ?: return
+        _cupSizeChangeUiState.value = CupSizeChangeUiState.Idle
+        viewModelScope.launch { applyCupSizeChange(state.newSize, resetTodayFirst = resetToday) }
+    }
+
+    fun dismissCupSizeChangeDialog() {
+        _cupSizeChangeUiState.value = CupSizeChangeUiState.Idle
+    }
+
+    // 몸무게 기반 목표가 적용된 상태(weightKg 존재)라면 컵 크기가 바뀌어도 목표 수분량(ml)이
+    // 유지되도록 잔 수를 다시 계산하되, 오늘 이미 마신 양(초기화했다면 0)을 반영해 진행률이
+    // 역전되지 않게 한다(recommendedGoalCupsPreservingProgress). 그렇지 않으면 기존 잔 수 그대로
+    // 컵 크기만 바뀐다.
+    private suspend fun applyCupSizeChange(newSize: Int, resetTodayFirst: Boolean) {
+        if (resetTodayFirst) waterService.resetToday()
+        val weightKg = settings.value.weightKg
+        if (weightKg == null) {
+            update { it.copy(cupSize = newSize) }
+            return
+        }
+        val todayEntries = waterService.currentTodayRecord().entries
+        val newGoal = StatsInsightService.recommendedGoalCupsPreservingProgress(weightKg, newSize, todayEntries)
+        update(refreshWidget = true) { it.copy(cupSize = newSize, dailyGoal = newGoal) }
+        _snackbarMessage.value = context.getString(R.string.settings_cup_size_goal_adjusted_snackbar, newGoal)
+    }
+
     fun updateNotificationEnabled(enabled: Boolean) = update { it.copy(notificationEnabled = enabled) }
     fun updateNotificationInterval(minutes: Int) = update { it.copy(notificationInterval = minutes) }
     fun updateNotificationStart(hour: Int) = update { it.copy(notificationStart = hour) }

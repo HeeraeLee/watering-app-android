@@ -74,6 +74,10 @@ class WaterService @Inject constructor(
         widgetUpdater.updateAll()
     }
 
+    // SettingsViewModel이 컵 크기 변경 확인/재계산을 위해 "오늘 이미 마신 기록"을 스냅샷으로
+    // 한 번 읽어야 해서 추가(2026-07-16). 지속 구독이 아니므로 Flow 대신 suspend 함수로 노출.
+    suspend fun currentTodayRecord(): DayRecord = repository.todayRecord.first()
+
     suspend fun clearAllData() {
         repository.clearAllData()
         widgetUpdater.updateAll()

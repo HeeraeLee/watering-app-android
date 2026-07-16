@@ -256,6 +256,11 @@
     <string name="settings_weight_goal_confirm_apply">적용</string>
     <string name="settings_weight_goal_applied_snackbar">%1$skg 기준 하루 목표를 %2$d잔으로 설정했어요</string>
     <string name="settings_weight_goal_last_input">마지막 입력: %1$skg → 하루 %2$d잔</string>
+    <string name="settings_cup_size_change_confirm_title">컵 크기를 바꾸시나요?</string>
+    <string name="settings_cup_size_change_confirm_body">오늘 세운 기록은 %1$dml(%2$d잔)입니다. 초기화할까요?</string>
+    <string name="settings_cup_size_change_reset_button">초기화하고 변경</string>
+    <string name="settings_cup_size_change_keep_button">기록 유지하고 변경</string>
+    <string name="settings_cup_size_goal_adjusted_snackbar">컵 크기를 바꿔서 목표를 %1$d잔으로 다시 계산했어요. 이미 마신 양은 그대로 인정돼요</string>
     <string name="settings_section_recording">기록 설정</string>
     <string name="settings_section_health">건강 연동</string>
     <string name="settings_hydration_sync_title">물 마시기 자동 저장</string>

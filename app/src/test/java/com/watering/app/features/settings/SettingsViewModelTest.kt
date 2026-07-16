@@ -4,7 +4,10 @@ import android.content.Context
 import app.cash.turbine.test
 import com.watering.app.R
 import com.watering.app.core.data.SettingsRepository
+import com.watering.app.core.model.DayRecord
+import com.watering.app.core.model.DrinkType
 import com.watering.app.core.model.UserSettings
+import com.watering.app.core.model.WaterEntry
 import com.watering.app.core.model.WidgetTheme
 import com.watering.app.core.service.CsvExportService
 import com.watering.app.core.service.HealthConnectAvailability
@@ -104,39 +107,156 @@ class SettingsViewModelTest {
         verify { notificationService.scheduleReminders(slot.captured) }
     }
 
-    @Test
-    fun updateCupSize_위젯은갱신하지않는다() = runTest(mainDispatcherRule.testDispatcher) {
-        val viewModel = createViewModel(UserSettings(cupSize = 200))
+    private fun todayRecordOf(entries: List<WaterEntry>) =
+        DayRecord(dateKey = "2026-07-16", entries = entries)
 
-        viewModel.settings.test {
-            awaitItem()
-            viewModel.updateCupSize(350)
-            cancelAndIgnoreRemainingEvents()
-        }
-
-        coVerify(exactly = 0) { widgetUpdater.updateAll() }
-    }
+    private fun entryOf(amount: Int) = WaterEntry(
+        timestampMillis = 0L,
+        amount = amount,
+        drinkType = DrinkType.WATER
+    )
 
     @Test
-    fun updateCupSize_몸무게가설정되어있으면목표잔수를재계산하고위젯을갱신한다() =
+    fun requestCupSizeChange_오늘기록이없으면바로적용되고위젯은갱신하지않는다() =
         runTest(mainDispatcherRule.testDispatcher) {
-            val viewModel = createViewModel(UserSettings(cupSize = 200, dailyGoal = 10, weightKg = 60.0))
+            val viewModel = createViewModel(UserSettings(cupSize = 200))
+            coEvery { waterService.currentTodayRecord() } returns todayRecordOf(emptyList())
             val slot = slot<UserSettings>()
             coEvery { settingsRepository.updateSettings(capture(slot)) } returns Unit
 
             viewModel.settings.test {
                 awaitItem()
-                viewModel.updateCupSize(400)
+                viewModel.requestCupSizeChange(350)
                 cancelAndIgnoreRemainingEvents()
             }
 
-            assertEquals(400, slot.captured.cupSize)
-            assertEquals(
-                StatsInsightService.recommendedGoalCups(60.0, 400),
-                slot.captured.dailyGoal
-            )
+            assertEquals(350, slot.captured.cupSize)
+            assertEquals(CupSizeChangeUiState.Idle, viewModel.cupSizeChangeUiState.value)
+            coVerify(exactly = 0) { widgetUpdater.updateAll() }
+        }
+
+    @Test
+    fun requestCupSizeChange_오늘기록이있으면확인다이얼로그를띄우고설정은아직안바뀐다() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val viewModel = createViewModel(UserSettings(cupSize = 200))
+            coEvery { waterService.currentTodayRecord() } returns
+                todayRecordOf(listOf(entryOf(200), entryOf(200)))
+
+            // settings는 WhileSubscribed(5_000)라 실제 구독자가 붙기 전까진 .value가 stateIn의
+            // 시드 기본값(UserSettings())에 머물러 있다 — .test{}로 먼저 구독해 initialSettings가
+            // 실제로 반영된 뒤에 requestCupSizeChange를 호출해야 settings.value.cupSize 비교가
+            // 의도한 값(200)을 본다.
+            viewModel.settings.test {
+                awaitItem()
+                viewModel.requestCupSizeChange(887)
+                cancelAndIgnoreRemainingEvents()
+            }
+
+            val state = viewModel.cupSizeChangeUiState.value
+            check(state is CupSizeChangeUiState.Confirming)
+            assertEquals(887, state.newSize)
+            assertEquals(400, state.todayTotalMl)
+            assertEquals(2, state.todayCount)
+            coVerify(exactly = 0) { settingsRepository.updateSettings(any()) }
+        }
+
+    @Test
+    fun requestCupSizeChange_같은크기를선택하면아무일도안한다() = runTest(mainDispatcherRule.testDispatcher) {
+        val viewModel = createViewModel(UserSettings(cupSize = 200))
+
+        viewModel.settings.test {
+            awaitItem()
+            viewModel.requestCupSizeChange(200)
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        assertEquals(CupSizeChangeUiState.Idle, viewModel.cupSizeChangeUiState.value)
+        coVerify(exactly = 0) { waterService.currentTodayRecord() }
+    }
+
+    @Test
+    fun confirmCupSizeChange_초기화선택시오늘기록을지우고체중목표라면초기화후기준으로목표를재계산한다() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val viewModel = createViewModel(UserSettings(cupSize = 355, dailyGoal = 6, weightKg = 60.0))
+            // 초기화 전 조회(다이얼로그 표시용)엔 이미 마신 6잔이 잡히지만, 초기화 이후 재조회에서는
+            // 빈 기록이어야 한다 — resetToday() 후 목표 재계산이 초기화 전 값을 잘못 재사용하지
+            // 않는지(=recommendedGoalCups와 완전히 동일한 값이 나오는지) 검증
+            coEvery { waterService.currentTodayRecord() } returns
+                todayRecordOf(List(6) { entryOf(355) }) andThen todayRecordOf(emptyList())
+            val slot = slot<UserSettings>()
+            coEvery { settingsRepository.updateSettings(capture(slot)) } returns Unit
+
+            viewModel.settings.test {
+                awaitItem()
+                viewModel.requestCupSizeChange(200)
+                viewModel.confirmCupSizeChange(resetToday = true)
+                cancelAndIgnoreRemainingEvents()
+            }
+
+            coVerify { waterService.resetToday() }
+            assertEquals(200, slot.captured.cupSize)
+            assertEquals(StatsInsightService.recommendedGoalCups(60.0, 200), slot.captured.dailyGoal)
+            assertEquals(CupSizeChangeUiState.Idle, viewModel.cupSizeChangeUiState.value)
+        }
+
+    @Test
+    fun confirmCupSizeChange_기록유지선택시체중목표라면이미마신양을반영해목표를재계산한다() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val viewModel = createViewModel(UserSettings(cupSize = 355, dailyGoal = 6, weightKg = 60.0))
+            // 355ml x 6잔 = 2130ml로 이미 목표(1980ml)를 초과 달성한 상태에서 200ml로 줄여도
+            // 목표가 6잔 아래로 내려가지 않아야 한다(달성 상태 역전 방지)
+            val entries = List(6) { entryOf(355) }
+            coEvery { waterService.currentTodayRecord() } returns todayRecordOf(entries)
+            val slot = slot<UserSettings>()
+            coEvery { settingsRepository.updateSettings(capture(slot)) } returns Unit
+
+            viewModel.settings.test {
+                awaitItem()
+                viewModel.requestCupSizeChange(200)
+                viewModel.confirmCupSizeChange(resetToday = false)
+                cancelAndIgnoreRemainingEvents()
+            }
+
+            coVerify(exactly = 0) { waterService.resetToday() }
+            assertEquals(200, slot.captured.cupSize)
+            assertEquals(6, slot.captured.dailyGoal)
             coVerify { widgetUpdater.updateAll() }
         }
+
+    @Test
+    fun confirmCupSizeChange_체중목표가없으면목표잔수는안바뀐다() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val viewModel = createViewModel(UserSettings(cupSize = 200, dailyGoal = 8))
+            coEvery { waterService.currentTodayRecord() } returns todayRecordOf(listOf(entryOf(200)))
+            val slot = slot<UserSettings>()
+            coEvery { settingsRepository.updateSettings(capture(slot)) } returns Unit
+
+            viewModel.settings.test {
+                awaitItem()
+                viewModel.requestCupSizeChange(887)
+                viewModel.confirmCupSizeChange(resetToday = false)
+                cancelAndIgnoreRemainingEvents()
+            }
+
+            assertEquals(887, slot.captured.cupSize)
+            assertEquals(8, slot.captured.dailyGoal)
+        }
+
+    @Test
+    fun dismissCupSizeChangeDialog_설정이안바뀐다() = runTest(mainDispatcherRule.testDispatcher) {
+        val viewModel = createViewModel(UserSettings(cupSize = 200))
+        coEvery { waterService.currentTodayRecord() } returns todayRecordOf(listOf(entryOf(200)))
+
+        viewModel.settings.test {
+            awaitItem()
+            viewModel.requestCupSizeChange(887)
+            viewModel.dismissCupSizeChangeDialog()
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        assertEquals(CupSizeChangeUiState.Idle, viewModel.cupSizeChangeUiState.value)
+        coVerify(exactly = 0) { settingsRepository.updateSettings(any()) }
+    }
 
     @Test
     fun updateNotificationEnabled_false로바꾸면알림을취소한다() = runTest(mainDispatcherRule.testDispatcher) {

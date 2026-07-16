@@ -253,6 +253,11 @@
     <string name="settings_weight_goal_confirm_apply">Apply</string>
     <string name="settings_weight_goal_applied_snackbar">Set your daily goal to %2$d glasses based on %1$skg</string>
     <string name="settings_weight_goal_last_input">Last entry: %1$skg → %2$d glasses a day</string>
+    <string name="settings_cup_size_change_confirm_title">Change cup size?</string>
+    <string name="settings_cup_size_change_confirm_body">You\'ve logged %1$dml (%2$d glasses) today. Reset today\'s log?</string>
+    <string name="settings_cup_size_change_reset_button">Reset and change</string>
+    <string name="settings_cup_size_change_keep_button">Keep log and change</string>
+    <string name="settings_cup_size_goal_adjusted_snackbar">Cup size changed — goal recalculated to %1$d glasses. What you\'ve already logged still counts.</string>
     <string name="settings_section_recording">Recording</string>
     <string name="settings_section_health">Health Sync</string>
     <string name="settings_hydration_sync_title">Auto-Save to Health Connect</string>

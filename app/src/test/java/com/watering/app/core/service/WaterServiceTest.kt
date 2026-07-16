@@ -16,6 +16,7 @@ import io.mockk.coVerifyOrder
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -146,6 +147,16 @@ class WaterServiceTest {
             repository.resetToday()
             widgetUpdater.updateAll()
         }
+    }
+
+    @Test
+    fun currentTodayRecord_repository의todayRecord첫값을그대로반환한다() = runTest {
+        val record = recordWithEntry()
+        every { repository.todayRecord } returns flowOf(record)
+
+        val result = service.currentTodayRecord()
+
+        assertEquals(record, result)
     }
 
     @Test

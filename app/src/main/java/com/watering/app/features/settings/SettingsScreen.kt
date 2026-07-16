@@ -91,6 +91,7 @@ fun SettingsScreen(
 ) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val weightGoalUiState by viewModel.weightGoalUiState.collectAsStateWithLifecycle()
+    val cupSizeChangeUiState by viewModel.cupSizeChangeUiState.collectAsStateWithLifecycle()
     val weightGoalSubtitle by viewModel.weightGoalSubtitle.collectAsStateWithLifecycle()
     val csvExportUiState by viewModel.csvExportUiState.collectAsStateWithLifecycle()
     val snackbarMessage by viewModel.snackbarMessage.collectAsStateWithLifecycle()
@@ -152,6 +153,13 @@ fun SettingsScreen(
         onApply = viewModel::applyWeightGoal
     )
 
+    CupSizeChangeConfirmDialog(
+        uiState = cupSizeChangeUiState,
+        onReset = { viewModel.confirmCupSizeChange(resetToday = true) },
+        onKeep = { viewModel.confirmCupSizeChange(resetToday = false) },
+        onDismiss = viewModel::dismissCupSizeChangeDialog
+    )
+
     Box(modifier = Modifier.fillMaxSize().background(AppBackgroundGradient)) {
         Scaffold(
             containerColor = Color.Transparent,
@@ -182,7 +190,7 @@ fun SettingsScreen(
                         goal = settings.dailyGoal,
                         cupSize = settings.cupSize,
                         onGoalChange = viewModel::updateDailyGoal,
-                        onCupSizeChange = viewModel::updateCupSize
+                        onCupSizeChange = viewModel::requestCupSizeChange
                     )
                 }
 
@@ -348,12 +356,13 @@ private val RecordingCardDividerColor: Color
     @Composable get() = if (isSystemInDarkTheme()) Color.White.copy(alpha = 0.14f) else Color(0xFFE8E1F5)
 
 // "하루 목표"/"컵 크기" 라벨, 그룹 제목(일상/카페/텀블러), 선택 안 된 칩 텍스트 톤 — 웹 목업
-// 3안(소프트 차콜/웜 그레이/라벤더 그레이) 비교 후 "웜 그레이" 채택(2026-07-16). 기존 onSurface
-// (#1C1B1F)가 카드 배경(연보라)과 대비가 너무 강하고 "컵 크기"만 Bold라 유독 도드라져 보인다는
-// 피드백 — 라이트는 옅은 회색으로, 다크는 기존 onSurface 그대로 유지(다크 카드 배경에선 이미
-// 문제 없던 값이라 이번 변경 범위 밖)
+// 3안(소프트 차콜/웜 그레이/라벤더 그레이) 비교 후 처음엔 "웜 그레이"를 채택했다가, 카드의
+// 라벤더 톤(그룹 바 #9B87D9)과 더 잘 어울린다는 이유로 "라벤더 그레이"로 재변경(2026-07-16).
+// 기존 onSurface(#1C1B1F)가 카드 배경(연보라)과 대비가 너무 강하고 "컵 크기"만 Bold라 유독
+// 도드라져 보인다는 피드백 — 라이트는 옅은 회색으로, 다크는 기존 onSurface 그대로 유지(다크
+// 카드 배경에선 이미 문제 없던 값이라 이번 변경 범위 밖)
 private val RecordingLabelColor: Color
-    @Composable get() = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.onSurface else Color(0xFF5A5A66)
+    @Composable get() = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.onSurface else Color(0xFF726C82)
 
 @Composable
 private fun RecordingSettingsCard(
@@ -663,6 +672,52 @@ private fun WeightGoalDialogs(
         dismissButton = {
             TextButton(onClick = onDismiss) {
                 Text(stringResource(R.string.settings_dialog_cancel))
+            }
+        }
+    )
+}
+
+// entries.size는 기록 당시 ml과 무관하게 개수만 세서, 컵 크기를 바꾸면 이미 기록한 항목이 새
+// 크기 기준으로 섞여 보이는 문제(2026-07-16, owner 제보)가 있어 오늘 기록이 있을 때만 이 확인
+// 다이얼로그를 띄운다. "초기화하고 변경"(빨강, 파괴적 동작)과 "취소"를 한 슬롯에 묶고, 기본
+// 권장 동작인 "기록 유지하고 변경"을 confirmButton(우측)에 둔다.
+@Composable
+private fun CupSizeChangeConfirmDialog(
+    uiState: CupSizeChangeUiState,
+    onReset: () -> Unit,
+    onKeep: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    val state = uiState as? CupSizeChangeUiState.Confirming ?: return
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.settings_cup_size_change_confirm_title)) },
+        text = {
+            Text(
+                stringResource(
+                    R.string.settings_cup_size_change_confirm_body,
+                    state.todayTotalMl,
+                    state.todayCount
+                )
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = onKeep) {
+                Text(stringResource(R.string.settings_cup_size_change_keep_button))
+            }
+        },
+        dismissButton = {
+            Row {
+                TextButton(onClick = onReset) {
+                    Text(
+                        stringResource(R.string.settings_cup_size_change_reset_button),
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+                TextButton(onClick = onDismiss) {
+                    Text(stringResource(R.string.settings_dialog_cancel))
+                }
             }
         }
     )

@@ -194,4 +194,89 @@ class StatsInsightServiceTest {
 
         assertEquals(20, result)
     }
+
+    @Test
+    fun recommendedGoalCupsPreservingProgress_오늘소비가없으면recommendedGoalCups와동일하다() {
+        // entries가 비어있으면 remainingMl == targetMl이 되어 순수 계산식과 완전히 같아야 함
+        // (컵 크기 변경 확인 다이얼로그에서 "초기화하고 변경"을 선택한 경로와 동치)
+        val expected = StatsInsightService.recommendedGoalCups(weightKg = 60.0, cupSizeMl = 400)
+
+        val result = StatsInsightService.recommendedGoalCupsPreservingProgress(
+            weightKg = 60.0,
+            newCupSizeMl = 400,
+            entriesConsumedToday = emptyList()
+        )
+
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun recommendedGoalCupsPreservingProgress_이미목표를초과달성한상태에서컵을줄여도목표가마신잔수아래로내려가지않는다() {
+        // 60kg -> 목표 1980ml. 355ml x 6잔 = 2130ml로 이미 초과 달성한 상태에서 200ml로 줄이면,
+        // 재계산이 오늘 소비를 무시하면 목표가 10잔으로 튀어 6/10(미달성)으로 역전되는 버그였음.
+        val entries = List(6) { entryOf(355, DrinkType.WATER) }
+
+        val result = StatsInsightService.recommendedGoalCupsPreservingProgress(
+            weightKg = 60.0,
+            newCupSizeMl = 200,
+            entriesConsumedToday = entries
+        )
+
+        assertEquals(6, result)
+    }
+
+    @Test
+    fun recommendedGoalCupsPreservingProgress_아직목표에못미친상태에서남은ml만큼추가잔수를요구한다() {
+        // 60kg -> 목표 1980ml(약 2000ml). 200ml 1잔(200ml) 마신 뒤 887ml로 변경 시,
+        // 남은 목표 1780ml / 887ml = 2.007 -> 반올림 2잔, 총 목표 = 이미 마신 1잔 + 2잔 = 3잔
+        val entries = listOf(entryOf(200, DrinkType.WATER))
+
+        val result = StatsInsightService.recommendedGoalCupsPreservingProgress(
+            weightKg = 60.0,
+            newCupSizeMl = 887,
+            entriesConsumedToday = entries
+        )
+
+        assertEquals(3, result)
+    }
+
+    @Test
+    fun recommendedGoalCupsPreservingProgress_hydrationRate가낮은음료도환산해서반영한다() {
+        // 60kg -> 목표 1980ml. 333ml 커피(hydrationRate 적용된 calculateHydrationVolumeMl 값)만큼만
+        // "이미 채운 몫"으로 인정돼야 함 -> calculateHydrationVolumeMl과 동일한 값을 남은 목표에서 뺀다
+        val entries = listOf(entryOf(333, DrinkType.JUICE)) // 333 * 0.85 = 283.05 -> 283ml
+        val alreadyConsumedMl = StatsInsightService.calculateHydrationVolumeMl(entries)
+        val expectedRemainingCups =
+            (((60.0 * 33.0) - alreadyConsumedMl).coerceAtLeast(0.0) / 200).let(Math::round).toInt()
+
+        val result = StatsInsightService.recommendedGoalCupsPreservingProgress(
+            weightKg = 60.0,
+            newCupSizeMl = 200,
+            entriesConsumedToday = entries
+        )
+
+        assertEquals(entries.size + expectedRemainingCups, result)
+    }
+
+    @Test
+    fun recommendedGoalCupsPreservingProgress_최소1잔으로클램프된다() {
+        val result = StatsInsightService.recommendedGoalCupsPreservingProgress(
+            weightKg = 1.0,
+            newCupSizeMl = 200,
+            entriesConsumedToday = emptyList()
+        )
+
+        assertEquals(1, result)
+    }
+
+    @Test
+    fun recommendedGoalCupsPreservingProgress_최대20잔으로클램프된다() {
+        val result = StatsInsightService.recommendedGoalCupsPreservingProgress(
+            weightKg = 200.0,
+            newCupSizeMl = 150,
+            entriesConsumedToday = emptyList()
+        )
+
+        assertEquals(20, result)
+    }
 }

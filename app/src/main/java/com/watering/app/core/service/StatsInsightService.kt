@@ -68,4 +68,23 @@ object StatsInsightService {
 
     fun recommendedGoalCups(weightKg: Double, cupSizeMl: Int): Int =
         (weightKg * ML_PER_KG / cupSizeMl).roundToInt().coerceIn(MIN_GOAL_CUPS, MAX_GOAL_CUPS)
+
+    // 컵 크기 변경으로 목표 잔 수를 재계산할 때, 오늘 이미 마신 유효 수분량(calculateHydrationVolumeMl)
+    // 만큼은 "이미 채운 몫"으로 보고 남은 목표에서 뺀다 — 그렇지 않으면 이미 목표 ml을 채운 상태에서
+    // 컵 크기를 줄이기만 해도 DayRecord.isAchieved가 역전되는 버그가 생긴다(2026-07-16, owner 제보).
+    // entries가 비어 있으면 remainingMl == targetMl이 되어 recommendedGoalCups와 완전히 동일한
+    // 결과를 내므로(반올림 방식도 동일하게 roundToInt), 오늘 기록이 없거나 초기화된 경우엔 기존
+    // 동작과 회귀 없이 호환된다.
+    fun recommendedGoalCupsPreservingProgress(
+        weightKg: Double,
+        newCupSizeMl: Int,
+        entriesConsumedToday: List<WaterEntry>
+    ): Int {
+        val consumedCupCount = entriesConsumedToday.size
+        val alreadyConsumedMl = calculateHydrationVolumeMl(entriesConsumedToday)
+        val targetMl = weightKg * ML_PER_KG
+        val remainingMl = (targetMl - alreadyConsumedMl).coerceAtLeast(0.0)
+        val remainingCups = (remainingMl / newCupSizeMl).roundToInt()
+        return (consumedCupCount + remainingCups).coerceIn(MIN_GOAL_CUPS, MAX_GOAL_CUPS)
+    }
 }
