@@ -185,12 +185,20 @@ class WaterDataStore @Inject constructor(
         editSafely { it.clear() }
     }
 
-    // 백업 복원 전용 — 오늘 기록/연속 기록/히스토리를 클라우드 백업 스냅샷으로 전체 덮어쓴다
-    suspend fun restoreAll(today: DayRecord, streak: StreakInfo, history: Map<String, DayRecord>) {
+    // 백업 복원 전용 — 오늘 기록/연속 기록/히스토리/연간 집계를 클라우드 백업 스냅샷으로 전체
+    // 덮어쓴다. annualHistory가 빠져있던 것을 2026-07-16에 추가 — 없으면 복원 후에도 연간
+    // 히트맵이 백업 전 데이터로 남아있었음
+    suspend fun restoreAll(
+        today: DayRecord,
+        streak: StreakInfo,
+        history: Map<String, DayRecord>,
+        annualHistory: Map<String, DailyAchievement>
+    ) {
         editSafely { prefs ->
             prefs[Keys.TODAY_RECORD] = json.encodeToString(today)
             prefs[Keys.STREAK_INFO] = json.encodeToString(streak)
             prefs[Keys.HISTORY] = json.encodeToString(history)
+            prefs[Keys.ANNUAL_HISTORY] = json.encodeToString(annualHistory)
         }
     }
 }

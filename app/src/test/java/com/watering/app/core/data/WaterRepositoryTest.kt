@@ -275,6 +275,21 @@ class WaterRepositoryTest {
     }
 
     @Test
+    fun restoreAll_annualHistory까지포함해dataStore위임하고완료된다() = runTest {
+        val today = DayRecord(dateKey = todayKey, goal = 8)
+        val streak = StreakInfo(currentStreak = 3)
+        val history = mapOf(yesterdayKey to DayRecord(dateKey = yesterdayKey, goal = 8))
+        val annualHistory = mapOf(
+            yesterdayKey to DailyAchievement(dateKey = yesterdayKey, totalCount = 8, goal = 8)
+        )
+        coEvery { dataStore.restoreAll(today, streak, history, annualHistory) } returns Unit
+
+        repository.restoreAll(today, streak, history, annualHistory)
+
+        coVerify { dataStore.restoreAll(today, streak, history, annualHistory) }
+    }
+
+    @Test
     fun getAnnualHistory_dataStore의연간이력을그대로전달한다() = runTest {
         val annualHistory = mapOf(
             todayKey to DailyAchievement(dateKey = todayKey, totalCount = 8, goal = 8)

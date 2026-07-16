@@ -65,6 +65,16 @@ class AchievementDataStore @Inject constructor(
         }
     }
 
+    // 백업/복원 전용 — 평생 업적(연속 기록 마일스톤)은 별도 DataStore("achievements")에 있어
+    // WaterDataStore.restoreAll의 백업 스냅샷에 포함되지 않았었음(2026-07-16 수정)
+    suspend fun getLifetimeEarnedNames(): Set<String> = getLifetimeEarnedSet()
+
+    suspend fun restoreLifetimeEarned(names: Set<String>) {
+        context.achievementDataStore.edit { prefs ->
+            prefs[LIFETIME_KEY] = names.joinToString(";")
+        }
+    }
+
     // 위젯(AddWaterAction)에서 달성한 업적은 그 자리에서 모달을 띄울 화면이 없으므로,
     // 앱을 다음에 열었을 때 HomeViewModel이 확인해서 보여줄 수 있도록 대기 상태로 저장한다.
     suspend fun setPendingDisplay(achievement: Achievement) {

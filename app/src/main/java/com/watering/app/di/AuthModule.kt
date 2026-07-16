@@ -5,8 +5,11 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.watering.app.core.data.SettingsRepository
 import com.watering.app.core.data.WaterRepository
+import com.watering.app.core.datastore.AchievementDataStore
 import com.watering.app.core.service.AuthService
 import com.watering.app.core.service.BackupService
+import com.watering.app.core.service.NotificationService
+import com.watering.app.widget.WateringWidgetUpdater
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -38,6 +41,16 @@ object AuthModule {
     fun provideBackupService(
         firestore: FirebaseFirestore,
         waterRepository: WaterRepository,
-        settingsRepository: SettingsRepository
-    ): BackupService = BackupService(firestore, waterRepository, settingsRepository)
+        settingsRepository: SettingsRepository,
+        achievementDataStore: AchievementDataStore,
+        widgetUpdater: WateringWidgetUpdater,
+        notificationService: NotificationService
+    ): BackupService = BackupService(
+        firestore,
+        waterRepository,
+        settingsRepository,
+        achievementDataStore,
+        widgetUpdater,
+        notificationService
+    )
 }
