@@ -10,7 +10,6 @@ import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
@@ -109,10 +108,13 @@ class RecordViewModelTest {
     }
 
     @Test
-    fun presetAmounts_고정된6개옵션을제공한다() = runTest(mainDispatcherRule.testDispatcher) {
-        val viewModel = createViewModel()
-
-        assertTrue(viewModel.presetAmounts.containsAll(listOf(100, 150, 200, 250, 350, 500)))
+    fun presetAmountsFor_음료종류별로해당규격프리셋을반환한다() {
+        assertEquals(listOf(190, 200, 500, 887), presetAmountsFor(DrinkType.WATER))
+        assertEquals(listOf(355, 473, 591, 710), presetAmountsFor(DrinkType.COFFEE))
+        assertEquals(listOf(355, 473, 591, 710), presetAmountsFor(DrinkType.TEA))
+        assertEquals(listOf(200, 355, 473, 500), presetAmountsFor(DrinkType.JUICE))
+        assertEquals(listOf(200, 355, 473, 500), presetAmountsFor(DrinkType.MILK))
+        assertEquals(listOf(200, 355, 473, 500, 710), presetAmountsFor(DrinkType.OTHER))
     }
 
     @Test
