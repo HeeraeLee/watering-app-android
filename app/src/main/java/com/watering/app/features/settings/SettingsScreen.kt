@@ -347,6 +347,14 @@ private val RecordingCardBackgroundColor: Color
 private val RecordingCardDividerColor: Color
     @Composable get() = if (isSystemInDarkTheme()) Color.White.copy(alpha = 0.14f) else Color(0xFFE8E1F5)
 
+// "하루 목표"/"컵 크기" 라벨, 그룹 제목(일상/카페/텀블러), 선택 안 된 칩 텍스트 톤 — 웹 목업
+// 3안(소프트 차콜/웜 그레이/라벤더 그레이) 비교 후 "웜 그레이" 채택(2026-07-16). 기존 onSurface
+// (#1C1B1F)가 카드 배경(연보라)과 대비가 너무 강하고 "컵 크기"만 Bold라 유독 도드라져 보인다는
+// 피드백 — 라이트는 옅은 회색으로, 다크는 기존 onSurface 그대로 유지(다크 카드 배경에선 이미
+// 문제 없던 값이라 이번 변경 범위 밖)
+private val RecordingLabelColor: Color
+    @Composable get() = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.onSurface else Color(0xFF5A5A66)
+
 @Composable
 private fun RecordingSettingsCard(
     goal: Int,
@@ -380,7 +388,7 @@ private fun DailyGoalRow(goal: Int, cupSize: Int, onGoalChange: (Int) -> Unit) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(stringResource(R.string.label_daily_goal), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
+        Text(stringResource(R.string.label_daily_goal), style = MaterialTheme.typography.titleMedium, color = RecordingLabelColor)
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(
                 onClick = { onGoalChange(goal - 1) },
@@ -486,8 +494,8 @@ private fun CupSizeSetting(goal: Int, cupSize: Int, onCupSizeChange: (Int) -> Un
         Text(
             stringResource(R.string.label_cup_size),
             style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface
+            fontWeight = FontWeight.Medium,
+            color = RecordingLabelColor
         )
         Spacer(Modifier.height(CupSizeGroupGap))
         CupSizeGroup(stringResource(R.string.cup_size_group_daily), DailyCupPresets, cupSize, onCupSizeChange)
@@ -525,18 +533,28 @@ private fun CupSizeGroup(
         Text(
             title,
             style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onSurface
+            color = RecordingLabelColor
         )
     }
     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         presets.forEach { preset ->
+            val selected = cupSize == preset.ml
             FilterChip(
-                selected = cupSize == preset.ml,
+                selected = selected,
                 onClick = { onCupSizeChange(preset.ml) },
                 label = {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("${preset.ml}ml", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold)
-                        Text(stringResource(preset.nameRes), style = MaterialTheme.typography.labelSmall)
+                        Text(
+                            "${preset.ml}ml",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.SemiBold,
+                            color = if (selected) Color.White else RecordingLabelColor
+                        )
+                        Text(
+                            stringResource(preset.nameRes),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = if (selected) Color.White else RecordingLabelColor
+                        )
                     }
                 },
                 colors = selectedChipColors()
