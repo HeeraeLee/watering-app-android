@@ -167,11 +167,18 @@ class WaterDataStore @Inject constructor(
             ?: emptyMap()
     }
 
-    suspend fun resetTodayRecord() {
+    // goal을 받아 저장한다 — 예전엔 DayRecord()의 기본값(8)이 그대로 저장돼 사용자가 설정한
+    // 목표와 다른 값이 남는 문제가 있었음. addEntry/removeLastEntry와 동일하게 재아카이빙도
+    // 함께 해야 "초기화했는데 히스토리/연간 집계/CSV엔 초기화 전 값이 그대로 남는" 문제가 없음.
+    suspend fun resetTodayRecord(goal: Int): DayRecord {
         val todayKey = LocalDate.now(clock).format(formatter)
+        val blank = DayRecord(dateKey = todayKey, goal = goal)
         editSafely { prefs ->
-            prefs[Keys.TODAY_RECORD] = json.encodeToString(DayRecord(dateKey = todayKey))
+            prefs[Keys.TODAY_RECORD] = json.encodeToString(blank)
         }
+        archiveTodayToHistory(blank)
+        archiveToAnnualHistory(blank)
+        return blank
     }
 
     suspend fun clearAllData() {

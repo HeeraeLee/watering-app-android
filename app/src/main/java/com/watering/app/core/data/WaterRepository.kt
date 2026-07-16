@@ -109,7 +109,7 @@ class WaterRepository @Inject constructor(
         return updated
     }
 
-    suspend fun resetToday() = dataStore.resetTodayRecord()
+    suspend fun resetToday(goal: Int): DayRecord = dataStore.resetTodayRecord(goal)
     suspend fun clearAllData() = dataStore.clearAllData()
 
     suspend fun restoreAll(today: DayRecord, streak: StreakInfo, history: Map<String, DayRecord>) =

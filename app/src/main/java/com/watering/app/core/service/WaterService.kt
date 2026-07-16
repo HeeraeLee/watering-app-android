@@ -72,8 +72,14 @@ class WaterService @Inject constructor(
     suspend fun rollbackStreakAfterUndo(record: DayRecord, current: StreakInfo): StreakInfo =
         repository.rollbackStreakAfterUndo(record, current)
 
+    // 오늘 이미 목표를 달성해 streak이 올라간 상태였다면, 초기화로 오늘이 다시 미달성이 되므로
+    // undo와 동일하게 되돌린다(MidnightResetWorker의 자정 롤오버 호출에서는 초기화 대상 날짜가
+    // streak.lastAchievedDateKey와 다르므로 자연히 아무 동작도 하지 않음).
     suspend fun resetToday() {
-        repository.resetToday()
+        val goal = settingsRepository.userSettings.first().dailyGoal
+        val currentStreak = repository.streakInfo.first()
+        val updated = repository.resetToday(goal)
+        repository.rollbackStreakAfterUndo(updated, currentStreak)
         widgetUpdater.updateAll()
     }
 

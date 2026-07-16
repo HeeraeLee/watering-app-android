@@ -256,11 +256,13 @@ class WaterRepositoryTest {
 
     @Test
     fun resetToday_dataStore위임하고완료된다() = runTest {
-        coEvery { dataStore.resetTodayRecord() } returns Unit
+        val blank = DayRecord(dateKey = todayKey, goal = 8)
+        coEvery { dataStore.resetTodayRecord(8) } returns blank
 
-        repository.resetToday()
+        val result = repository.resetToday(8)
 
-        coVerify { dataStore.resetTodayRecord() }
+        assertEquals(blank, result)
+        coVerify { dataStore.resetTodayRecord(8) }
     }
 
     @Test

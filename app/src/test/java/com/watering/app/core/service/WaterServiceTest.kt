@@ -152,11 +152,21 @@ class WaterServiceTest {
     }
 
     @Test
-    fun resetToday_repository초기화하고위젯을갱신한다() = runTest {
+    fun resetToday_현재설정의목표로초기화하고streak을되돌린뒤위젯을갱신한다() = runTest {
+        every { settingsRepository.userSettings } returns
+            MutableStateFlow(UserSettings(dailyGoal = 12, healthConnectEnabled = false))
+        val currentStreak = StreakInfo(currentStreak = 3, lastAchievedDateKey = "2026-07-02")
+        every { repository.streakInfo } returns MutableStateFlow(currentStreak)
+        val blank = DayRecord(dateKey = "2026-07-02", goal = 12)
+        coEvery { repository.resetToday(12) } returns blank
+        coEvery { repository.rollbackStreakAfterUndo(blank, currentStreak) } returns
+            currentStreak.copy(currentStreak = 2)
+
         service.resetToday()
 
         coVerifyOrder {
-            repository.resetToday()
+            repository.resetToday(12)
+            repository.rollbackStreakAfterUndo(blank, currentStreak)
             widgetUpdater.updateAll()
         }
     }
