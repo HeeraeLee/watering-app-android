@@ -29,9 +29,10 @@ class WaterService @Inject constructor(
     suspend fun addWater(
         amount: Int,
         drinkType: DrinkType = DrinkType.WATER,
-        goal: Int
+        goal: Int,
+        cupSize: Int
     ): WaterUpdateResult {
-        val result = repository.addEntry(amount, drinkType, goal)
+        val result = repository.addEntry(amount, drinkType, goal, cupSize)
         widgetUpdater.updateAll()
         syncToHealthConnectIfEnabled(result.updated)
         return result
@@ -60,8 +61,8 @@ class WaterService @Inject constructor(
         }
     }
 
-    suspend fun undoLastEntry(goal: Int): DayRecord {
-        val updated = repository.removeLastEntry(goal)
+    suspend fun undoLastEntry(goal: Int, cupSize: Int): DayRecord {
+        val updated = repository.removeLastEntry(goal, cupSize)
         widgetUpdater.updateAll()
         return updated
     }
@@ -78,9 +79,9 @@ class WaterService @Inject constructor(
     // 있었음(2026-07-16). 오늘 이미 목표를 달성해 streak이 올라간 상태였다면, 초기화로 오늘이
     // 다시 미달성이 되므로 undo와 동일하게 되돌린다.
     suspend fun resetToday() {
-        val goal = settingsRepository.userSettings.first().dailyGoal
+        val settings = settingsRepository.userSettings.first()
         val currentStreak = repository.streakInfo.first()
-        val updated = repository.resetToday(goal)
+        val updated = repository.resetToday(settings.dailyGoal, settings.cupSize)
         repository.rollbackStreakAfterUndo(updated, currentStreak)
         widgetUpdater.updateAll()
     }
@@ -91,8 +92,8 @@ class WaterService @Inject constructor(
     // 달리 TODAY_RECORD가 아직 어제 날짜에 머물러 있을 때만(=진짜 stale할 때만) 초기화한다
     // (2026-07-16, 자정 리셋 지연 시 당일 기록 소실 버그 수정).
     suspend fun resetTodayForMidnightRollover() {
-        val goal = settingsRepository.userSettings.first().dailyGoal
-        val updated = repository.resetTodayIfStale(goal) ?: return
+        val settings = settingsRepository.userSettings.first()
+        val updated = repository.resetTodayIfStale(settings.dailyGoal, settings.cupSize) ?: return
         val currentStreak = repository.streakInfo.first()
         repository.rollbackStreakAfterUndo(updated, currentStreak)
         widgetUpdater.updateAll()

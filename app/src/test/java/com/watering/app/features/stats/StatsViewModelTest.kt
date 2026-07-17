@@ -75,7 +75,7 @@ class StatsViewModelTest {
             val todayStat = state.weekStats.last()
             assertTrue(todayStat.isToday)
             assertEquals(todayKey, todayStat.dateKey)
-            assertEquals(5, todayStat.count)
+            assertEquals(5.0, todayStat.count, 0.0)
         }
     }
 
@@ -119,7 +119,7 @@ class StatsViewModelTest {
             val state = awaitItem()
             assertEquals(0, state.weeklyTotal)
             assertEquals(0, state.goalDays)
-            assertTrue(state.weekStats.all { it.count == 0 })
+            assertTrue(state.weekStats.all { it.count == 0.0 })
         }
     }
 

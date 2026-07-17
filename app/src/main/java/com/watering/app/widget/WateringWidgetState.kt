@@ -18,6 +18,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.flow.first
+import kotlin.math.floor
 
 data class WidgetState(
     val totalCount: Int = 0,
@@ -66,10 +67,14 @@ suspend fun loadWidgetState(context: Context): WidgetState {
         val record = entryPoint.waterRepository().todayRecord.first()
         val settings = entryPoint.settingsRepository().userSettings.first()
         val goal = settings.dailyGoal.coerceAtLeast(1)
+        // record.cupSize는 마지막 기록 시점의 스냅샷이라 컵 크기를 바꾼 직후 다음 기록 전까지
+        // stale할 수 있음 — goal과 동일하게 항상 최신 settings.cupSize로 직접 재계산한다
+        val cupSize = settings.cupSize.coerceAtLeast(1)
+        val totalCountExact = record.entries.sumOf { it.amount }.toDouble() / cupSize
         WidgetState(
-            totalCount = record.totalCount,
+            totalCount = floor(totalCountExact).toInt(),
             goal = goal,
-            achievementRate = record.totalCount.toDouble() / goal,
+            achievementRate = totalCountExact / goal,
             theme = settings.widgetTheme,
             totalMl = record.entries.sumOf { it.amount }
         ).also { WidgetStateCache.lastKnownGood = it }

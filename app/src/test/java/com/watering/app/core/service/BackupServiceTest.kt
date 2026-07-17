@@ -33,7 +33,7 @@ class BackupServiceTest {
         streakInfo = StreakInfo(currentStreak = 3, longestStreak = 5),
         history = mapOf("2026-07-01" to DayRecord(dateKey = "2026-07-01", goal = 8)),
         annualHistory = mapOf(
-            "2026-07-01" to DailyAchievement(dateKey = "2026-07-01", totalCount = 8, goal = 8)
+            "2026-07-01" to DailyAchievement(dateKey = "2026-07-01", totalCount = 8.0, goal = 8)
         ),
         lifetimeAchievements = setOf("STREAK_7", "STREAK_30"),
         settings = UserSettings(dailyGoal = 8, cupSize = 200),

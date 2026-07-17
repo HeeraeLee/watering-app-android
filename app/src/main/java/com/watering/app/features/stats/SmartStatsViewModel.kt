@@ -44,19 +44,24 @@ class SmartStatsViewModel @Inject constructor(
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
         val todayDate = LocalDate.now(clock)
 
+        // record.cupSize(마지막 기록 시점 스냅샷)가 아니라 항상 최신 settings.cupSize로 재계산 —
+        // goal과 동일한 이유로 컵 크기 변경 직후 stale해지는 걸 막기 위함
+        val todayTotalCount = today.entries.sumOf { it.amount }.toDouble() / settings.cupSize.coerceAtLeast(1)
+
         val monthRecords = (29 downTo 0).map { offset ->
             val key = todayDate.minusDays(offset.toLong()).format(formatter)
             val record: DayRecord? = if (key == today.dateKey) today else history[key]
             record ?: DayRecord(dateKey = key, goal = settings.dailyGoal)
         }
         val monthStats = monthRecords.mapIndexed { index, record ->
+            val isTodayRecord = record.dateKey == today.dateKey
             DayStat(
                 dateKey = record.dateKey,
                 label = "",
-                count = record.totalCount,
+                count = if (isTodayRecord) todayTotalCount else record.totalCount,
                 // 오늘은 항상 최신 목표(위젯 경로와 동일), 과거는 기록 당시 저장된 목표를 그대로 사용 —
                 // 목표를 바꿔도 이미 지난 날의 달성 여부가 소급 재판정되지 않도록 함
-                goal = if (record.dateKey == today.dateKey) settings.dailyGoal else record.goal,
+                goal = if (isTodayRecord) settings.dailyGoal else record.goal,
                 isToday = index == monthRecords.lastIndex
             )
         }
@@ -70,7 +75,7 @@ class SmartStatsViewModel @Inject constructor(
         // 오늘 것은 archiveToAnnualHistory가 다음 기록 시점에나 반영되므로, 실시간 todayRecord로 대체
         val todayAchievement = DailyAchievement(
             dateKey = today.dateKey,
-            totalCount = today.totalCount,
+            totalCount = todayTotalCount,
             goal = settings.dailyGoal
         )
         val annualDays = (364 downTo 0).map { offset ->

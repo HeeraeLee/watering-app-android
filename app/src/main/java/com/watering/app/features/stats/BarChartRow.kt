@@ -35,7 +35,7 @@ val GreenColor = Color(0xFF34C759)
 // WeekBarChart(7일, 라벨 있음)와 MonthBarChart(30일, 라벨 없음)가 공유하는 막대 드로잉 프리미티브.
 data class BarChartEntry(
     val key: String,
-    val count: Int,
+    val count: Double,
     val goal: Int,
     val isToday: Boolean = false,
     val topLabel: String? = null,
@@ -52,7 +52,7 @@ fun BarChartRow(
     modifier: Modifier = Modifier.fillMaxWidth()
 ) {
     if (entries.isEmpty()) return
-    val maxCount = maxOf(entries.maxOf { it.count }, entries.first().goal, 1)
+    val maxCount = maxOf(entries.maxOf { it.count }, entries.first().goal.toDouble(), 1.0)
 
     Row(
         modifier = modifier,
@@ -61,11 +61,11 @@ fun BarChartRow(
     ) {
         entries.forEach { entry ->
             val fillRatio by animateFloatAsState(
-                targetValue = (entry.count.toFloat() / maxCount).coerceIn(0f, 1f),
+                targetValue = (entry.count.toFloat() / maxCount.toFloat()).coerceIn(0f, 1f),
                 animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
                 label = "bar_${entry.key}"
             )
-            val goalRatio = (entry.goal.toFloat() / maxCount).coerceIn(0f, 1f)
+            val goalRatio = (entry.goal.toFloat() / maxCount.toFloat()).coerceIn(0f, 1f)
             val isAchieved = entry.count >= entry.goal
             val barColor = when {
                 isAchieved -> GreenColor

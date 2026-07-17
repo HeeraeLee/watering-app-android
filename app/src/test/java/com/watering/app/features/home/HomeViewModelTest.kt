@@ -88,7 +88,7 @@ class HomeViewModelTest {
     fun addWater_기본물마시기는cupSize만큼기록하고스낵바메시지를설정한다() = runTest(mainDispatcherRule.testDispatcher) {
         val viewModel = createViewModel()
         val updated = record.copy(entries = record.entries)
-        coEvery { waterService.addWater(200, DrinkType.WATER, 8) } returns WaterUpdateResult(record, updated)
+        coEvery { waterService.addWater(200, DrinkType.WATER, 8, 200) } returns WaterUpdateResult(record, updated)
         coEvery { waterService.updateStreak(updated, streak) } returns streak
         coEvery { achievementChecker.check(any(), updated, streak) } returns null
 
@@ -100,14 +100,14 @@ class HomeViewModelTest {
 
         assertEquals("💧 +200ml 기록됐어요", viewModel.snackbarMessage.value)
         assertNull(viewModel.pendingAchievement.value)
-        coVerify { waterService.addWater(200, DrinkType.WATER, 8) }
+        coVerify { waterService.addWater(200, DrinkType.WATER, 8, 200) }
     }
 
     @Test
     fun addWater_업적을달성하면pendingAchievement가설정된다() = runTest(mainDispatcherRule.testDispatcher) {
         val viewModel = createViewModel()
         val updated = record.copy()
-        coEvery { waterService.addWater(200, DrinkType.WATER, 8) } returns WaterUpdateResult(record, updated)
+        coEvery { waterService.addWater(200, DrinkType.WATER, 8, 200) } returns WaterUpdateResult(record, updated)
         coEvery { waterService.updateStreak(updated, streak) } returns streak
         coEvery { achievementChecker.check(any(), updated, streak) } returns Achievement.GOAL_ACHIEVED
 
@@ -139,7 +139,7 @@ class HomeViewModelTest {
     fun addWaterCustom_지정한음료와용량으로기록하고메시지를설정한다() = runTest(mainDispatcherRule.testDispatcher) {
         val viewModel = createViewModel()
         val updated = record.copy()
-        coEvery { waterService.addWater(350, DrinkType.COFFEE, 8) } returns WaterUpdateResult(record, updated)
+        coEvery { waterService.addWater(350, DrinkType.COFFEE, 8, 200) } returns WaterUpdateResult(record, updated)
         coEvery { waterService.updateStreak(updated, streak) } returns streak
         coEvery { achievementChecker.check(any(), updated, streak) } returns null
 
@@ -205,7 +205,7 @@ class HomeViewModelTest {
     @Test
     fun undoLastEntry_repository에서제거하고스낵바를비운다() = runTest(mainDispatcherRule.testDispatcher) {
         val viewModel = createViewModel()
-        coEvery { waterService.undoLastEntry(8) } returns record
+        coEvery { waterService.undoLastEntry(8, 200) } returns record
 
         viewModel.uiState.test {
             awaitItem()
@@ -213,7 +213,7 @@ class HomeViewModelTest {
             cancelAndIgnoreRemainingEvents()
         }
 
-        coVerify { waterService.undoLastEntry(8) }
+        coVerify { waterService.undoLastEntry(8, 200) }
         assertNull(viewModel.snackbarMessage.value)
     }
 
@@ -222,7 +222,7 @@ class HomeViewModelTest {
         // 취소로 목표 미달성이 된 오늘 기록 — 이미 올라간 streak을 되돌려야 하는 상황
         val undoneRecord = DayRecord(dateKey = "2026-07-02", goal = 8, entries = emptyList())
         val viewModel = createViewModel()
-        coEvery { waterService.undoLastEntry(8) } returns undoneRecord
+        coEvery { waterService.undoLastEntry(8, 200) } returns undoneRecord
 
         viewModel.uiState.test {
             awaitItem()
@@ -247,7 +247,7 @@ class HomeViewModelTest {
     // achievementChecker가 해당 업적을 반환하도록 stub한 뒤 addWater를 한 번 거쳐 상태를 만든다.
     private suspend fun setPendingAchievement(viewModel: HomeViewModel, achievement: Achievement) {
         val updated = record.copy()
-        coEvery { waterService.addWater(200, DrinkType.WATER, 8) } returns WaterUpdateResult(record, updated)
+        coEvery { waterService.addWater(200, DrinkType.WATER, 8, 200) } returns WaterUpdateResult(record, updated)
         coEvery { waterService.updateStreak(updated, streak) } returns streak
         coEvery { achievementChecker.check(any(), updated, streak) } returns achievement
 

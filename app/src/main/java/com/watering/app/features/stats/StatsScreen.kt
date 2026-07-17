@@ -49,6 +49,7 @@ import com.watering.app.ui.theme.AppBackgroundGradient
 import com.watering.app.ui.theme.AppCardBackgroundColor
 import com.watering.app.ui.theme.AppInfoBannerBorderColor
 import com.watering.app.ui.theme.AppSummaryValueColor
+import kotlin.math.floor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -215,7 +216,7 @@ private fun WeekBarChart(stats: List<DayStat>) {
                 count = day.count,
                 goal = day.goal,
                 isToday = day.isToday,
-                topLabel = "${day.count}",
+                topLabel = "${floor(day.count).toInt()}",
                 bottomLabel = day.label
             )
         },

@@ -7,9 +7,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class DailyAchievement(
     val dateKey: String,         // "yyyy-MM-dd" 형식
-    val totalCount: Int,
+    val totalCount: Double,      // DayRecord.totalCount(ml 비례 크레딧)를 그대로 복사
     val goal: Int
 ) {
-    val achievementRate: Double get() = if (goal == 0) 0.0 else totalCount.toDouble() / goal
+    val achievementRate: Double get() = if (goal == 0) 0.0 else totalCount / goal
     val isAchieved: Boolean get() = totalCount >= goal
 }

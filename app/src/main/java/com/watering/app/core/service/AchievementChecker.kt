@@ -20,8 +20,9 @@ class AchievementChecker @Inject constructor(
     ): Achievement? {
         val dateKey = next.dateKey
 
-        // 첫 잔
-        if (prev.totalCount == 0 && next.totalCount == 1) {
+        // 첫 잔 — totalCount는 ml 비례 크레딧(소수)이라 "1잔을 다 채웠다"가 아니라 "처음
+        // 기록을 남겼다"를 기준으로 판정해야 함(entries 개수 기반)
+        if (prev.entries.isEmpty() && next.entries.size == 1) {
             return emit(dateKey, Achievement.FIRST_SIP)
         }
 
@@ -45,8 +46,8 @@ class AchievementChecker @Inject constructor(
         }
 
         // 50% 돌파
-        val prevRate = if (prev.goal > 0) prev.totalCount.toDouble() / prev.goal else 0.0
-        val nextRate = if (next.goal > 0) next.totalCount.toDouble() / next.goal else 0.0
+        val prevRate = prev.achievementRate
+        val nextRate = next.achievementRate
         if (prevRate < 0.5 && nextRate >= 0.5 && !next.isAchieved) {
             return emit(dateKey, Achievement.HALF_WAY)
         }

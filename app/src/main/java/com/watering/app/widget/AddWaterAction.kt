@@ -35,7 +35,8 @@ class AddWaterAction : ActionCallback {
             val result = waterService.addWater(
                 amount = settings.cupSize,
                 drinkType = DrinkType.WATER,
-                goal = settings.dailyGoal
+                goal = settings.dailyGoal,
+                cupSize = settings.cupSize
             )
             val streak = waterService.updateStreak(result.updated, waterRepository.streakInfo.first())
             analyticsService.logRecordAdd(settings.cupSize, DrinkType.WATER.name, source = "widget")

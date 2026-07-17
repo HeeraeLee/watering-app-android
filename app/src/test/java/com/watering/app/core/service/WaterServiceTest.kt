@@ -54,13 +54,13 @@ class WaterServiceTest {
     @Test
     fun addWater_repository에저장하고위젯을갱신한다() = runTest {
         val record = recordWithEntry()
-        coEvery { repository.addEntry(200, DrinkType.WATER, 8) } returns WaterUpdateResult(emptyPrev, record)
+        coEvery { repository.addEntry(200, DrinkType.WATER, 8, 200) } returns WaterUpdateResult(emptyPrev, record)
 
-        val result = service.addWater(amount = 200, drinkType = DrinkType.WATER, goal = 8)
+        val result = service.addWater(amount = 200, drinkType = DrinkType.WATER, goal = 8, cupSize = 200)
 
         assertEquals(record, result.updated)
         coVerifyOrder {
-            repository.addEntry(200, DrinkType.WATER, 8)
+            repository.addEntry(200, DrinkType.WATER, 8, 200)
             widgetUpdater.updateAll()
         }
     }
@@ -68,9 +68,9 @@ class WaterServiceTest {
     @Test
     fun addWater_연동꺼져있으면HealthConnect에쓰지않는다() = runTest {
         val record = recordWithEntry()
-        coEvery { repository.addEntry(any(), any(), any()) } returns WaterUpdateResult(emptyPrev, record)
+        coEvery { repository.addEntry(any(), any(), any(), any()) } returns WaterUpdateResult(emptyPrev, record)
 
-        service.addWater(amount = 200, drinkType = DrinkType.WATER, goal = 8)
+        service.addWater(amount = 200, drinkType = DrinkType.WATER, goal = 8, cupSize = 200)
 
         coVerify(exactly = 0) { healthConnectService.writeHydrationRecord(any(), any()) }
     }
@@ -81,9 +81,9 @@ class WaterServiceTest {
         coEvery { healthConnectService.hasPermissions(HealthConnectService.HYDRATION_PERMISSIONS) } returns true
         // 커피 200ml * 0.7 = 140ml
         val record = recordWithEntry(amount = 200, drinkType = DrinkType.COFFEE, timestamp = 12345L)
-        coEvery { repository.addEntry(200, DrinkType.COFFEE, 8) } returns WaterUpdateResult(emptyPrev, record)
+        coEvery { repository.addEntry(200, DrinkType.COFFEE, 8, 200) } returns WaterUpdateResult(emptyPrev, record)
 
-        service.addWater(amount = 200, drinkType = DrinkType.COFFEE, goal = 8)
+        service.addWater(amount = 200, drinkType = DrinkType.COFFEE, goal = 8, cupSize = 200)
 
         coVerify { healthConnectService.writeHydrationRecord(volumeMl = 140.0, timestampMillis = 12345L) }
     }
@@ -93,9 +93,9 @@ class WaterServiceTest {
         every { settingsRepository.userSettings } returns MutableStateFlow(UserSettings(healthConnectEnabled = true))
         coEvery { healthConnectService.hasPermissions(HealthConnectService.HYDRATION_PERMISSIONS) } returns false
         val record = recordWithEntry()
-        coEvery { repository.addEntry(any(), any(), any()) } returns WaterUpdateResult(emptyPrev, record)
+        coEvery { repository.addEntry(any(), any(), any(), any()) } returns WaterUpdateResult(emptyPrev, record)
 
-        service.addWater(amount = 200, drinkType = DrinkType.WATER, goal = 8)
+        service.addWater(amount = 200, drinkType = DrinkType.WATER, goal = 8, cupSize = 200)
 
         coVerify(exactly = 0) { healthConnectService.writeHydrationRecord(any(), any()) }
     }
@@ -106,9 +106,9 @@ class WaterServiceTest {
         coEvery { healthConnectService.hasPermissions(HealthConnectService.HYDRATION_PERMISSIONS) } returns true
         coEvery { healthConnectService.writeHydrationRecord(any(), any()) } throws RuntimeException("boom")
         val record = recordWithEntry()
-        coEvery { repository.addEntry(any(), any(), any()) } returns WaterUpdateResult(emptyPrev, record)
+        coEvery { repository.addEntry(any(), any(), any(), any()) } returns WaterUpdateResult(emptyPrev, record)
 
-        val result = service.addWater(amount = 200, drinkType = DrinkType.WATER, goal = 8)
+        val result = service.addWater(amount = 200, drinkType = DrinkType.WATER, goal = 8, cupSize = 200)
 
         assertEquals(record, result.updated)
     }
@@ -116,13 +116,13 @@ class WaterServiceTest {
     @Test
     fun undoLastEntry_repository에서제거하고위젯을갱신한다() = runTest {
         val record = DayRecord(dateKey = "2026-07-02")
-        coEvery { repository.removeLastEntry(8) } returns record
+        coEvery { repository.removeLastEntry(8, 200) } returns record
 
-        val result = service.undoLastEntry(goal = 8)
+        val result = service.undoLastEntry(goal = 8, cupSize = 200)
 
         assertEquals(record, result)
         coVerifyOrder {
-            repository.removeLastEntry(8)
+            repository.removeLastEntry(8, 200)
             widgetUpdater.updateAll()
         }
     }
@@ -158,14 +158,14 @@ class WaterServiceTest {
         val currentStreak = StreakInfo(currentStreak = 3, lastAchievedDateKey = "2026-07-02")
         every { repository.streakInfo } returns MutableStateFlow(currentStreak)
         val blank = DayRecord(dateKey = "2026-07-02", goal = 12)
-        coEvery { repository.resetToday(12) } returns blank
+        coEvery { repository.resetToday(12, 200) } returns blank
         coEvery { repository.rollbackStreakAfterUndo(blank, currentStreak) } returns
             currentStreak.copy(currentStreak = 2)
 
         service.resetToday()
 
         coVerifyOrder {
-            repository.resetToday(12)
+            repository.resetToday(12, 200)
             repository.rollbackStreakAfterUndo(blank, currentStreak)
             widgetUpdater.updateAll()
         }
@@ -178,14 +178,14 @@ class WaterServiceTest {
         val currentStreak = StreakInfo(currentStreak = 3, lastAchievedDateKey = "2026-07-02")
         every { repository.streakInfo } returns MutableStateFlow(currentStreak)
         val fresh = DayRecord(dateKey = "2026-07-03", goal = 12)
-        coEvery { repository.resetTodayIfStale(12) } returns fresh
+        coEvery { repository.resetTodayIfStale(12, 200) } returns fresh
         coEvery { repository.rollbackStreakAfterUndo(fresh, currentStreak) } returns
             currentStreak.copy(currentStreak = 2)
 
         service.resetTodayForMidnightRollover()
 
         coVerifyOrder {
-            repository.resetTodayIfStale(12)
+            repository.resetTodayIfStale(12, 200)
             repository.rollbackStreakAfterUndo(fresh, currentStreak)
             widgetUpdater.updateAll()
         }
@@ -195,7 +195,7 @@ class WaterServiceTest {
     fun resetTodayForMidnightRollover_이미오늘날짜라stale하지않으면아무것도안한다() = runTest {
         every { settingsRepository.userSettings } returns
             MutableStateFlow(UserSettings(dailyGoal = 12, healthConnectEnabled = false))
-        coEvery { repository.resetTodayIfStale(12) } returns null
+        coEvery { repository.resetTodayIfStale(12, 200) } returns null
 
         service.resetTodayForMidnightRollover()
 

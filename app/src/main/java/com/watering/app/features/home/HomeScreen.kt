@@ -78,6 +78,7 @@ import com.watering.app.ui.theme.AppCardBackgroundColor
 import com.watering.app.ui.theme.AppUndoTextColor
 import com.watering.app.ui.theme.DrinkBadge
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlin.math.floor
 
 private fun Context.findActivity(): Activity? = when (this) {
     is Activity -> this
@@ -176,7 +177,7 @@ fun HomeScreen(
             item {
                 Spacer(Modifier.height(16.dp))
                 AchievementRing(
-                    current = uiState.record.totalCount,
+                    current = floor(uiState.record.totalCount).toInt(),
                     goal = uiState.record.goal,
                     rate = uiState.record.achievementRate,
                     isAchieved = uiState.record.isAchieved

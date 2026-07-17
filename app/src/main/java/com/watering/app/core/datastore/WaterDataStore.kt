@@ -76,7 +76,7 @@ class WaterDataStore @Inject constructor(
     // 직렬화되므로, 여기서 읽은 prev는 위젯 연속 탭처럼 여러 호출이 겹쳐도 항상 그 트랜잭션 시점의
     // 정확한 이전 상태다(트랜잭션 밖에서 별도로 .first()로 prev를 읽으면 그 사이 다른 쓰기가 끼어들어
     // stale해질 수 있음 — WaterUpdateResult 참고).
-    suspend fun addEntry(amount: Int, drinkType: DrinkType, goal: Int): WaterUpdateResult {
+    suspend fun addEntry(amount: Int, drinkType: DrinkType, goal: Int, cupSize: Int): WaterUpdateResult {
         val todayKey = LocalDate.now(clock).format(formatter)
         lateinit var prev: DayRecord
         lateinit var updated: DayRecord
@@ -91,7 +91,7 @@ class WaterDataStore @Inject constructor(
                 amount = amount,
                 drinkType = drinkType
             )
-            updated = current.copy(entries = current.entries + entry, goal = goal)
+            updated = current.copy(entries = current.entries + entry, goal = goal, cupSize = cupSize)
             prefs[Keys.TODAY_RECORD] = json.encodeToString(updated)
             prefs[Keys.LAST_UPDATED] = System.currentTimeMillis().toString()
         }
@@ -100,7 +100,7 @@ class WaterDataStore @Inject constructor(
         return WaterUpdateResult(prev, updated)
     }
 
-    suspend fun removeLastEntry(goal: Int): DayRecord {
+    suspend fun removeLastEntry(goal: Int, cupSize: Int): DayRecord {
         val todayKey = LocalDate.now(clock).format(formatter)
         lateinit var updated: DayRecord
         editSafely { prefs ->
@@ -108,7 +108,7 @@ class WaterDataStore @Inject constructor(
                 ?.let { runCatching { json.decodeFromString<DayRecord>(it) }.getOrNull() }
                 ?.takeIf { it.dateKey == todayKey }
                 ?: DayRecord(dateKey = todayKey)
-            updated = current.copy(entries = current.entries.dropLast(1), goal = goal)
+            updated = current.copy(entries = current.entries.dropLast(1), goal = goal, cupSize = cupSize)
             prefs[Keys.TODAY_RECORD] = json.encodeToString(updated)
         }
         // addEntry와 동일하게 취소 후 상태도 즉시 재아카이빙 — 안 하면 자정 이후 히스토리/연간
@@ -170,9 +170,9 @@ class WaterDataStore @Inject constructor(
     // goal을 받아 저장한다 — 예전엔 DayRecord()의 기본값(8)이 그대로 저장돼 사용자가 설정한
     // 목표와 다른 값이 남는 문제가 있었음. addEntry/removeLastEntry와 동일하게 재아카이빙도
     // 함께 해야 "초기화했는데 히스토리/연간 집계/CSV엔 초기화 전 값이 그대로 남는" 문제가 없음.
-    suspend fun resetTodayRecord(goal: Int): DayRecord {
+    suspend fun resetTodayRecord(goal: Int, cupSize: Int): DayRecord {
         val todayKey = LocalDate.now(clock).format(formatter)
-        val blank = DayRecord(dateKey = todayKey, goal = goal)
+        val blank = DayRecord(dateKey = todayKey, goal = goal, cupSize = cupSize)
         editSafely { prefs ->
             prefs[Keys.TODAY_RECORD] = json.encodeToString(blank)
         }
@@ -188,14 +188,14 @@ class WaterDataStore @Inject constructor(
     // 사용자가 명시적으로 요청하는 resetTodayRecord()(컵 크기 변경 "초기화")는 항상 무조건
     // 초기화해야 하므로 이 조건부 버전과 별도로 유지한다(2026-07-16, 자정 리셋 지연 시 당일
     // 기록 소실 버그 수정).
-    suspend fun resetTodayRecordIfStale(goal: Int): DayRecord? {
+    suspend fun resetTodayRecordIfStale(goal: Int, cupSize: Int): DayRecord? {
         val todayKey = LocalDate.now(clock).format(formatter)
         var blank: DayRecord? = null
         editSafely { prefs ->
             val current = prefs[Keys.TODAY_RECORD]
                 ?.let { runCatching { json.decodeFromString<DayRecord>(it) }.getOrNull() }
             if (current?.dateKey == todayKey) return@editSafely
-            val fresh = DayRecord(dateKey = todayKey, goal = goal)
+            val fresh = DayRecord(dateKey = todayKey, goal = goal, cupSize = cupSize)
             prefs[Keys.TODAY_RECORD] = json.encodeToString(fresh)
             blank = fresh
         }

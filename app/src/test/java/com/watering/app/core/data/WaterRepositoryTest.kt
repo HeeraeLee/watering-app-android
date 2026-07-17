@@ -197,7 +197,7 @@ class WaterRepositoryTest {
         val notAchieved = DayRecord(dateKey = todayKey, entries = emptyList(), goal = 1)
         val current = StreakInfo(currentStreak = 4, longestStreak = 10, lastAchievedDateKey = todayKey)
         every { dataStore.getAnnualHistory() } returns MutableStateFlow(
-            mapOf(yesterdayKey to DailyAchievement(dateKey = yesterdayKey, totalCount = 8, goal = 8))
+            mapOf(yesterdayKey to DailyAchievement(dateKey = yesterdayKey, totalCount = 8.0, goal = 8))
         )
 
         val result = repository.rollbackStreakAfterUndo(notAchieved, current)
@@ -213,7 +213,7 @@ class WaterRepositoryTest {
         val notAchieved = DayRecord(dateKey = todayKey, entries = emptyList(), goal = 1)
         val current = StreakInfo(currentStreak = 6, longestStreak = 6, lastAchievedDateKey = todayKey)
         every { dataStore.getAnnualHistory() } returns MutableStateFlow(
-            mapOf(yesterdayKey to DailyAchievement(dateKey = yesterdayKey, totalCount = 8, goal = 8))
+            mapOf(yesterdayKey to DailyAchievement(dateKey = yesterdayKey, totalCount = 8.0, goal = 8))
         )
 
         val result = repository.rollbackStreakAfterUndo(notAchieved, current)
@@ -233,7 +233,7 @@ class WaterRepositoryTest {
             protectionUsedMonthKey = currentMonthKey
         )
         every { dataStore.getAnnualHistory() } returns MutableStateFlow(
-            mapOf(twoDaysAgoKey to DailyAchievement(dateKey = twoDaysAgoKey, totalCount = 8, goal = 8))
+            mapOf(twoDaysAgoKey to DailyAchievement(dateKey = twoDaysAgoKey, totalCount = 8.0, goal = 8))
         )
 
         val result = repository.rollbackStreakAfterUndo(notAchieved, current)
@@ -256,31 +256,31 @@ class WaterRepositoryTest {
 
     @Test
     fun resetToday_dataStore위임하고완료된다() = runTest {
-        val blank = DayRecord(dateKey = todayKey, goal = 8)
-        coEvery { dataStore.resetTodayRecord(8) } returns blank
+        val blank = DayRecord(dateKey = todayKey, goal = 8, cupSize = 200)
+        coEvery { dataStore.resetTodayRecord(8, 200) } returns blank
 
-        val result = repository.resetToday(8)
+        val result = repository.resetToday(8, 200)
 
         assertEquals(blank, result)
-        coVerify { dataStore.resetTodayRecord(8) }
+        coVerify { dataStore.resetTodayRecord(8, 200) }
     }
 
     @Test
     fun resetTodayIfStale_dataStore위임하고결과를그대로반환한다() = runTest {
-        val blank = DayRecord(dateKey = todayKey, goal = 8)
-        coEvery { dataStore.resetTodayRecordIfStale(8) } returns blank
+        val blank = DayRecord(dateKey = todayKey, goal = 8, cupSize = 200)
+        coEvery { dataStore.resetTodayRecordIfStale(8, 200) } returns blank
 
-        val result = repository.resetTodayIfStale(8)
+        val result = repository.resetTodayIfStale(8, 200)
 
         assertEquals(blank, result)
-        coVerify { dataStore.resetTodayRecordIfStale(8) }
+        coVerify { dataStore.resetTodayRecordIfStale(8, 200) }
     }
 
     @Test
     fun resetTodayIfStale_dataStore가null을반환하면그대로null을반환한다() = runTest {
-        coEvery { dataStore.resetTodayRecordIfStale(8) } returns null
+        coEvery { dataStore.resetTodayRecordIfStale(8, 200) } returns null
 
-        val result = repository.resetTodayIfStale(8)
+        val result = repository.resetTodayIfStale(8, 200)
 
         assertEquals(null, result)
     }
@@ -300,7 +300,7 @@ class WaterRepositoryTest {
         val streak = StreakInfo(currentStreak = 3)
         val history = mapOf(yesterdayKey to DayRecord(dateKey = yesterdayKey, goal = 8))
         val annualHistory = mapOf(
-            yesterdayKey to DailyAchievement(dateKey = yesterdayKey, totalCount = 8, goal = 8)
+            yesterdayKey to DailyAchievement(dateKey = yesterdayKey, totalCount = 8.0, goal = 8)
         )
         coEvery { dataStore.restoreAll(today, streak, history, annualHistory) } returns Unit
 
@@ -312,7 +312,7 @@ class WaterRepositoryTest {
     @Test
     fun getAnnualHistory_dataStore의연간이력을그대로전달한다() = runTest {
         val annualHistory = mapOf(
-            todayKey to DailyAchievement(dateKey = todayKey, totalCount = 8, goal = 8)
+            todayKey to DailyAchievement(dateKey = todayKey, totalCount = 8.0, goal = 8)
         )
         every { dataStore.getAnnualHistory() } returns MutableStateFlow(annualHistory)
 

@@ -25,11 +25,11 @@ class WaterRepository @Inject constructor(
     fun getHistory(): Flow<Map<String, DayRecord>> = dataStore.getHistory()
     fun getAnnualHistory(): Flow<Map<String, DailyAchievement>> = dataStore.getAnnualHistory()
 
-    suspend fun addEntry(amount: Int, drinkType: DrinkType, goal: Int): WaterUpdateResult =
-        dataStore.addEntry(amount, drinkType, goal)
+    suspend fun addEntry(amount: Int, drinkType: DrinkType, goal: Int, cupSize: Int): WaterUpdateResult =
+        dataStore.addEntry(amount, drinkType, goal, cupSize)
 
-    suspend fun removeLastEntry(goal: Int): DayRecord =
-        dataStore.removeLastEntry(goal)
+    suspend fun removeLastEntry(goal: Int, cupSize: Int): DayRecord =
+        dataStore.removeLastEntry(goal, cupSize)
 
     // 한 달에 하루, 정확히 하루를 놓쳤을 때만 연속 기록이 끊기지 않는다 (2일 이상 공백은 보호 대상 아님)
     suspend fun updateStreak(record: DayRecord, current: StreakInfo): StreakInfo {
@@ -109,9 +109,10 @@ class WaterRepository @Inject constructor(
         return updated
     }
 
-    suspend fun resetToday(goal: Int): DayRecord = dataStore.resetTodayRecord(goal)
+    suspend fun resetToday(goal: Int, cupSize: Int): DayRecord = dataStore.resetTodayRecord(goal, cupSize)
 
-    suspend fun resetTodayIfStale(goal: Int): DayRecord? = dataStore.resetTodayRecordIfStale(goal)
+    suspend fun resetTodayIfStale(goal: Int, cupSize: Int): DayRecord? =
+        dataStore.resetTodayRecordIfStale(goal, cupSize)
 
     suspend fun clearAllData() = dataStore.clearAllData()
 

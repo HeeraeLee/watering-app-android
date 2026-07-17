@@ -70,7 +70,7 @@ class SmartStatsViewModelTest {
             val lastStat = state.monthStats.last()
             assertTrue(lastStat.isToday)
             assertEquals(todayKey, lastStat.dateKey)
-            assertEquals(5, lastStat.count)
+            assertEquals(5.0, lastStat.count, 0.0)
         }
     }
 
@@ -127,14 +127,14 @@ class SmartStatsViewModelTest {
     @Test
     fun uiState_연간슬롯은365개이며기록없는날은null이다() = runTest(mainDispatcherRule.testDispatcher) {
         val someDate = todayDate.minusDays(10).format(formatter)
-        val annualHistory = mapOf(someDate to DailyAchievement(dateKey = someDate, totalCount = 8, goal = 8))
+        val annualHistory = mapOf(someDate to DailyAchievement(dateKey = someDate, totalCount = 8.0, goal = 8))
         val viewModel = createViewModel(annualHistory = annualHistory)
 
         viewModel.uiState.test {
             val state = awaitItem()
             assertEquals(365, state.annualDays.size)
             val recorded = state.annualDays.first { it?.dateKey == someDate }
-            assertEquals(8, recorded?.totalCount)
+            assertEquals(8.0, recorded?.totalCount)
             val missingDayIndex = state.annualDays.indexOfFirst {
                 it == null
             }
@@ -151,7 +151,7 @@ class SmartStatsViewModelTest {
             val state = awaitItem()
             val todayAchievement = state.annualDays.last()
             assertEquals(todayKey, todayAchievement?.dateKey)
-            assertEquals(3, todayAchievement?.totalCount)
+            assertEquals(3.0, todayAchievement?.totalCount)
         }
     }
 

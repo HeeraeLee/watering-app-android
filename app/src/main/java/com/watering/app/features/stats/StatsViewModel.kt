@@ -17,11 +17,12 @@ import java.time.Clock
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
+import kotlin.math.floor
 
 data class DayStat(
     val dateKey: String,
     val label: String,      // "월", "화" 등 요일 한 글자
-    val count: Int,
+    val count: Double,      // ml 비례 크레딧(소수) — DayRecord.totalCount와 동일한 단위
     val goal: Int,
     val isToday: Boolean
 )
@@ -57,14 +58,22 @@ class StatsViewModel @Inject constructor(
         val week = (6 downTo 0).map { offset ->
             val date = todayDate.minusDays(offset.toLong())
             val key = date.format(formatter)
-            val record: DayRecord? = if (key == today.dateKey) today else history[key]
+            val isTodayKey = key == today.dateKey
+            val record: DayRecord? = if (isTodayKey) today else history[key]
+            // 오늘은 record.cupSize(마지막 기록 시점 스냅샷)가 아니라 항상 최신 settings.cupSize로
+            // 재계산 — goal과 동일한 이유로 컵 크기 변경 직후 stale해지는 걸 막기 위함
+            val count = when {
+                record == null -> 0.0
+                isTodayKey -> record.entries.sumOf { it.amount }.toDouble() / settings.cupSize.coerceAtLeast(1)
+                else -> record.totalCount
+            }
             DayStat(
                 dateKey = key,
                 label = dayLabels[date.dayOfWeek.value % 7],
-                count = record?.totalCount ?: 0,
+                count = count,
                 // 오늘은 항상 최신 목표(위젯 경로와 동일), 과거는 기록 당시 저장된 목표를 그대로 사용 —
                 // 목표를 바꿔도 이미 지난 날의 달성 여부가 소급 재판정되지 않도록 함
-                goal = if (key == today.dateKey) settings.dailyGoal else (record?.goal ?: settings.dailyGoal),
+                goal = if (isTodayKey) settings.dailyGoal else (record?.goal ?: settings.dailyGoal),
                 isToday = offset == 0
             )
         }
@@ -74,7 +83,7 @@ class StatsViewModel @Inject constructor(
             weekStats = week,
             weeklyAvg = if (counts.isEmpty()) 0.0 else counts.average(),
             goalDays = week.count { it.count >= it.goal },
-            weeklyTotal = counts.sum(),
+            weeklyTotal = floor(counts.sum()).toInt(),
             currentStreak = streak.currentStreak,
             longestStreak = streak.longestStreak
         )

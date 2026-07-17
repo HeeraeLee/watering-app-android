@@ -57,7 +57,7 @@ class HomeViewModel @Inject constructor(
         settingsRepository.userSettings
     ) { record, streak, settings ->
         HomeUiState(
-            record = record.copy(goal = settings.dailyGoal),
+            record = record.copy(goal = settings.dailyGoal, cupSize = settings.cupSize),
             streak = streak,
             settings = settings
         )
@@ -83,7 +83,8 @@ class HomeViewModel @Inject constructor(
                 val result = waterService.addWater(
                     amount = current.settings.cupSize,
                     drinkType = drinkType,
-                    goal = current.settings.dailyGoal
+                    goal = current.settings.dailyGoal,
+                    cupSize = current.settings.cupSize
                 )
                 val streak = waterService.updateStreak(result.updated, current.streak)
                 _snackbarMessage.value = context.getString(R.string.home_snackbar_water_recorded, current.settings.cupSize)
@@ -103,7 +104,8 @@ class HomeViewModel @Inject constructor(
                 val result = waterService.addWater(
                     amount = amount,
                     drinkType = drinkType,
-                    goal = current.settings.dailyGoal
+                    goal = current.settings.dailyGoal,
+                    cupSize = current.settings.cupSize
                 )
                 val streak = waterService.updateStreak(result.updated, current.streak)
                 _snackbarMessage.value = context.getString(
@@ -136,7 +138,7 @@ class HomeViewModel @Inject constructor(
     fun undoLastEntry() {
         viewModelScope.launch {
             val current = uiState.value
-            val updated = waterService.undoLastEntry(current.settings.dailyGoal)
+            val updated = waterService.undoLastEntry(current.settings.dailyGoal, current.settings.cupSize)
             waterService.rollbackStreakAfterUndo(updated, current.streak)
             _snackbarMessage.value = null
             analyticsService.logRecordUndo()

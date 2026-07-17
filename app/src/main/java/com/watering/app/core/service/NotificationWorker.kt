@@ -18,6 +18,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.first
 import java.time.LocalTime
+import kotlin.math.floor
 
 @HiltWorker
 class NotificationWorker @AssistedInject constructor(
@@ -30,6 +31,10 @@ class NotificationWorker @AssistedInject constructor(
     override suspend fun doWork(): Result {
         val settings = settingsRepository.userSettings.first()
         val record = waterRepository.todayRecord.first()
+        // record.cupSize는 마지막 기록 시점의 스냅샷이라 컵 크기를 바꾼 직후 다음 기록 전까지
+        // stale할 수 있음 — goal과 동일하게 항상 최신 settings.cupSize로 직접 재계산한다
+        val cupSize = settings.cupSize.coerceAtLeast(1)
+        val totalCountExact = record.entries.sumOf { it.amount }.toDouble() / cupSize
 
         // 알림 시간대 외 또는 목표 달성 시 skip
         val now = LocalTime.now().hour
@@ -37,7 +42,7 @@ class NotificationWorker @AssistedInject constructor(
         // record.isAchieved(마지막 기록 시점의 옛 goal)로 skip을 판정하면 아래 본문에 쓰는
         // settings.dailyGoal(현재)과 서로 다른 목표를 기준으로 삼게 돼, 목표를 바꾼 직후
         // skip 여부와 본문 진행률이 서로 모순될 수 있었음 — 항상 최신 settings.dailyGoal 하나로 통일
-        if (record.totalCount >= settings.dailyGoal) return Result.success()
+        if (totalCountExact >= settings.dailyGoal) return Result.success()
 
         // Android 13+ 권한 확인
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -46,7 +51,7 @@ class NotificationWorker @AssistedInject constructor(
             if (!granted) return Result.success()
         }
 
-        showReminderNotification(record.totalCount, settings.dailyGoal)
+        showReminderNotification(floor(totalCountExact).toInt(), settings.dailyGoal)
         return Result.success()
     }
 
