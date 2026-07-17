@@ -106,10 +106,23 @@ class WaterService @Inject constructor(
     // Home 화면은 오늘 record.goal을 항상 최신 settings.dailyGoal로 덮어써서 보여주므로(item①과
     // 동일한 패턴), 목표를 낮추면 화면엔 그 자리에서 "달성!"이 뜨지만 streak은 addWater/undo
     // 경로에서만 갱신돼 그대로 남아있는 모순이 있었음 — 설정에서 목표가 바뀔 때마다 호출해 동기화한다.
+    //
+    // "현재 streak에 오늘이 이미 반영돼 있는지"는 저장된 today.goal이 아니라
+    // streak.lastAchievedDateKey로 판단한다 — today.goal(DayRecord 스냅샷)은 기록을 남길 때만
+    // 갱신되므로, 기록 없이 설정만 여러 번 바꾸는 상황(목표를 낮췄다 다시 올리는 등)에서는 이전
+    // 상태를 반영하지 못해 롤백이 누락됨. 달성 방향으로 넘어가면 updateStreak(),
+    // 미달성으로 되돌아가면 undo와 동일한 rollbackStreakAfterUndo()를 호출해 대칭적으로 처리한다
+    // (2026-07-17, 목표를 낮췄다 올리는 것만으로 streak이 영구 증가하던 악용 경로 수정 —
+    // updateDailyGoal/applyCupSizeChange/applyWeightGoal 세 경로 모두 이 함수를 거치므로 함께 막힘).
     suspend fun syncStreakForGoalChange(newGoal: Int) {
         val today = repository.todayRecord.first()
         val current = repository.streakInfo.first()
-        repository.updateStreak(today.copy(goal = newGoal), current)
+        val updatedRecord = today.copy(goal = newGoal)
+        val creditedToday = current.lastAchievedDateKey == today.dateKey
+        when {
+            !creditedToday && updatedRecord.isAchieved -> repository.updateStreak(updatedRecord, current)
+            creditedToday && !updatedRecord.isAchieved -> repository.rollbackStreakAfterUndo(updatedRecord, current)
+        }
     }
 
     suspend fun clearAllData() {

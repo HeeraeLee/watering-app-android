@@ -218,6 +218,41 @@ class WaterServiceTest {
         coVerify { repository.updateStreak(recordWithNewGoal, currentStreak) }
     }
 
+    // 오너 제보 재현: 1잔만 마신 상태에서 목표를 낮춰(위 테스트) streak을 얻은 뒤 다시 목표를
+    // 올리면, 그 크레딧이 롤백돼야 한다 — 안 그러면 목표를 낮췄다 올리는 것만으로 streak이
+    // 공짜로 영구 증가하는 악용이 가능했다(2026-07-17 수정)
+    @Test
+    fun syncStreakForGoalChange_목표를낮췄다올리면오늘크레딧이롤백된다() = runTest {
+        val today = recordWithEntry() // dateKey="2026-07-02", entries 1개(200ml), cupSize 200
+        every { repository.todayRecord } returns flowOf(today)
+        // 이미 목표를 낮춰 오늘이 streak에 반영된 상태(lastAchievedDateKey == today.dateKey)
+        val currentStreak = StreakInfo(currentStreak = 4, lastAchievedDateKey = "2026-07-02")
+        every { repository.streakInfo } returns flowOf(currentStreak)
+        val recordWithNewGoal = today.copy(goal = 8) // 1/8이라 다시 미달성
+        val rolledBack = currentStreak.copy(currentStreak = 3)
+        coEvery { repository.rollbackStreakAfterUndo(recordWithNewGoal, currentStreak) } returns rolledBack
+
+        service.syncStreakForGoalChange(8)
+
+        coVerify { repository.rollbackStreakAfterUndo(recordWithNewGoal, currentStreak) }
+        coVerify(exactly = 0) { repository.updateStreak(any(), any()) }
+    }
+
+    @Test
+    fun syncStreakForGoalChange_달성상태변화가없으면streak을건드리지않는다() = runTest {
+        val today = recordWithEntry() // entries 1개(200ml), cupSize 200 → 1잔
+        every { repository.todayRecord } returns flowOf(today)
+        // 오늘은 아직 streak에 반영되지 않았고(lastAchievedDateKey != 오늘), 목표를 8로 바꿔도
+        // 여전히 미달성이라 달성 상태 자체는 변하지 않는다
+        val currentStreak = StreakInfo(currentStreak = 2, lastAchievedDateKey = "2026-07-01")
+        every { repository.streakInfo } returns flowOf(currentStreak)
+
+        service.syncStreakForGoalChange(8)
+
+        coVerify(exactly = 0) { repository.updateStreak(any(), any()) }
+        coVerify(exactly = 0) { repository.rollbackStreakAfterUndo(any(), any()) }
+    }
+
     @Test
     fun currentTodayRecord_repository의todayRecord첫값을그대로반환한다() = runTest {
         val record = recordWithEntry()
