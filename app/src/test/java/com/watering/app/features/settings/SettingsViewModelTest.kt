@@ -452,6 +452,37 @@ class SettingsViewModelTest {
             assertEquals("60kg 기준 하루 목표를 10잔으로 설정했어요", viewModel.snackbarMessage.value)
         }
 
+    // 오너 제보 재현(2026-07-16 발견): 체중을 처음 입력하면 오늘 이미 마신 기록을 전혀 고려하지
+    // 않고 recommendedGoalCups를 그대로 목표로 대입해, 이미 달성한 상태가 미달성으로 역전될 수
+    // 있었다. "다른 음료 선택"으로 컵 크기(200ml)와 무관하게 1200ml를 한 번에 기록해 이미
+    // 6/6(totalCount = 1200/200 = 6.0) 달성한 상황 — 컵 크기 변경 경로와 동일하게
+    // recommendedGoalCupsPreservingProgress를 재사용해야 새 목표(5)가 totalCount(6.0)를
+    // 넘지 않아 달성 상태가 유지된다. 고치기 전에는 recommendedGoalCups(60.0, 200)인 10이
+    // 그대로 쓰여 6/10(미달성)으로 역전됐다.
+    @Test
+    fun applyWeightGoal_오늘이미마신기록을반영해목표잔수를역전없이재계산한다() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val viewModel = createViewModel(UserSettings(dailyGoal = 6, cupSize = 200))
+            val todayEntries = listOf(entryOf(1200))
+            coEvery { waterService.currentTodayRecord() } returns todayRecordOf(todayEntries)
+            val slot = slot<UserSettings>()
+            coEvery { settingsRepository.updateSettings(capture(slot)) } returns Unit
+
+            viewModel.settings.test {
+                awaitItem()
+                viewModel.onWeightInputChange("60")
+                viewModel.applyWeightGoal()
+                cancelAndIgnoreRemainingEvents()
+            }
+
+            assertEquals(60.0, slot.captured.weightKg)
+            assertEquals(
+                StatsInsightService.recommendedGoalCupsPreservingProgress(60.0, 200, todayEntries),
+                slot.captured.dailyGoal
+            )
+            assertTrue(slot.captured.dailyGoal < StatsInsightService.recommendedGoalCups(60.0, 200))
+        }
+
     @Test
     fun weightGoalSubtitle_저장된몸무게있으면마지막입력을표시한다() =
         runTest(mainDispatcherRule.testDispatcher) {

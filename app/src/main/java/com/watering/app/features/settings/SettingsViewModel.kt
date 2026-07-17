@@ -177,25 +177,41 @@ class SettingsViewModel @Inject constructor(
 
     fun healthConnectPermissionContract() = healthConnectService.permissionRequestContract()
 
-    // 저장된 몸무게가 있으면 입력값을 미리 채워서 열고, 없으면 빈 입력으로 연다
+    // 저장된 몸무게가 있으면 입력값을 미리 채워서 열고, 없으면 빈 입력으로 연다. 추천 잔 수는
+    // 오늘 이미 마신 양을 반영해야(recommendedGoalCupsPreservingProgress) 진행률이 역전되지
+    // 않으므로(2026-07-16 발견 버그, applyCupSizeChange와 동일한 패턴) DataStore 조회가 끝날
+    // 때까지는 recommendedCups를 null로 둬 "적용" 버튼이 비활성 상태를 유지하게 한다.
     fun openWeightGoalDialog() {
         val savedWeightKg = settings.value.weightKg
-        _weightGoalUiState.value = WeightGoalUiState.Editing(
-            weightInput = savedWeightKg?.let { formatWeightInput(it) } ?: "",
-            recommendedCups = savedWeightKg?.let {
-                StatsInsightService.recommendedGoalCups(it, settings.value.cupSize)
+        val initialInput = savedWeightKg?.let { formatWeightInput(it) } ?: ""
+        _weightGoalUiState.value = WeightGoalUiState.Editing(weightInput = initialInput, recommendedCups = null)
+        if (savedWeightKg == null) return
+        viewModelScope.launch {
+            val todayEntries = waterService.currentTodayRecord().entries
+            val cups = StatsInsightService.recommendedGoalCupsPreservingProgress(
+                savedWeightKg, settings.value.cupSize, todayEntries
+            )
+            val current = _weightGoalUiState.value
+            if (current is WeightGoalUiState.Editing && current.weightInput == initialInput) {
+                _weightGoalUiState.value = current.copy(recommendedCups = cups)
             }
-        )
+        }
     }
 
     fun onWeightInputChange(input: String) {
         val weightKg = input.toDoubleOrNull()
-        val cups = if (weightKg != null && weightKg > 0) {
-            StatsInsightService.recommendedGoalCups(weightKg, settings.value.cupSize)
-        } else {
-            null
+        _weightGoalUiState.value = WeightGoalUiState.Editing(input, recommendedCups = null)
+        if (weightKg == null || weightKg <= 0) return
+        viewModelScope.launch {
+            val todayEntries = waterService.currentTodayRecord().entries
+            val cups = StatsInsightService.recommendedGoalCupsPreservingProgress(
+                weightKg, settings.value.cupSize, todayEntries
+            )
+            val current = _weightGoalUiState.value
+            if (current is WeightGoalUiState.Editing && current.weightInput == input) {
+                _weightGoalUiState.value = current.copy(recommendedCups = cups)
+            }
         }
-        _weightGoalUiState.value = WeightGoalUiState.Editing(input, cups)
     }
 
     fun applyWeightGoal() {
