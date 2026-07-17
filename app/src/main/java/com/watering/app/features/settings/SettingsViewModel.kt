@@ -280,11 +280,13 @@ class SettingsViewModel @Inject constructor(
             } else {
                 notificationService.cancelReminders()
             }
-            // 목표가 바뀐 경우에만 동기화 — updateDailyGoal/applyCupSizeChange/applyWeightGoal
-            // 세 경로 모두 여기로 모이므로 한 곳에서 처리(오늘 즉시 달성으로 바뀌었는데 streak이
-            // 안 따라오던 모순 수정)
-            if (updated.dailyGoal != previous.dailyGoal) {
-                waterService.syncStreakForGoalChange(updated.dailyGoal)
+            // 목표 또는 컵 크기가 바뀐 경우에만 동기화 — updateDailyGoal/applyCupSizeChange/
+            // applyWeightGoal 세 경로 모두 여기로 모이므로 한 곳에서 처리(오늘 즉시 달성으로
+            // 바뀌었는데 streak이 안 따라오던 모순 수정). cupSize만 바뀌고 goal은 그대로인
+            // 경우(체중 미설정 상태의 컵 크기 변경)도 오늘의 isAchieved에 영향을 주므로 함께 체크
+            // (2026-07-17, 컵 크기만 줄여도 달성 판정이 어긋나던 악용 경로 수정).
+            if (updated.dailyGoal != previous.dailyGoal || updated.cupSize != previous.cupSize) {
+                waterService.syncStreakForGoalChange(updated.dailyGoal, updated.cupSize)
             }
         }
     }

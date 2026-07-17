@@ -114,10 +114,15 @@ class WaterService @Inject constructor(
     // 미달성으로 되돌아가면 undo와 동일한 rollbackStreakAfterUndo()를 호출해 대칭적으로 처리한다
     // (2026-07-17, 목표를 낮췄다 올리는 것만으로 streak이 영구 증가하던 악용 경로 수정 —
     // updateDailyGoal/applyCupSizeChange/applyWeightGoal 세 경로 모두 이 함수를 거치므로 함께 막힘).
-    suspend fun syncStreakForGoalChange(newGoal: Int) {
+    // cupSize도 함께 받아 today.copy에 반영한다 — 저장된 today.cupSize(마지막 기록 시점 스냅샷)를
+    // 그대로 쓰면, 컵 크기만 바꾸고 아직 새 기록을 안 남긴 상태에서 isAchieved가 옛 컵 크기 기준으로
+    // 계산돼 목표(newGoal, 새 컵 크기 기준으로 추천된 값)와 어긋나는 조합이 생긴다 — 이 어긋남을
+    // 이용해 컵 크기를 줄이는 것만으로 실제로는 부족한 양인데도 즉시 "달성"으로 잡혀 streak이
+    // 크레딧되는 악용 경로가 있었음(2026-07-17, 조사 결과 ③).
+    suspend fun syncStreakForGoalChange(newGoal: Int, cupSize: Int) {
         val today = repository.todayRecord.first()
         val current = repository.streakInfo.first()
-        val updatedRecord = today.copy(goal = newGoal)
+        val updatedRecord = today.copy(goal = newGoal, cupSize = cupSize)
         val creditedToday = current.lastAchievedDateKey == today.dateKey
         when {
             !creditedToday && updatedRecord.isAchieved -> repository.updateStreak(updatedRecord, current)

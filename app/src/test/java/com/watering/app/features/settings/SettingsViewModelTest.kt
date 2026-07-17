@@ -117,11 +117,11 @@ class SettingsViewModelTest {
             cancelAndIgnoreRemainingEvents()
         }
 
-        coVerify { waterService.syncStreakForGoalChange(6) }
+        coVerify { waterService.syncStreakForGoalChange(6, 200) }
     }
 
     @Test
-    fun updateNotificationEnabled_목표가안바뀌면streak동기화를호출하지않는다() =
+    fun updateNotificationEnabled_목표와컵크기가안바뀌면streak동기화를호출하지않는다() =
         runTest(mainDispatcherRule.testDispatcher) {
             val viewModel = createViewModel(UserSettings(dailyGoal = 8, notificationEnabled = true))
 
@@ -131,7 +131,27 @@ class SettingsViewModelTest {
                 cancelAndIgnoreRemainingEvents()
             }
 
-            coVerify(exactly = 0) { waterService.syncStreakForGoalChange(any()) }
+            coVerify(exactly = 0) { waterService.syncStreakForGoalChange(any(), any()) }
+        }
+
+    // 오너 제보 재현(조사 결과 ③): 체중 미설정 상태에서 컵 크기만 줄이면 목표 잔수는 그대로라
+    // 예전 코드는 streak 동기화 자체를 호출하지 않았다 — 그 사이 오늘 기록이 새 컵 크기 기준으로
+    // 재분모돼 실제로는 부족한데도 화면상 달성으로 보일 수 있었다. 이제는 컵 크기만 바뀌어도
+    // 동기화를 호출해야 한다.
+    @Test
+    fun applyCupSizeChange_목표잔수는그대로여도컵크기가바뀌면streak을동기화한다() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val viewModel = createViewModel(UserSettings(cupSize = 200, dailyGoal = 8))
+            coEvery { waterService.currentTodayRecord() } returns todayRecordOf(listOf(entryOf(200)))
+
+            viewModel.settings.test {
+                awaitItem()
+                viewModel.requestCupSizeChange(100)
+                viewModel.confirmCupSizeChange(resetToday = false)
+                cancelAndIgnoreRemainingEvents()
+            }
+
+            coVerify { waterService.syncStreakForGoalChange(8, 100) }
         }
 
     private fun todayRecordOf(entries: List<WaterEntry>) =

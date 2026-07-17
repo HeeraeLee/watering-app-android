@@ -209,11 +209,11 @@ class WaterServiceTest {
         every { repository.todayRecord } returns flowOf(today)
         val currentStreak = StreakInfo(currentStreak = 3)
         every { repository.streakInfo } returns flowOf(currentStreak)
-        val recordWithNewGoal = today.copy(goal = 1)
+        val recordWithNewGoal = today.copy(goal = 1, cupSize = 200)
         val updatedStreak = currentStreak.copy(currentStreak = 4)
         coEvery { repository.updateStreak(recordWithNewGoal, currentStreak) } returns updatedStreak
 
-        service.syncStreakForGoalChange(1)
+        service.syncStreakForGoalChange(1, 200)
 
         coVerify { repository.updateStreak(recordWithNewGoal, currentStreak) }
     }
@@ -228,11 +228,11 @@ class WaterServiceTest {
         // 이미 목표를 낮춰 오늘이 streak에 반영된 상태(lastAchievedDateKey == today.dateKey)
         val currentStreak = StreakInfo(currentStreak = 4, lastAchievedDateKey = "2026-07-02")
         every { repository.streakInfo } returns flowOf(currentStreak)
-        val recordWithNewGoal = today.copy(goal = 8) // 1/8이라 다시 미달성
+        val recordWithNewGoal = today.copy(goal = 8, cupSize = 200) // 1/8이라 다시 미달성
         val rolledBack = currentStreak.copy(currentStreak = 3)
         coEvery { repository.rollbackStreakAfterUndo(recordWithNewGoal, currentStreak) } returns rolledBack
 
-        service.syncStreakForGoalChange(8)
+        service.syncStreakForGoalChange(8, 200)
 
         coVerify { repository.rollbackStreakAfterUndo(recordWithNewGoal, currentStreak) }
         coVerify(exactly = 0) { repository.updateStreak(any(), any()) }
@@ -247,7 +247,33 @@ class WaterServiceTest {
         val currentStreak = StreakInfo(currentStreak = 2, lastAchievedDateKey = "2026-07-01")
         every { repository.streakInfo } returns flowOf(currentStreak)
 
-        service.syncStreakForGoalChange(8)
+        service.syncStreakForGoalChange(8, 200)
+
+        coVerify(exactly = 0) { repository.updateStreak(any(), any()) }
+        coVerify(exactly = 0) { repository.rollbackStreakAfterUndo(any(), any()) }
+    }
+
+    // 오너 제보 재현(조사 결과 ③): 컵 크기를 확 줄이면 저장된 today.cupSize(옛 스냅샷)를 그대로
+    // 쓰던 이전 코드는 새 목표(새 컵 크기 기준으로 추천된 값)와 옛 컵 크기 조합으로 isAchieved를
+    // 잘못 계산해, 실제로는 목표에 못 미치는데도 즉시 "달성"으로 잡혀 streak이 크레딧될 수 있었다.
+    // 이제는 호출부가 넘긴 새 cupSize를 today.copy에 반영하므로 정확히 계산돼야 한다.
+    @Test
+    fun syncStreakForGoalChange_컵크기변경도새cupSize기준으로정확히계산한다() = runTest {
+        // 887ml 컵 기준 2잔(goal=2)이 옛 목표. 200ml 컵으로 6잔(1200ml) 마신 상태에서 컵 크기를
+        // 887ml로 키우면(체중 목표 재계산으로 goal=2가 됐다고 가정) 옛 cupSize(200)를 그대로 쓰면
+        // 1200/200=6.0 >= 2로 오달성 처리되지만, 새 cupSize(887)를 쓰면 1200/887≈1.35 < 2로 정확히
+        // 미달성이어야 한다
+        val today = DayRecord(
+            dateKey = "2026-07-02",
+            entries = List(6) { WaterEntry(timestampMillis = 0L, amount = 200, drinkType = DrinkType.WATER) },
+            goal = 7,
+            cupSize = 200
+        )
+        every { repository.todayRecord } returns flowOf(today)
+        val currentStreak = StreakInfo(currentStreak = 3, lastAchievedDateKey = "2026-07-01")
+        every { repository.streakInfo } returns flowOf(currentStreak)
+
+        service.syncStreakForGoalChange(2, 887)
 
         coVerify(exactly = 0) { repository.updateStreak(any(), any()) }
         coVerify(exactly = 0) { repository.rollbackStreakAfterUndo(any(), any()) }
