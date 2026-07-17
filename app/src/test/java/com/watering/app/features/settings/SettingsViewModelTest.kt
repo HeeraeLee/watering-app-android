@@ -23,7 +23,9 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -104,8 +106,73 @@ class SettingsViewModelTest {
 
         assertEquals(12, slot.captured.dailyGoal)
         coVerify { widgetUpdater.updateAll() }
-        verify { notificationService.scheduleReminders(slot.captured) }
     }
+
+    // 로직 헛점 전수 분석 ⑧ 재현(2026-07-16): 알림과 무관한 설정(목표 등)을 바꿀 때마다
+    // scheduleReminders가 매번 호출돼 WorkManager의 REPLACE 정책으로 알림 flex 타이머가 그때마다
+    // 리셋되던 문제 — 알림 관련 필드(활성 여부/주기/시작·종료 시각)가 실제로 바뀌지 않았다면
+    // 재스케줄을 호출하지 않아야 한다.
+    @Test
+    fun updateDailyGoal_알림설정이안바뀌면알림을재스케줄하지않는다() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val viewModel = createViewModel(UserSettings(dailyGoal = 8, notificationEnabled = true))
+
+            viewModel.settings.test {
+                awaitItem()
+                viewModel.updateDailyGoal(12)
+                cancelAndIgnoreRemainingEvents()
+            }
+
+            verify(exactly = 0) { notificationService.scheduleReminders(any()) }
+            verify(exactly = 0) { notificationService.cancelReminders() }
+        }
+
+    // 로직 헛점 전수 분석 ⑧ 재현(재확인 필요로 남아있던 항목): update()가 매번 settings.value(캐시된
+    // 스냅샷)를 읽어 그중 한 필드만 바꾼 UserSettings 전체를 덮어쓰는 구조라, 서로 다른 설정을
+    // 거의 동시에 바꾸면 두 번째 호출이 첫 번째 호출의 DataStore 쓰기가 아직 settings.value에
+    // 반영되기 전의 stale한 previous를 읽어 그 필드 변경을 덮어써버릴 수 있었다(lost update).
+    // settingsRepository.updateSettings가 실제 DataStore처럼 지연 후 다시 userSettings에 반영되도록
+    // 흉내낸 뒤, 두 update()를 겹치는 순서로 호출해 재현 — mutex로 직렬화한 뒤에는 두 필드 변경이
+    // 모두 살아남아야 한다.
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    @Test
+    fun update_서로다른설정을거의동시에바꿔도서로의변경을덮어쓰지않는다() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val backing = MutableStateFlow(
+                UserSettings(dailyGoal = 8, cupSize = 200, widgetTheme = WidgetTheme.DEFAULT)
+            )
+            context = mockk(relaxed = true)
+            val writtenSettings = slot<UserSettings>()
+            settingsRepository = mockk {
+                every { userSettings } returns backing
+                coEvery { updateSettings(capture(writtenSettings)) } coAnswers {
+                    // DataStore 쓰기 → Flow 재방출까지의 실제 왕복 지연을 흉내내, 두 update() 호출이
+                    // 겹치는 창을 인위적으로 만든다
+                    delay(10)
+                    backing.value = writtenSettings.captured
+                }
+            }
+            notificationService = mockk(relaxed = true)
+            waterService = mockk(relaxed = true)
+            widgetUpdater = mockk(relaxed = true)
+            healthConnectService = mockk { every { availability } returns HealthConnectAvailability.AVAILABLE }
+            csvExportService = mockk(relaxed = true)
+            val viewModel = SettingsViewModel(
+                context, settingsRepository, notificationService, waterService,
+                widgetUpdater, healthConnectService, csvExportService
+            )
+
+            viewModel.settings.test {
+                awaitItem()
+                viewModel.updateDailyGoal(12)
+                viewModel.updateWidgetTheme(WidgetTheme.MINT)
+                cancelAndIgnoreRemainingEvents()
+            }
+            advanceUntilIdle()
+
+            assertEquals(12, backing.value.dailyGoal)
+            assertEquals(WidgetTheme.MINT, backing.value.widgetTheme)
+        }
 
     @Test
     fun updateDailyGoal_목표가바뀌면streak도동기화한다() = runTest(mainDispatcherRule.testDispatcher) {

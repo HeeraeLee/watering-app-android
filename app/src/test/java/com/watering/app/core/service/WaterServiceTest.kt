@@ -15,6 +15,7 @@ import io.mockk.coVerify
 import io.mockk.coVerifyOrder
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
@@ -72,7 +73,7 @@ class WaterServiceTest {
 
         service.addWater(amount = 200, drinkType = DrinkType.WATER, goal = 8, cupSize = 200)
 
-        coVerify(exactly = 0) { healthConnectService.writeHydrationRecord(any(), any()) }
+        coVerify(exactly = 0) { healthConnectService.writeHydrationRecord(any(), any(), any()) }
     }
 
     @Test
@@ -85,7 +86,13 @@ class WaterServiceTest {
 
         service.addWater(amount = 200, drinkType = DrinkType.COFFEE, goal = 8, cupSize = 200)
 
-        coVerify { healthConnectService.writeHydrationRecord(volumeMl = 140.0, timestampMillis = 12345L) }
+        coVerify {
+            healthConnectService.writeHydrationRecord(
+                volumeMl = 140.0,
+                timestampMillis = 12345L,
+                clientRecordId = record.entries.last().id
+            )
+        }
     }
 
     @Test
@@ -97,14 +104,14 @@ class WaterServiceTest {
 
         service.addWater(amount = 200, drinkType = DrinkType.WATER, goal = 8, cupSize = 200)
 
-        coVerify(exactly = 0) { healthConnectService.writeHydrationRecord(any(), any()) }
+        coVerify(exactly = 0) { healthConnectService.writeHydrationRecord(any(), any(), any()) }
     }
 
     @Test
     fun addWater_HealthConnect쓰기가실패해도기록결과는정상반환한다() = runTest {
         every { settingsRepository.userSettings } returns MutableStateFlow(UserSettings(healthConnectEnabled = true))
         coEvery { healthConnectService.hasPermissions(HealthConnectService.HYDRATION_PERMISSIONS) } returns true
-        coEvery { healthConnectService.writeHydrationRecord(any(), any()) } throws RuntimeException("boom")
+        coEvery { healthConnectService.writeHydrationRecord(any(), any(), any()) } throws RuntimeException("boom")
         val record = recordWithEntry()
         coEvery { repository.addEntry(any(), any(), any(), any()) } returns WaterUpdateResult(emptyPrev, record)
 
@@ -125,6 +132,33 @@ class WaterServiceTest {
             repository.removeLastEntry(8, 200)
             widgetUpdater.updateAll()
         }
+    }
+
+    // 로직 헛점 전수 분석 ⑦ 재현(2026-07-17): 취소가 로컬 기록만 지우고 Health Connect에 이미
+    // 써둔 레코드는 그대로 남아있던 버그 — 연동이 켜져있으면 마지막 기록의 clientRecordId(=
+    // WaterEntry.id)로 Health Connect 레코드도 함께 지워야 한다.
+    @Test
+    fun undoLastEntry_연동켜져있고권한있으면지운항목의HealthConnect레코드도삭제한다() = runTest {
+        every { settingsRepository.userSettings } returns
+            MutableStateFlow(UserSettings(healthConnectEnabled = true))
+        coEvery { healthConnectService.hasPermissions(HealthConnectService.HYDRATION_PERMISSIONS) } returns true
+        val lastEntry = WaterEntry(timestampMillis = 1000L, amount = 200, drinkType = DrinkType.WATER)
+        every { repository.todayRecord } returns flowOf(DayRecord(dateKey = "2026-07-02", entries = listOf(lastEntry)))
+        coEvery { repository.removeLastEntry(8, 200) } returns DayRecord(dateKey = "2026-07-02")
+
+        service.undoLastEntry(goal = 8, cupSize = 200)
+
+        coVerify { healthConnectService.deleteHydrationRecord(lastEntry.id) }
+    }
+
+    @Test
+    fun undoLastEntry_연동꺼져있으면HealthConnect삭제를시도하지않는다() = runTest {
+        coEvery { repository.removeLastEntry(8, 200) } returns DayRecord(dateKey = "2026-07-02")
+
+        service.undoLastEntry(goal = 8, cupSize = 200)
+
+        verify(exactly = 0) { repository.todayRecord }
+        coVerify(exactly = 0) { healthConnectService.deleteHydrationRecord(any()) }
     }
 
     @Test
@@ -169,6 +203,31 @@ class WaterServiceTest {
             repository.rollbackStreakAfterUndo(blank, currentStreak)
             widgetUpdater.updateAll()
         }
+    }
+
+    // 로직 헛점 전수 분석 ⑦ 재현(2026-07-17): "오늘 기록 초기화"가 로컬 기록만 지우고 Health
+    // Connect에 이미 써둔 오늘의 레코드는 전부 그대로 남아있던 버그 — 연동이 켜져있으면 초기화
+    // 직전 오늘 entries 전체를 clientRecordId 기준으로 지워야 한다.
+    @Test
+    fun resetToday_연동켜져있으면오늘의모든기록을HealthConnect에서삭제한다() = runTest {
+        every { settingsRepository.userSettings } returns
+            MutableStateFlow(UserSettings(dailyGoal = 12, cupSize = 200, healthConnectEnabled = true))
+        coEvery { healthConnectService.hasPermissions(HealthConnectService.HYDRATION_PERMISSIONS) } returns true
+        val currentStreak = StreakInfo(currentStreak = 3, lastAchievedDateKey = "2026-07-02")
+        every { repository.streakInfo } returns MutableStateFlow(currentStreak)
+        val entry1 = WaterEntry(timestampMillis = 1000L, amount = 200, drinkType = DrinkType.WATER)
+        val entry2 = WaterEntry(timestampMillis = 2000L, amount = 200, drinkType = DrinkType.WATER)
+        every { repository.todayRecord } returns
+            flowOf(DayRecord(dateKey = "2026-07-02", entries = listOf(entry1, entry2)))
+        val blank = DayRecord(dateKey = "2026-07-02", goal = 12)
+        coEvery { repository.resetToday(12, 200) } returns blank
+        coEvery { repository.rollbackStreakAfterUndo(blank, currentStreak) } returns
+            currentStreak.copy(currentStreak = 2)
+
+        service.resetToday()
+
+        coVerify { healthConnectService.deleteHydrationRecord(entry1.id) }
+        coVerify { healthConnectService.deleteHydrationRecord(entry2.id) }
     }
 
     @Test

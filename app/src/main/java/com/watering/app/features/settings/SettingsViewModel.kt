@@ -28,6 +28,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 
 sealed interface WeightGoalUiState {
@@ -285,24 +287,47 @@ class SettingsViewModel @Inject constructor(
         _csvExportUiState.value = CsvExportUiState.Idle
     }
 
+    // 설정 화면의 여러 컨트롤(목표 스테퍼, 컵 크기, 위젯 테마 등)이 각자 독립적으로 update()를
+    // 호출하는데, 매 호출이 settings.value(캐시된 StateFlow 스냅샷)를 읽어 그중 한 필드만 바꾼
+    // 새 UserSettings 전체를 덮어쓰는 구조라, 두 설정을 연달아 빠르게 바꾸면(예: 목표 스테퍼
+    // 연타 직후 다른 항목 변경) 두 번째 호출이 첫 번째 호출의 DataStore 쓰기가 settings.value에
+    // 반영되기 전의 stale한 previous를 읽어 그 필드 변경을 덮어써버리는(lost update) 레이스가
+    // 있었다(2026-07-16 로직 헛점 전수 분석 ⑧, 재확인 필요로 남아있던 항목). Mutex로 "읽기 →
+    // 변형 → 쓰기" 구간을 직렬화해, 두 번째 호출이 항상 첫 번째 호출이 끝난 뒤의 최신 상태를
+    // 읽도록 한다.
+    private val updateMutex = Mutex()
+
     private fun update(refreshWidget: Boolean = false, transform: (UserSettings) -> UserSettings) {
         viewModelScope.launch {
-            val previous = settings.value
-            val updated = transform(previous)
-            settingsRepository.updateSettings(updated)
-            if (refreshWidget) widgetUpdater.updateAll()
-            if (updated.notificationEnabled) {
-                notificationService.scheduleReminders(updated)
-            } else {
-                notificationService.cancelReminders()
-            }
-            // 목표 또는 컵 크기가 바뀐 경우에만 동기화 — updateDailyGoal/applyCupSizeChange/
-            // applyWeightGoal 세 경로 모두 여기로 모이므로 한 곳에서 처리(오늘 즉시 달성으로
-            // 바뀌었는데 streak이 안 따라오던 모순 수정). cupSize만 바뀌고 goal은 그대로인
-            // 경우(체중 미설정 상태의 컵 크기 변경)도 오늘의 isAchieved에 영향을 주므로 함께 체크
-            // (2026-07-17, 컵 크기만 줄여도 달성 판정이 어긋나던 악용 경로 수정).
-            if (updated.dailyGoal != previous.dailyGoal || updated.cupSize != previous.cupSize) {
-                waterService.syncStreakForGoalChange(updated.dailyGoal, updated.cupSize)
+            updateMutex.withLock {
+                val previous = settings.value
+                val updated = transform(previous)
+                settingsRepository.updateSettings(updated)
+                if (refreshWidget) widgetUpdater.updateAll()
+                // 알림 관련 필드가 실제로 바뀐 경우에만 재스케줄 — scheduleReminders는 WorkManager
+                // PeriodicWorkRequest를 REPLACE로 다시 큐에 넣어 flex 타이머가 "지금"부터 다시
+                // 시작된다. 알림과 무관한 설정(위젯 테마, 목표, 컵 크기 등)을 바꿀 때마다 매번
+                // 호출되면 다음 알림까지 남은 시간이 그때마다 리셋돼 알림이 계속 밀리는 문제가
+                // 있었다(2026-07-16 로직 헛점 전수 분석 ⑧). 목표/컵 크기 동기화(아래)와 동일한 패턴.
+                if (previous.notificationEnabled != updated.notificationEnabled ||
+                    previous.notificationInterval != updated.notificationInterval ||
+                    previous.notificationStart != updated.notificationStart ||
+                    previous.notificationEnd != updated.notificationEnd
+                ) {
+                    if (updated.notificationEnabled) {
+                        notificationService.scheduleReminders(updated)
+                    } else {
+                        notificationService.cancelReminders()
+                    }
+                }
+                // 목표 또는 컵 크기가 바뀐 경우에만 동기화 — updateDailyGoal/applyCupSizeChange/
+                // applyWeightGoal 세 경로 모두 여기로 모이므로 한 곳에서 처리(오늘 즉시 달성으로
+                // 바뀌었는데 streak이 안 따라오던 모순 수정). cupSize만 바뀌고 goal은 그대로인
+                // 경우(체중 미설정 상태의 컵 크기 변경)도 오늘의 isAchieved에 영향을 주므로 함께
+                // 체크(2026-07-17, 컵 크기만 줄여도 달성 판정이 어긋나던 악용 경로 수정).
+                if (updated.dailyGoal != previous.dailyGoal || updated.cupSize != previous.cupSize) {
+                    waterService.syncStreakForGoalChange(updated.dailyGoal, updated.cupSize)
+                }
             }
         }
     }

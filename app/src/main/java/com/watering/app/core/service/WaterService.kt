@@ -54,16 +54,45 @@ class WaterService @Inject constructor(
             val entry = updated.entries.last()
             healthConnectService.writeHydrationRecord(
                 volumeMl = entry.amount * entry.drinkType.hydrationRate,
-                timestampMillis = entry.timestampMillis
+                timestampMillis = entry.timestampMillis,
+                clientRecordId = entry.id
             )
         } catch (e: Exception) {
             Log.w(TAG, "Health Connect 동기화 실패", e)
         }
     }
 
+    // 취소/초기화로 로컬에서 지워지는 WaterEntry와 짝지어 쓴 Health Connect 레코드도 함께
+    // 지운다(2026-07-17, 로직 헛점 전수 분석 ⑦ — 기록 취소/초기화가 Health Connect엔 반영 안
+    // 되던 버그). 자정 롤오버(resetTodayForMidnightRollover)는 실제로 마신 기록을 취소하는 게
+    // 아니라 날짜만 넘어가는 것이라 대상에서 제외 — 여기서 호출하지 않는다.
+    // 연동이 꺼져있는(대다수) 경우엔 entries를 조회할 필요조차 없도록 호출부에서 먼저
+    // healthConnectEnabled를 확인해 entryIds를 비워 넘긴다(불필요한 DataStore 조회 방지).
+    private suspend fun deleteFromHealthConnectIfEnabled(entryIds: List<String>) {
+        if (entryIds.isEmpty()) return
+        if (!healthConnectService.hasPermissions(HealthConnectService.HYDRATION_PERMISSIONS)) {
+            Log.d(TAG, "Health Connect 삭제 스킵: WRITE_HYDRATION 권한 미승인")
+            return
+        }
+        entryIds.forEach { entryId ->
+            try {
+                healthConnectService.deleteHydrationRecord(entryId)
+            } catch (e: Exception) {
+                Log.w(TAG, "Health Connect 기록 삭제 실패 (entryId=$entryId)", e)
+            }
+        }
+    }
+
     suspend fun undoLastEntry(goal: Int, cupSize: Int): DayRecord {
+        val healthConnectEnabled = settingsRepository.userSettings.first().healthConnectEnabled
+        val removedEntryId = if (healthConnectEnabled) {
+            repository.todayRecord.first().entries.lastOrNull()?.id
+        } else {
+            null
+        }
         val updated = repository.removeLastEntry(goal, cupSize)
         widgetUpdater.updateAll()
+        deleteFromHealthConnectIfEnabled(listOfNotNull(removedEntryId))
         return updated
     }
 
@@ -81,9 +110,15 @@ class WaterService @Inject constructor(
     suspend fun resetToday() {
         val settings = settingsRepository.userSettings.first()
         val currentStreak = repository.streakInfo.first()
+        val removedEntryIds = if (settings.healthConnectEnabled) {
+            repository.todayRecord.first().entries.map { it.id }
+        } else {
+            emptyList()
+        }
         val updated = repository.resetToday(settings.dailyGoal, settings.cupSize)
         repository.rollbackStreakAfterUndo(updated, currentStreak)
         widgetUpdater.updateAll()
+        deleteFromHealthConnectIfEnabled(removedEntryIds)
     }
 
     // MidnightResetWorker 전용 — 기기가 꺼져있다 늦게 켜지면 이 워커가 실제 자정보다 한참 뒤에

@@ -47,7 +47,11 @@ class HealthConnectService @Inject constructor(
 
     // 물 마시기는 지속 시간이 없는 단일 이벤트지만, HydrationRecord는 startTime < endTime을
     // 요구해 종료 시각을 1ms 뒤로 둠(실측 검증 중 IllegalArgumentException으로 확인)
-    suspend fun writeHydrationRecord(volumeMl: Double, timestampMillis: Long) {
+    //
+    // clientRecordId로 로컬 WaterEntry.id를 그대로 넘겨둔다 — Health Connect가 반환하는 서버
+    // 레코드 ID를 별도로 저장해두지 않아도, 취소/초기화 시 이 값으로 deleteHydrationRecord를 호출해
+    // 정확히 같은 레코드를 지울 수 있다(2026-07-17, 로직 헛점 전수 분석 ⑦ 수정).
+    suspend fun writeHydrationRecord(volumeMl: Double, timestampMillis: Long, clientRecordId: String) {
         client?.insertRecords(
             listOf(
                 HydrationRecord(
@@ -56,9 +60,20 @@ class HealthConnectService @Inject constructor(
                     endTime = Instant.ofEpochMilli(timestampMillis + 1),
                     endZoneOffset = null,
                     volume = Volume.milliliters(volumeMl),
-                    metadata = Metadata.manualEntry()
+                    metadata = Metadata.manualEntry(clientRecordId = clientRecordId)
                 )
             )
+        )
+    }
+
+    // "마지막 취소"/"오늘 기록 초기화"가 로컬 기록만 지우고 Health Connect에 이미 쓴 레코드는
+    // 그대로 남아있던 버그 수정(2026-07-17, ⑦). writeHydrationRecord가 clientRecordId로 저장해둔
+    // WaterEntry.id로 정확히 같은 레코드만 지운다 — 서버 recordId를 몰라도 삭제 가능.
+    suspend fun deleteHydrationRecord(clientRecordId: String) {
+        client?.deleteRecords(
+            recordType = HydrationRecord::class,
+            recordIdsList = emptyList(),
+            clientRecordIdsList = listOf(clientRecordId)
         )
     }
 }
