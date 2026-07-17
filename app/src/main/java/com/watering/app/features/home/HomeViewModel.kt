@@ -139,7 +139,10 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             val current = uiState.value
             val updated = waterService.undoLastEntry(current.settings.dailyGoal, current.settings.cupSize)
-            waterService.rollbackStreakAfterUndo(updated, current.streak)
+            // uiState.value.streak(StateFlow 캐시)가 아니라 currentStreakInfo()로 직접 최신 값을
+            // 읽는다 — 달성 직후 아주 빠르게 undo하면 StateFlow가 아직 재구독 전이라 옛 streak을
+            // 롤백에 넘겨 방금 올라간 증가분이 안 지워질 수 있었음(2026-07-17, 조사 결과 ⑤)
+            waterService.rollbackStreakAfterUndo(updated, waterService.currentStreakInfo())
             _snackbarMessage.value = null
             analyticsService.logRecordUndo()
         }

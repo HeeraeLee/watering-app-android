@@ -103,6 +103,15 @@ class WaterService @Inject constructor(
     // 한 번 읽어야 해서 추가(2026-07-16). 지속 구독이 아니므로 Flow 대신 suspend 함수로 노출.
     suspend fun currentTodayRecord(): DayRecord = repository.todayRecord.first()
 
+    // HomeViewModel.undoLastEntry()가 uiState(StateFlow)의 캐시된 streak 대신 이 함수로 직접
+    // 최신 값을 읽어야 한다 — StateFlow는 기록 직후(달성 → updateStreak() 저장) 곧바로 undo가
+    // 뒤따르는 아주 빠른 순서에서는 아직 재구독 전이라 옛 streak을 들고 있을 수 있고, 그 옛 값을
+    // rollbackStreakAfterUndo()에 넘기면 방금 올라간 streak 증가분이 롤백에서 누락될 수 있었다
+    // (2026-07-17, 목표 달성 악용 가능성 전수 조사 ⑤). resetToday()/resetTodayForMidnightRollover()는
+    // 이미 매번 repository.streakInfo.first()로 직접 읽어 이 문제가 없었음 — undoLastEntry() 호출부만
+    // 같은 패턴으로 맞춘다.
+    suspend fun currentStreakInfo(): StreakInfo = repository.streakInfo.first()
+
     // Home 화면은 오늘 record.goal을 항상 최신 settings.dailyGoal로 덮어써서 보여주므로(item①과
     // 동일한 패턴), 목표를 낮추면 화면엔 그 자리에서 "달성!"이 뜨지만 streak은 addWater/undo
     // 경로에서만 갱신돼 그대로 남아있는 모순이 있었음 — 설정에서 목표가 바뀔 때마다 호출해 동기화한다.

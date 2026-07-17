@@ -223,6 +223,7 @@ class HomeViewModelTest {
         val undoneRecord = DayRecord(dateKey = "2026-07-02", goal = 8, entries = emptyList())
         val viewModel = createViewModel()
         coEvery { waterService.undoLastEntry(8, 200) } returns undoneRecord
+        coEvery { waterService.currentStreakInfo() } returns streak
 
         viewModel.uiState.test {
             awaitItem()
@@ -230,9 +231,34 @@ class HomeViewModelTest {
             cancelAndIgnoreRemainingEvents()
         }
 
-        // uiState의 streak(취소 시점 기준 값)을 그대로 넘겨 롤백을 요청하는지 확인
+        // uiState의 캐시된 streak이 아니라 currentStreakInfo()로 직접 읽은 최신 값을 넘겨
+        // 롤백을 요청하는지 확인(2026-07-17, 빠른 undo 타이밍 레이스 수정)
         coVerify { waterService.rollbackStreakAfterUndo(undoneRecord, streak) }
     }
+
+    // 오너 제보 재현(조사 결과 ⑤): 달성 직후 아주 빠르게 undo하면 uiState(StateFlow)가 아직
+    // 재구독 전이라 옛 streak을 들고 있을 수 있다 — 그 옛 값이 아니라 currentStreakInfo()로 읽은
+    // 최신 값이 롤백에 쓰여야 한다(2026-07-17 수정)
+    @Test
+    fun undoLastEntry_uiState의캐시된streak이stale해도currentStreakInfo로읽은최신값을롤백에쓴다() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val undoneRecord = DayRecord(dateKey = "2026-07-02", goal = 8, entries = emptyList())
+            val viewModel = createViewModel()
+            coEvery { waterService.undoLastEntry(8, 200) } returns undoneRecord
+            // uiState는 여전히 옛 streak(currentStreak=2)을 들고 있지만, DataStore엔 이미
+            // 최신 streak(currentStreak=5)이 반영된 상황을 재현
+            val freshStreak = StreakInfo(currentStreak = 5, lastAchievedDateKey = "2026-07-02")
+            coEvery { waterService.currentStreakInfo() } returns freshStreak
+
+            viewModel.uiState.test {
+                awaitItem()
+                viewModel.undoLastEntry()
+                cancelAndIgnoreRemainingEvents()
+            }
+
+            coVerify { waterService.rollbackStreakAfterUndo(undoneRecord, freshStreak) }
+            coVerify(exactly = 0) { waterService.rollbackStreakAfterUndo(undoneRecord, streak) }
+        }
 
     @Test
     fun clearSnackbar_메시지를비운다() = runTest(mainDispatcherRule.testDispatcher) {

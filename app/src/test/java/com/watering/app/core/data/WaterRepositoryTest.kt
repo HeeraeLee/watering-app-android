@@ -4,7 +4,9 @@ import app.cash.turbine.test
 import com.watering.app.core.datastore.WaterDataStore
 import com.watering.app.core.model.DailyAchievement
 import com.watering.app.core.model.DayRecord
+import com.watering.app.core.model.DrinkType
 import com.watering.app.core.model.StreakInfo
+import com.watering.app.core.model.WaterEntry
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -294,19 +296,72 @@ class WaterRepositoryTest {
         coVerify { dataStore.clearAllData() }
     }
 
+    // streak(백업 원본)의 currentStreak=3은 그대로 저장되지 않아야 한다 — annualHistory엔
+    // 어제 하루치 달성만 있으므로, 재계산된 값(1)이 dataStore로 전달돼야 한다.
     @Test
-    fun restoreAll_annualHistory까지포함해dataStore위임하고완료된다() = runTest {
+    fun restoreAll_streak원본을믿지않고annualHistory기준으로재계산해dataStore에위임한다() = runTest {
         val today = DayRecord(dateKey = todayKey, goal = 8)
         val streak = StreakInfo(currentStreak = 3)
         val history = mapOf(yesterdayKey to DayRecord(dateKey = yesterdayKey, goal = 8))
         val annualHistory = mapOf(
             yesterdayKey to DailyAchievement(dateKey = yesterdayKey, totalCount = 8.0, goal = 8)
         )
-        coEvery { dataStore.restoreAll(today, streak, history, annualHistory) } returns Unit
+        val recomputed = StreakInfo(currentStreak = 1, longestStreak = 1, lastAchievedDateKey = yesterdayKey)
+        coEvery { dataStore.restoreAll(today, recomputed, history, annualHistory) } returns Unit
 
         repository.restoreAll(today, streak, history, annualHistory)
 
-        coVerify { dataStore.restoreAll(today, streak, history, annualHistory) }
+        coVerify { dataStore.restoreAll(today, recomputed, history, annualHistory) }
+    }
+
+    // 오너 제보 재현(조사 결과 ④): 연속 기록이 50일일 때 백업해두고, 이후 실제로는 스트릭이
+    // 끊긴 상태에서 그 백업을 복원해도 저장된 streak(50)을 그대로 되살리면 안 된다 — 복원되는
+    // annualHistory가 실제로 뒷받침하는 값(연속 3일)까지만 인정돼야 한다.
+    @Test
+    fun restoreAll_백업된streak이annualHistory보다부풀려져있으면축소재계산된다() = runTest {
+        val todayRecord = DayRecord(dateKey = todayKey, goal = 8) // 오늘은 아직 미달성
+        val inflatedStreak = StreakInfo(currentStreak = 50, longestStreak = 50, lastAchievedDateKey = todayKey)
+        val threeDaysAgoKey = today.minusDays(3).format(formatter)
+        val history = emptyMap<String, DayRecord>()
+        // annualHistory엔 실제로 연속 3일(오늘 기준 1~3일 전)만 달성 기록이 있음
+        val annualHistory = mapOf(
+            yesterdayKey to DailyAchievement(dateKey = yesterdayKey, totalCount = 8.0, goal = 8),
+            twoDaysAgoKey to DailyAchievement(dateKey = twoDaysAgoKey, totalCount = 8.0, goal = 8),
+            threeDaysAgoKey to DailyAchievement(dateKey = threeDaysAgoKey, totalCount = 8.0, goal = 8)
+        )
+        val recomputed = repository.recomputeStreakFromHistory(annualHistory, todayRecord)
+        coEvery { dataStore.restoreAll(todayRecord, recomputed, history, annualHistory) } returns Unit
+
+        repository.restoreAll(todayRecord, inflatedStreak, history, annualHistory)
+
+        assertEquals(3, recomputed.currentStreak)
+        coVerify { dataStore.restoreAll(todayRecord, recomputed, history, annualHistory) }
+        coVerify(exactly = 0) { dataStore.restoreAll(todayRecord, inflatedStreak, history, annualHistory) }
+    }
+
+    @Test
+    fun recomputeStreakFromHistory_오늘것은annualHistory대신실시간todayRecord로판단한다() {
+        // annualHistory엔 오늘이 미달성(stale)으로 남아있지만, 실시간 todayRecord는 달성 상태
+        val staleToday = DailyAchievement(dateKey = todayKey, totalCount = 0.0, goal = 8)
+        val liveToday = DayRecord(
+            dateKey = todayKey,
+            entries = List(8) { WaterEntry(timestampMillis = 0L, amount = 200, drinkType = DrinkType.WATER) },
+            goal = 8,
+            cupSize = 200
+        )
+        val annualHistory = mapOf(todayKey to staleToday)
+
+        val result = repository.recomputeStreakFromHistory(annualHistory, liveToday)
+
+        assertEquals(1, result.currentStreak)
+        assertEquals(todayKey, result.lastAchievedDateKey)
+    }
+
+    @Test
+    fun recomputeStreakFromHistory_기록이없으면기본값을반환한다() {
+        val result = repository.recomputeStreakFromHistory(emptyMap(), DayRecord(dateKey = todayKey, goal = 8))
+
+        assertEquals(StreakInfo(), result)
     }
 
     @Test
