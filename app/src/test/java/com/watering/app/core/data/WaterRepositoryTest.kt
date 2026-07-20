@@ -131,25 +131,37 @@ class WaterRepositoryTest {
         val current = StreakInfo(
             currentStreak = 10,
             longestStreak = 10,
-            lastAchievedDateKey = twoDaysAgoKey,
-            protectionUsedThisMonth = false
+            lastAchievedDateKey = twoDaysAgoKey
         )
 
         val result = repository.updateStreak(achievedRecord(), current)
 
         assertEquals(11, result.currentStreak)
-        assertTrue(result.protectionUsedThisMonth)
-        assertEquals(currentMonthKey, result.protectionUsedMonthKey)
+        assertTrue(todayKey in result.protectionUsedDates)
     }
 
     @Test
-    fun updateStreak_이틀전달성_이번달보호이미사용했으면_streak가1로리셋() = runTest {
+    fun updateStreak_이틀전달성_이번달보호1회만사용했으면_두번째도보호되어streak증가() = runTest {
         val current = StreakInfo(
             currentStreak = 10,
             longestStreak = 10,
             lastAchievedDateKey = twoDaysAgoKey,
-            protectionUsedThisMonth = true,
-            protectionUsedMonthKey = currentMonthKey
+            protectionUsedDates = listOf("$currentMonthKey-01")
+        )
+
+        val result = repository.updateStreak(achievedRecord(), current)
+
+        assertEquals(11, result.currentStreak)
+        assertTrue(result.protectionUsedDates.containsAll(listOf("$currentMonthKey-01", todayKey)))
+    }
+
+    @Test
+    fun updateStreak_이틀전달성_이번달보호2회모두사용했으면_streak가1로리셋() = runTest {
+        val current = StreakInfo(
+            currentStreak = 10,
+            longestStreak = 10,
+            lastAchievedDateKey = twoDaysAgoKey,
+            protectionUsedDates = listOf("$currentMonthKey-01", "$currentMonthKey-02")
         )
 
         val result = repository.updateStreak(achievedRecord(), current)
@@ -225,14 +237,13 @@ class WaterRepositoryTest {
     }
 
     @Test
-    fun rollbackStreakAfterUndo_이틀전달성으로보호가쓰였던갱신이면_보호플래그도되돌린다() = runTest {
+    fun rollbackStreakAfterUndo_이틀전달성으로보호가쓰였던갱신이면_보호사용날짜도되돌린다() = runTest {
         val notAchieved = DayRecord(dateKey = todayKey, entries = emptyList(), goal = 1)
         val current = StreakInfo(
             currentStreak = 11,
             longestStreak = 11,
             lastAchievedDateKey = todayKey,
-            protectionUsedThisMonth = true,
-            protectionUsedMonthKey = currentMonthKey
+            protectionUsedDates = listOf(todayKey)
         )
         every { dataStore.getAnnualHistory() } returns MutableStateFlow(
             mapOf(twoDaysAgoKey to DailyAchievement(dateKey = twoDaysAgoKey, totalCount = 8.0, goal = 8))
@@ -242,7 +253,29 @@ class WaterRepositoryTest {
 
         assertEquals(10, result.currentStreak)
         assertEquals(twoDaysAgoKey, result.lastAchievedDateKey)
-        assertEquals(false, result.protectionUsedThisMonth)
+        assertTrue(todayKey !in result.protectionUsedDates)
+    }
+
+    @Test
+    fun rollbackStreakAfterUndo_다른날짜에쓴보호권은_이번undo로되돌아가지않는다() = runTest {
+        // 이번 달 다른 날짜에 이미 정당하게 보호권을 쓴 상태에서, 오늘은 그와 무관한 일반
+        // 리셋(else -> 1)이 undo되는 상황 — 예전 버그는 이 케이스에서 이미 쓴 보호권을
+        // 착각해서 되돌려버렸음(월간 플래그+상태 추론 방식의 한계)
+        val earlierProtectionDate = if (today.dayOfMonth == 1) "$currentMonthKey-02" else "$currentMonthKey-01"
+        val notAchieved = DayRecord(dateKey = todayKey, entries = emptyList(), goal = 1)
+        val current = StreakInfo(
+            currentStreak = 1,
+            longestStreak = 5,
+            lastAchievedDateKey = todayKey,
+            protectionUsedDates = listOf(earlierProtectionDate)
+        )
+        // 어제/이틀 전 모두 미달성 — 오늘 갱신은 보호권과 무관한 리셋이었음
+        every { dataStore.getAnnualHistory() } returns MutableStateFlow(emptyMap())
+
+        val result = repository.rollbackStreakAfterUndo(notAchieved, current)
+
+        assertEquals(0, result.currentStreak)
+        assertTrue(earlierProtectionDate in result.protectionUsedDates)
     }
 
     @Test

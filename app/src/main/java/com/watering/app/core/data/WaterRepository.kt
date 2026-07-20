@@ -17,6 +17,10 @@ import javax.inject.Singleton
 class WaterRepository @Inject constructor(
     private val dataStore: WaterDataStore
 ) {
+    companion object {
+        private const val MONTHLY_PROTECTION_LIMIT = 2
+    }
+
     private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
     private val monthFormatter = DateTimeFormatter.ofPattern("yyyy-MM")
 
@@ -31,7 +35,8 @@ class WaterRepository @Inject constructor(
     suspend fun removeLastEntry(goal: Int, cupSize: Int): DayRecord =
         dataStore.removeLastEntry(goal, cupSize)
 
-    // 한 달에 하루, 정확히 하루를 놓쳤을 때만 연속 기록이 끊기지 않는다 (2일 이상 공백은 보호 대상 아님)
+    // 한 달에 MONTHLY_PROTECTION_LIMIT회, 정확히 하루를 놓쳤을 때만 연속 기록이 끊기지 않는다
+    // (2일 이상 공백은 보호 대상 아님)
     //
     // 순수 전이 계산은 advanceStreak()로 분리해뒀다 — recomputeStreakFromHistory()(백업 복원 시
     // 재계산)도 같은 함수를 재사용해 두 경로의 로직이 갈라지지 않게 하기 위함(2026-07-17).
@@ -50,11 +55,10 @@ class WaterRepository @Inject constructor(
         val yesterdayKey = day.minusDays(1).format(formatter)
         val twoDaysAgoKey = day.minusDays(2).format(formatter)
         val currentMonthKey = day.format(monthFormatter)
-        val protectionAvailable =
-            current.protectionUsedMonthKey != currentMonthKey || !current.protectionUsedThisMonth
+        val usedThisMonth = current.protectionUsedDates.count { it.startsWith(currentMonthKey) }
+        val protectionAvailable = usedThisMonth < MONTHLY_PROTECTION_LIMIT
 
-        var protectionUsedThisMonth = current.protectionUsedThisMonth
-        var protectionUsedMonthKey = current.protectionUsedMonthKey
+        var protectionUsedDates = current.protectionUsedDates
 
         val newStreak = when {
             current.lastAchievedDateKey == yesterdayKey || current.currentStreak == 0 ->
@@ -62,8 +66,7 @@ class WaterRepository @Inject constructor(
             current.lastAchievedDateKey == dateKey ->
                 current.currentStreak
             current.lastAchievedDateKey == twoDaysAgoKey && protectionAvailable -> {
-                protectionUsedThisMonth = true
-                protectionUsedMonthKey = currentMonthKey
+                protectionUsedDates = current.protectionUsedDates + dateKey
                 current.currentStreak + 1
             }
             else -> 1
@@ -72,8 +75,7 @@ class WaterRepository @Inject constructor(
             currentStreak = newStreak,
             longestStreak = maxOf(current.longestStreak, newStreak),
             lastAchievedDateKey = dateKey,
-            protectionUsedThisMonth = protectionUsedThisMonth,
-            protectionUsedMonthKey = protectionUsedMonthKey
+            protectionUsedDates = protectionUsedDates
         )
     }
 
@@ -109,14 +111,12 @@ class WaterRepository @Inject constructor(
         val today = LocalDate.parse(record.dateKey, formatter)
         val yesterdayKey = today.minusDays(1).format(formatter)
         val twoDaysAgoKey = today.minusDays(2).format(formatter)
-        val currentMonthKey = today.format(monthFormatter)
         val annualHistory = dataStore.getAnnualHistory().first()
         val yesterdayAchieved = annualHistory[yesterdayKey]?.isAchieved == true
-        val twoDaysAgoAchieved = annualHistory[twoDaysAgoKey]?.isAchieved == true
-        // updateStreak이 이틀 공백을 보호로 이어붙인 증가였는지 판별 — 그 경우에만 보호 사용
-        // 플래그도 함께 되돌린다(다른 날짜에 쓴 보호까지 되돌리지 않도록)
-        val usedProtectionToday = !yesterdayAchieved && twoDaysAgoAchieved &&
-            current.protectionUsedThisMonth && current.protectionUsedMonthKey == currentMonthKey
+        // 이번 갱신(오늘 dateKey)이 실제로 보호권을 소비했었는지 — 상태 추론이 아니라 그 갱신이
+        // 저장해둔 정확한 날짜 기록(protectionUsedDates)으로 직접 대조해, 다른 날짜에 쓴 보호권
+        // 사용 이력을 착각해서 되돌리는 일이 없도록 함
+        val usedProtectionToday = record.dateKey in current.protectionUsedDates
 
         val updated = current.copy(
             currentStreak = (current.currentStreak - 1).coerceAtLeast(0),
@@ -130,7 +130,9 @@ class WaterRepository @Inject constructor(
                 usedProtectionToday -> twoDaysAgoKey
                 else -> current.lastAchievedDateKey
             },
-            protectionUsedThisMonth = if (usedProtectionToday) false else current.protectionUsedThisMonth
+            protectionUsedDates = if (usedProtectionToday) {
+                current.protectionUsedDates - record.dateKey
+            } else current.protectionUsedDates
         )
         dataStore.saveStreakInfo(updated)
         return updated
