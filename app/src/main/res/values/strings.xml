@@ -92,6 +92,8 @@
 
     <!-- 여러 화면에서 공유하는 문구 -->
     <string name="content_description_back">뒤로</string>
+    <string name="content_description_dismiss">닫기</string>
+    <string name="home_protection_banner">보호권이 발동되어 연속 기록이 유지됐어요</string>
     <string name="label_current_streak">현재 연속</string>
     <string name="label_longest_streak">최장 연속</string>
     <string name="label_goal_achieved_banner">목표 달성! 🎉</string>
@@ -187,6 +189,8 @@
     <string name="stats_weekly_total_value">%1$d잔</string>
     <string name="stats_streak_section">연속 기록</string>
     <string name="stats_goal_line">목표: %1$d잔</string>
+    <string name="stats_protection_section">연속 기록 보호권</string>
+    <string name="stats_protection_used_value">이번 달 %1$d회 사용 · %2$d회 남음</string>
     <string name="smart_stats_title">스마트 통계</string>
     <string name="stats_smart_cta_description">30일 트렌드와 연간 기록을 확인해보세요.</string>
     <string name="smart_stats_month_trend_title">30일 트렌드</string>

@@ -48,6 +48,11 @@ class StatsViewModelTest {
             every { getHistory() } returns MutableStateFlow(history)
             every { this@mockk.todayRecord } returns MutableStateFlow(todayRecord)
             every { streakInfo } returns MutableStateFlow(streak)
+            every { protectionUsedCount(any(), any()) } answers {
+                val streakArg = firstArg<StreakInfo>()
+                val monthKey = secondArg<String>()
+                streakArg.protectionUsedDates.count { it.startsWith(monthKey) }
+            }
         }
         val settingsRepository = mockk<SettingsRepository> {
             every { userSettings } returns MutableStateFlow(settings)
@@ -150,6 +155,29 @@ class StatsViewModelTest {
             val state = awaitItem()
             val todayStat = state.weekStats.last()
             assertEquals(12, todayStat.goal) // record.goal(8)이 아닌 최신 설정(12) 반영
+        }
+    }
+
+    @Test
+    fun uiState_이번달보호권사용횟수를집계한다() = runTest(mainDispatcherRule.testDispatcher) {
+        // minusMonths(1)은 항상 다른 달이라 월 경계(매달 1일)에 실행돼도 흔들리지 않는 조합
+        val lastMonthDateKey = today.minusMonths(1).format(formatter)
+        val todayRecord = DayRecord(dateKey = todayKey, entries = emptyList(), goal = 8)
+        val viewModel = createViewModel(
+            todayRecord,
+            history = emptyMap(),
+            streak = StreakInfo(
+                currentStreak = 3,
+                longestStreak = 5,
+                protectionUsedDates = listOf(todayKey, lastMonthDateKey)
+            )
+        )
+
+        viewModel.uiState.test {
+            val state = awaitItem()
+            // lastMonthDateKey는 이번 달이 아니므로 집계에서 제외되고 todayKey만 반영
+            assertEquals(1, state.protectionUsedThisMonth)
+            assertEquals(WaterRepository.MONTHLY_PROTECTION_LIMIT, state.protectionLimit)
         }
     }
 

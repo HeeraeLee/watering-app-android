@@ -69,6 +69,21 @@ class HomeViewModel @Inject constructor(
     private val _pendingAchievement = MutableStateFlow<Achievement?>(null)
     val pendingAchievement: StateFlow<Achievement?> = _pendingAchievement
 
+    // 보호권이 방금 발동됐을 때만 잠깐 보여주는 배너 상태 (2026-07-20, UI 노출 시안 C 채택) —
+    // streak.protectionUsedDates에 오늘 날짜가 새로 추가됐는지로 판정
+    private val _showProtectionBanner = MutableStateFlow(false)
+    val showProtectionBanner: StateFlow<Boolean> = _showProtectionBanner
+
+    private fun checkProtectionTriggered(before: StreakInfo, after: StreakInfo, dateKey: String) {
+        if (dateKey in after.protectionUsedDates && dateKey !in before.protectionUsedDates) {
+            _showProtectionBanner.value = true
+        }
+    }
+
+    fun dismissProtectionBanner() {
+        _showProtectionBanner.value = false
+    }
+
     init {
         // 위젯 탭으로 달성했지만 아직 못 보여준 업적이 있으면 앱 진입 시 모달로 보여준다
         viewModelScope.launch {
@@ -87,6 +102,7 @@ class HomeViewModel @Inject constructor(
                     cupSize = current.settings.cupSize
                 )
                 val streak = waterService.updateStreak(result.updated, current.streak)
+                checkProtectionTriggered(current.streak, streak, result.updated.dateKey)
                 _snackbarMessage.value = context.getString(R.string.home_snackbar_water_recorded, current.settings.cupSize)
                 analyticsService.logRecordAdd(current.settings.cupSize, drinkType.name, source = "home")
                 achievementChecker.check(result.prev, result.updated, streak)?.let { _pendingAchievement.value = it }
@@ -108,6 +124,7 @@ class HomeViewModel @Inject constructor(
                     cupSize = current.settings.cupSize
                 )
                 val streak = waterService.updateStreak(result.updated, current.streak)
+                checkProtectionTriggered(current.streak, streak, result.updated.dateKey)
                 _snackbarMessage.value = context.getString(
                     R.string.home_snackbar_drink_recorded,
                     drinkType.emoji,

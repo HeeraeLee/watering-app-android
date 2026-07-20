@@ -18,7 +18,7 @@ class WaterRepository @Inject constructor(
     private val dataStore: WaterDataStore
 ) {
     companion object {
-        private const val MONTHLY_PROTECTION_LIMIT = 2
+        const val MONTHLY_PROTECTION_LIMIT = 2
     }
 
     private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
@@ -28,6 +28,12 @@ class WaterRepository @Inject constructor(
     val streakInfo: Flow<StreakInfo> = dataStore.streakInfo
     fun getHistory(): Flow<Map<String, DayRecord>> = dataStore.getHistory()
     fun getAnnualHistory(): Flow<Map<String, DailyAchievement>> = dataStore.getAnnualHistory()
+
+    // 통계 화면의 "연속 기록 보호권" 카드가 이번 달 사용/잔여 횟수를 보여주기 위해 필요
+    // (2026-07-20, 보호권 UI 노출 시안 C 채택 — 이전까진 백그라운드 로직으로만 동작해 사용자가
+    // 발동 여부·잔여 횟수를 알 방법이 없었음)
+    fun protectionUsedCount(streak: StreakInfo, monthKey: String): Int =
+        streak.protectionUsedDates.count { it.startsWith(monthKey) }
 
     suspend fun addEntry(amount: Int, drinkType: DrinkType, goal: Int, cupSize: Int): WaterUpdateResult =
         dataStore.addEntry(amount, drinkType, goal, cupSize)

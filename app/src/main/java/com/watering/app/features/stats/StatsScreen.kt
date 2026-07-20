@@ -15,14 +15,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.draw.shadow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -142,6 +145,17 @@ fun StatsScreen(
                 }
             }
 
+            // 연속 기록 보호권 — 이전엔 백그라운드 로직으로만 동작해 발동 여부/잔여 횟수를 사용자가
+            // 알 방법이 없었음(2026-07-20, UI 노출 시안 C 채택)
+            item {
+                SectionCard(title = stringResource(R.string.stats_protection_section)) {
+                    ProtectionStatusRow(
+                        usedThisMonth = uiState.protectionUsedThisMonth,
+                        limit = uiState.protectionLimit
+                    )
+                }
+            }
+
             // 스마트 통계 (30일 트렌드 + 연간 기록)
             item {
                 SmartStatsCta(onNavigateToSmartStats = onNavigateToSmartStats)
@@ -201,6 +215,47 @@ fun SectionCard(title: String, content: @Composable () -> Unit) {
             )
             Spacer(Modifier.height(16.dp))
             content()
+        }
+    }
+}
+
+@Composable
+private fun ProtectionStatusRow(usedThisMonth: Int, limit: Int) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(
+            imageVector = Icons.Filled.Shield,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(28.dp)
+        )
+        Spacer(Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = stringResource(
+                    R.string.stats_protection_used_value,
+                    usedThisMonth,
+                    (limit - usedThisMonth).coerceAtLeast(0)
+                ),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(Modifier.height(6.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                repeat(limit) { index ->
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .background(
+                                color = if (index < usedThisMonth) {
+                                    MaterialTheme.colorScheme.secondary
+                                } else {
+                                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.25f)
+                                },
+                                shape = CircleShape
+                            )
+                    )
+                }
+            }
         }
     }
 }

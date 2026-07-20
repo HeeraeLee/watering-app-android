@@ -33,7 +33,9 @@ data class StatsUiState(
     val goalDays: Int = 0,
     val weeklyTotal: Int = 0,
     val currentStreak: Int = 0,
-    val longestStreak: Int = 0
+    val longestStreak: Int = 0,
+    val protectionUsedThisMonth: Int = 0,
+    val protectionLimit: Int = WaterRepository.MONTHLY_PROTECTION_LIMIT
 )
 
 @HiltViewModel
@@ -79,13 +81,15 @@ class StatsViewModel @Inject constructor(
         }
 
         val counts = week.map { it.count }
+        val monthKey = todayDate.format(DateTimeFormatter.ofPattern("yyyy-MM"))
         StatsUiState(
             weekStats = week,
             weeklyAvg = if (counts.isEmpty()) 0.0 else counts.average(),
             goalDays = week.count { it.count >= it.goal },
             weeklyTotal = floor(counts.sum()).toInt(),
             currentStreak = streak.currentStreak,
-            longestStreak = streak.longestStreak
+            longestStreak = streak.longestStreak,
+            protectionUsedThisMonth = waterRepository.protectionUsedCount(streak, monthKey)
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), StatsUiState())
 }

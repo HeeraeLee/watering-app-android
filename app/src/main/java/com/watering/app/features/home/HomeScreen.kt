@@ -30,8 +30,11 @@ import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -75,6 +78,8 @@ import com.watering.app.core.model.WaterEntry
 import com.watering.app.features.record.RecordSheet
 import com.watering.app.ui.theme.AppBackgroundGradient
 import com.watering.app.ui.theme.AppCardBackgroundColor
+import com.watering.app.ui.theme.AppInfoBannerBackgroundColor
+import com.watering.app.ui.theme.AppInfoBannerBorderColor
 import com.watering.app.ui.theme.AppUndoTextColor
 import com.watering.app.ui.theme.DrinkBadge
 import kotlinx.coroutines.withTimeoutOrNull
@@ -96,6 +101,7 @@ fun HomeScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarMessage by viewModel.snackbarMessage.collectAsStateWithLifecycle()
     val pendingAchievement by viewModel.pendingAchievement.collectAsStateWithLifecycle()
+    val showProtectionBanner by viewModel.showProtectionBanner.collectAsStateWithLifecycle()
     val activity = LocalContext.current.findActivity()
     val snackbarHostState = remember { SnackbarHostState() }
     var showRecordSheet by remember { mutableStateOf(false) }
@@ -174,6 +180,13 @@ fun HomeScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 48.dp)
         ) {
+            if (showProtectionBanner) {
+                item {
+                    Spacer(Modifier.height(16.dp))
+                    ProtectionBanner(onDismiss = { viewModel.dismissProtectionBanner() })
+                }
+            }
+
             item {
                 Spacer(Modifier.height(16.dp))
                 AchievementRing(
@@ -307,6 +320,38 @@ fun HomeScreen(
                 onDismiss = { viewModel.dismissAchievement(activity) }
             )
         }
+        }
+    }
+}
+
+@Composable
+private fun ProtectionBanner(onDismiss: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(AppInfoBannerBackgroundColor, RoundedCornerShape(12.dp))
+            .border(1.5.dp, AppInfoBannerBorderColor, RoundedCornerShape(12.dp))
+            .padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            Icons.Filled.Shield,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary
+        )
+        Spacer(Modifier.width(10.dp))
+        Text(
+            stringResource(R.string.home_protection_banner),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.weight(1f)
+        )
+        IconButton(onClick = onDismiss) {
+            Icon(
+                Icons.Filled.Close,
+                contentDescription = stringResource(R.string.content_description_dismiss),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }

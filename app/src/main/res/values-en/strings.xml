@@ -89,6 +89,8 @@
 
     <!-- Shared across screens -->
     <string name="content_description_back">Back</string>
+    <string name="content_description_dismiss">Dismiss</string>
+    <string name="home_protection_banner">Streak protection kicked in — your streak is safe</string>
     <string name="label_current_streak">Current Streak</string>
     <string name="label_longest_streak">Best Streak</string>
     <string name="label_goal_achieved_banner">Goal achieved! 🎉</string>
@@ -184,6 +186,8 @@
     <string name="stats_weekly_total_value">%1$d glasses</string>
     <string name="stats_streak_section">Streak</string>
     <string name="stats_goal_line">Goal: %1$d glasses</string>
+    <string name="stats_protection_section">Streak Protection</string>
+    <string name="stats_protection_used_value">Used %1$d this month · %2$d left</string>
     <string name="smart_stats_title">Smart Stats</string>
     <string name="stats_smart_cta_description">Check your 30-day trend and annual record.</string>
     <string name="smart_stats_month_trend_title">30-Day Trend</string>
