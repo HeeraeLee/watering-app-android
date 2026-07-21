@@ -7,6 +7,7 @@ import com.watering.app.core.service.BackupService
 import com.watering.app.testutil.MainDispatcherRule
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.coVerifyOrder
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -167,5 +168,57 @@ class BackupViewModelTest {
         viewModel.restore()
 
         coVerify(exactly = 0) { backupService.restore(any()) }
+    }
+
+    @Test
+    fun deleteAccountAndData_성공하면_백업삭제후계정삭제순서로호출되고Idle이된다() = runTest(mainDispatcherRule.testDispatcher) {
+        coEvery { backupService.getLastBackupTimestamp("uid-1") } returns null
+        coEvery { backupService.deleteBackup("uid-1") } returns Result.success(Unit)
+        coEvery { authService.deleteAccount(any()) } returns Result.success(Unit)
+        val viewModel = createViewModel(initialUser = signedInUser())
+        val activity = mockk<Context>()
+
+        viewModel.deleteAccountAndData(activity)
+
+        assertEquals(BackupUiState.Idle, viewModel.backupUiState.value)
+        // 보안 규칙(auth.uid == 문서 uid) 때문에 로그아웃 전에 백업 문서부터 지워야 하므로 순서 검증
+        coVerifyOrder {
+            backupService.deleteBackup("uid-1")
+            authService.deleteAccount(activity)
+        }
+    }
+
+    @Test
+    fun deleteAccountAndData_백업삭제가실패하면_계정삭제는시도하지않고Error상태가된다() = runTest(mainDispatcherRule.testDispatcher) {
+        coEvery { backupService.getLastBackupTimestamp("uid-1") } returns null
+        coEvery { backupService.deleteBackup("uid-1") } returns Result.failure(RuntimeException("네트워크 오류"))
+        val viewModel = createViewModel(initialUser = signedInUser())
+
+        viewModel.deleteAccountAndData(mockk())
+
+        assertTrue(viewModel.backupUiState.value is BackupUiState.Error)
+        coVerify(exactly = 0) { authService.deleteAccount(any()) }
+    }
+
+    @Test
+    fun deleteAccountAndData_백업삭제는성공했지만계정삭제가실패하면_Error상태가된다() = runTest(mainDispatcherRule.testDispatcher) {
+        coEvery { backupService.getLastBackupTimestamp("uid-1") } returns null
+        coEvery { backupService.deleteBackup("uid-1") } returns Result.success(Unit)
+        coEvery { authService.deleteAccount(any()) } returns Result.failure(RuntimeException("계정 삭제 실패"))
+        val viewModel = createViewModel(initialUser = signedInUser())
+
+        viewModel.deleteAccountAndData(mockk())
+
+        assertTrue(viewModel.backupUiState.value is BackupUiState.Error)
+    }
+
+    @Test
+    fun deleteAccountAndData_로그아웃상태면_아무동작하지않는다() = runTest(mainDispatcherRule.testDispatcher) {
+        val viewModel = createViewModel(initialUser = null)
+
+        viewModel.deleteAccountAndData(mockk())
+
+        coVerify(exactly = 0) { backupService.deleteBackup(any()) }
+        coVerify(exactly = 0) { authService.deleteAccount(any()) }
     }
 }
