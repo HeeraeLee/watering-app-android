@@ -104,6 +104,7 @@ fun HealthConnectSettingsScreen(
                             }
                         }
                     )
+                    HealthConnectRateHint()
                 }
             }
         }
@@ -138,6 +139,37 @@ private fun HealthConnectVisibilityHint(onOpenSettings: () -> Unit) {
             )
         }
         Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = infoColor)
+    }
+}
+
+// 음료별 수분 환산율이 Health Connect 저장값에 적용된다는 사실을 사용자에게 알림 —
+// HealthConnectVisibilityHint와 같은 배너 스타일을 재사용하되, 딥링크가 없어 클릭/화살표 없이 정적으로 표시
+@Composable
+private fun HealthConnectRateHint() {
+    val infoColor = MaterialTheme.colorScheme.primary
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .background(AppInfoBannerBackgroundColor, RoundedCornerShape(12.dp))
+            .border(1.5.dp, AppInfoBannerBorderColor, RoundedCornerShape(12.dp))
+            .padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(Icons.Filled.Info, contentDescription = null, tint = infoColor)
+        Spacer(Modifier.width(10.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                stringResource(R.string.settings_hydration_sync_rate_title),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                stringResource(R.string.settings_hydration_sync_rate_body),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }
 

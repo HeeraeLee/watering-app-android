@@ -196,6 +196,7 @@
     <string name="smart_stats_insight_placeholder">Not enough data yet to find a pattern.</string>
     <string name="smart_stats_insight_no_pattern">No particular time you tend to miss — you\'re staying consistent!</string>
     <string name="smart_stats_hydration_volume">Today\'s actual hydration: approx. %1$dml</string>
+    <string name="smart_stats_hydration_volume_hint">This applies each drink\'s hydration rate, not the raw amount. Your goal and streak aren\'t affected.</string>
     <string name="smart_stats_axis_today">Today</string>
     <string name="smart_stats_legend_none">Not met</string>
     <string name="smart_stats_legend_partial">Partially met</string>
@@ -274,6 +275,8 @@
     <string name="settings_health_connect_dialog_ok">OK</string>
     <string name="settings_hydration_sync_other_app_title">Why isn\'t it showing in Samsung Health?</string>
     <string name="settings_hydration_sync_other_app_body">Samsung Health temporarily removed hydration support in a recent update. Until it\'s restored, try another app like Google Health to check your data</string>
+    <string name="settings_hydration_sync_rate_title">A conversion rate applies</string>
+    <string name="settings_hydration_sync_rate_body">Health Connect stores an amount adjusted by each drink\'s hydration rate (e.g. coffee 70%, tea 90%), not the raw amount you logged. Your in-app goal and streak still use the raw amount, so they\'re not affected.</string>
     <string name="settings_section_notification">Notifications</string>
     <string name="settings_section_backup">Backup &amp; Restore</string>
     <string name="settings_notification_switch_title">Water Reminders</string>

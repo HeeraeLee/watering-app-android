@@ -199,6 +199,7 @@
     <string name="smart_stats_insight_placeholder">아직 패턴을 찾을 데이터가 부족해요.</string>
     <string name="smart_stats_insight_no_pattern">특별히 놓치는 시간대가 없어요. 고르게 잘 마시고 있어요!</string>
     <string name="smart_stats_hydration_volume">오늘 실제 수분 섭취량: 약 %1$dml</string>
+    <string name="smart_stats_hydration_volume_hint">마신 양이 아니라 음료별 수분 환산율을 반영한 값이에요. 목표·연속 기록에는 영향 없어요.</string>
     <string name="smart_stats_axis_today">오늘</string>
     <string name="smart_stats_legend_none">미달성</string>
     <string name="smart_stats_legend_partial">일부 달성</string>
@@ -277,6 +278,8 @@
     <string name="settings_health_connect_dialog_ok">확인</string>
     <string name="settings_hydration_sync_other_app_title">왜 삼성 헬스에 안 보이나요?</string>
     <string name="settings_hydration_sync_other_app_body">삼성 헬스가 최근 업데이트에서 수분 기능을 잠시 뺐어요. 복구 전까지는 Google Health 등 다른 앱으로 확인해보세요!</string>
+    <string name="settings_hydration_sync_rate_title">환산율이 적용돼요</string>
+    <string name="settings_hydration_sync_rate_body">Health Connect에는 마신 양 그대로가 아니라 음료별 수분 환산율(예: 커피 70%, 차 90%)을 반영한 양이 저장돼요. 앱 안의 목표·연속 기록은 그대로 마신 양 기준이라 영향 없어요.</string>
     <string name="settings_section_notification">알림 설정</string>
     <string name="settings_section_backup">백업 및 복원</string>
     <string name="settings_notification_switch_title">물 마시기 알림</string>
