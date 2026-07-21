@@ -86,6 +86,16 @@ android {
     testOptions {
         unitTests.isReturnDefaultValues = true
     }
+
+    // mockk-android가 끌어오는 JUnit 5(Jupiter) 계열 전이 의존성들이 androidTest APK 패키징 시
+    // 서로 같은 META-INF 라이선스 파일을 중복으로 갖고 있어 충돌 — 실행에 영향 없는 문서성
+    // 파일이라 안전하게 제외
+    packaging {
+        resources {
+            excludes += "META-INF/LICENSE.md"
+            excludes += "META-INF/LICENSE-notice.md"
+        }
+    }
 }
 
 dependencies {
@@ -168,6 +178,7 @@ dependencies {
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(platform(libs.compose.bom))
     androidTestImplementation(libs.compose.ui.test.junit4)
+    androidTestImplementation(libs.mockk.android)
     debugImplementation(libs.compose.ui.tooling)
     debugImplementation(libs.compose.ui.test.manifest)
 }
