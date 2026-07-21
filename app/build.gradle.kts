@@ -1,5 +1,6 @@
 import java.io.FileInputStream
 import java.util.Properties
+import org.gradle.testing.jacoco.tasks.JacocoReport
 
 plugins {
     alias(libs.plugins.android.application)
@@ -10,6 +11,11 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.google.services)
     alias(libs.plugins.firebase.crashlytics)
+    id("jacoco")
+}
+
+jacoco {
+    toolVersion = "0.8.12"
 }
 
 val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -164,4 +170,56 @@ dependencies {
     androidTestImplementation(libs.compose.ui.test.junit4)
     debugImplementation(libs.compose.ui.tooling)
     debugImplementation(libs.compose.ui.test.manifest)
+}
+
+tasks.register<JacocoReport>("jacocoTestReport") {
+    dependsOn("testDebugUnitTest")
+
+    group = "Reporting"
+    description = "Service/Repository/ViewModel 레이어 커버리지 리포트 생성 (HTML+XML)"
+
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+        csv.required.set(false)
+    }
+
+    // 분모 = core/** (model/data/datastore/service) + features/**의 ViewModel만.
+    // UI(Compose 화면)·widget(Glance)·navigation·di는 애초에 테스트 대상이 아니라 제외 —
+    // 기획서 "Service 레이어 80%" 목표와 직접 비교 가능한 숫자를 만들기 위한 의도적 스코프.
+    val businessLogicIncludes = listOf(
+        "**/core/**",
+        "**/features/**/*ViewModel.class",
+        "**/features/**/*ViewModel\$*.class"
+    )
+
+    // Hilt/Dagger·Compose 컴파일러·kotlinx.serialization이 생성한, 손으로 짠 로직이 없는
+    // 보일러플레이트 — 위 include 범위(core/**) 안에도 *_Factory 등이 섞여 있어 별도 제외 필요.
+    val generatedCodeExcludes = listOf(
+        "**/Hilt_*.class",
+        "**/*_HiltModules*.class",
+        "**/*_Factory.class",
+        "**/*_MembersInjector.class",
+        "**/*_GeneratedInjector.class",
+        "**/*_AssistedFactory.class",
+        "**/*_AssistedFactory_Impl.class",
+        "**/*_HiltModule.class",
+        "**/Dagger*.class",
+        "**/*\$serializer.class",
+        "**/*\$\$serializer.class",
+        "**/BuildConfig.class"
+    )
+
+    val kotlinClasses = fileTree(layout.buildDirectory.dir("tmp/kotlin-classes/debug")) {
+        include(businessLogicIncludes)
+        exclude(generatedCodeExcludes)
+    }
+
+    classDirectories.setFrom(kotlinClasses)
+    sourceDirectories.setFrom(files("$projectDir/src/main/java"))
+    executionData.setFrom(
+        fileTree(layout.buildDirectory.get()) {
+            include("jacoco/testDebugUnitTest.exec")
+        }
+    )
 }
