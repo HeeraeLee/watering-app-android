@@ -112,4 +112,6 @@ v0.31.11에서 교체된 물방울 캐릭터 "CHEERS!" 런처 아이콘과 동�
 
 ## 피처 그래픽 (1024×500)
 
-`docs/store/feature_graphic_1024x500.png` — 2026-07-10 사용자가 직접 수정한 버전으로 교체
+`docs/store/feature_graphic_1024x500.png` — 2026-07-22 최신 버전으로 교체("CHEERS!" 마스코트 +
+"워터링 / 위젯 한 번 탭으로 끝" 카피). 영문판은 `docs/store/feature_graphic_en_1024x500.png`
+("WATERING / JUST ONE WIDGET TAP") — 언어별 개별 파일이라 en-US 등록정보에 별도 업로드 필요.

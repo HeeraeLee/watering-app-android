@@ -81,14 +81,21 @@ content — expected: Everyone).
 
 ## Screenshots
 
-Same asset set as `listing_ko.md` (`docs/store/screenshots/`). If English-language screenshot
-variants are needed for the store listing (not just widget preview thumbnails), that is a separate
-follow-up — see `docs/개발보고서.md` "남은 작업" for the widget-preview English asset work already
-done (`drawable-en-nodpi/`).
+**Not shared with the Korean listing — screenshots are per-language in Play Console.** Real
+English-UI captures (system language switched to English on the physical test device) live in
+`docs/store/screenshots_en/` (raw) and `docs/store/screenshots_en_marketing/` (with the speech
+bubble/headline overlay composited on top, matching the Korean marketing set's style). Upload the
+7 marketing files (01_home–07_dark_mode) to the en-US listing's "Phone screenshots" section.
 
 ## Icon
 
 `docs/store/play_store_icon_512.png` (same as Korean listing — icon is language-independent)
+
+## Feature graphic (1024×500)
+
+**Language-specific — not shared with the Korean listing.**
+`docs/store/feature_graphic_en_1024x500.png` ("WATERING / JUST ONE WIDGET TAP", same mascot
+artwork as the Korean version with translated copy).
 
 ## Feature graphic (1024×500)
 
