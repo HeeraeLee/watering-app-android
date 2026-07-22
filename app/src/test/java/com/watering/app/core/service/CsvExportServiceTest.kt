@@ -1,6 +1,8 @@
 package com.watering.app.core.service
 
 import android.content.Context
+import android.net.Uri
+import androidx.core.content.FileProvider
 import com.watering.app.R
 import com.watering.app.core.data.WaterRepository
 import com.watering.app.core.model.DayRecord
@@ -8,9 +10,17 @@ import com.watering.app.core.model.DrinkType
 import com.watering.app.core.model.WaterEntry
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
+import java.io.File
+import java.nio.file.Files
 import java.time.Clock
+import java.time.Instant
+import java.time.ZoneOffset
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -22,13 +32,22 @@ class CsvExportServiceTest {
     private lateinit var waterRepository: WaterRepository
     private lateinit var service: CsvExportService
 
+    private val fixedClock = Clock.fixed(Instant.parse("2026-07-22T00:00:00Z"), ZoneOffset.UTC)
+
     @Before
     fun setUp() {
         context = mockk()
         waterRepository = mockk()
-        service = CsvExportService(context, waterRepository, Clock.systemDefaultZone())
+        service = CsvExportService(context, waterRepository, fixedClock)
         every { context.getString(R.string.drink_water) } returns "물"
         every { context.getString(R.string.drink_coffee) } returns "커피"
+        every { context.cacheDir } returns Files.createTempDirectory("csv_export_test").toFile()
+        every { context.packageName } returns "com.watering.app.debug"
+    }
+
+    @After
+    fun tearDown() {
+        unmockkStatic(FileProvider::class)
     }
 
     private fun entry(timestampMillis: Long, amount: Int = 200, drinkType: DrinkType = DrinkType.WATER) =
@@ -93,5 +112,33 @@ class CsvExportServiceTest {
         val result = service.exportToCsv()
 
         assertTrue(result.isFailure)
+    }
+
+    @Test
+    fun exportToCsv_성공하면캐시에CSV파일을쓰고FileProviderUri를반환한다() = runTest {
+        val history = mapOf(
+            "2026-07-02" to DayRecord(
+                dateKey = "2026-07-02",
+                entries = listOf(entry(timestampMillis = 1_800_000_000_000L, amount = 150, drinkType = DrinkType.COFFEE))
+            )
+        )
+        every { waterRepository.getHistory() } returns flowOf(history)
+
+        val expectedUri = mockk<Uri>()
+        mockkStatic(FileProvider::class)
+        every {
+            FileProvider.getUriForFile(context, "com.watering.app.debug.fileprovider", any())
+        } returns expectedUri
+
+        val result = service.exportToCsv()
+
+        assertTrue(result.isSuccess)
+        assertEquals(expectedUri, result.getOrNull())
+
+        val writtenFile = File(File(context.cacheDir, "csv"), "watering_기록_2026-07-22.csv")
+        assertTrue(writtenFile.exists())
+        val content = writtenFile.readText(Charsets.UTF_8)
+        assertTrue(content.contains("2026-07-02,"))
+        assertTrue(content.contains("커피,150"))
     }
 }
