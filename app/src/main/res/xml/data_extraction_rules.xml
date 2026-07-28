@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- achievement_pending: 위젯 탭 후 다음 앱 실행 1회에 한해 보여줄 일회성 알림 큐라
+     재설치 시점엔 유효하지 않아야 함(AchievementDataStore.kt 참고) -->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="file" path="datastore/achievement_pending.preferences_pb" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="file" path="datastore/achievement_pending.preferences_pb" />
+    </device-transfer>
+</data-extraction-rules>

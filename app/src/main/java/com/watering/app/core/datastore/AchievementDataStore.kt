@@ -16,6 +16,14 @@ import kotlinx.coroutines.flow.first
 private val Context.achievementDataStore: DataStore<Preferences>
     by preferencesDataStore(name = "achievements")
 
+// pending_display는 "위젯 탭 후 다음 앱 실행 1회에 한해 보여줄 알림 큐"일 뿐이라, earned_today/
+// earned_lifetime과 달리 앱 삭제 후 재설치 시점엔 유효하지 않아야 한다. 같은 파일에 있으면
+// Auto Backup이 이 키까지 통째로 복원해, 재설치 직후 아무 행동도 안 했는데 예전 위젯 탭 때
+// 큐잉된 성취 카드가 떠버리는 문제가 있었다(2026-07-28). 그래서 별도 파일로 분리하고
+// data_extraction_rules.xml / fullBackupContent.xml에서 이 파일만 백업 제외한다.
+private val Context.achievementPendingDataStore: DataStore<Preferences>
+    by preferencesDataStore(name = "achievement_pending")
+
 @Singleton
 class AchievementDataStore @Inject constructor(
     @ApplicationContext private val context: Context
@@ -78,13 +86,13 @@ class AchievementDataStore @Inject constructor(
     // 위젯(AddWaterAction)에서 달성한 업적은 그 자리에서 모달을 띄울 화면이 없으므로,
     // 앱을 다음에 열었을 때 HomeViewModel이 확인해서 보여줄 수 있도록 대기 상태로 저장한다.
     suspend fun setPendingDisplay(achievement: Achievement) {
-        context.achievementDataStore.edit { prefs -> prefs[PENDING_DISPLAY_KEY] = achievement.name }
+        context.achievementPendingDataStore.edit { prefs -> prefs[PENDING_DISPLAY_KEY] = achievement.name }
     }
 
     suspend fun consumePendingDisplay(): Achievement? {
-        val prefs = context.achievementDataStore.data.first()
+        val prefs = context.achievementPendingDataStore.data.first()
         val name = prefs[PENDING_DISPLAY_KEY] ?: return null
-        context.achievementDataStore.edit { it.remove(PENDING_DISPLAY_KEY) }
+        context.achievementPendingDataStore.edit { it.remove(PENDING_DISPLAY_KEY) }
         return runCatching { Achievement.valueOf(name) }.getOrNull()
     }
 }

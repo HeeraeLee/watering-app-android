@@ -37,10 +37,14 @@ class ReviewService @Inject constructor(
         launchReviewFlow(activity)
     }
 
+    // 인앱 리뷰 API는 쿼터 초과 시 isSuccessful=true를 반환하면서도 다이얼로그를 띄우지 않는
+    // 경우가 있어(구글이 어뷰징 방지 목적으로 의도적으로 감지 불가하게 설계함), 자동 유도와 달리
+    // 사용자가 명시적으로 누른 버튼은 이 "조용한 실패"에도 반드시 반응이 있어야 한다. 그래서
+    // 인앱 다이얼로그를 시도하지 않고 스토어 리뷰 작성 페이지로 바로 보낸다(2026-07-28).
     suspend fun requestManualReview(activity: Activity) {
         settingsRepository.markReviewRequested(clock.millis())
         analyticsService.logReviewFlowRequested(trigger = "manual")
-        launchReviewFlow(activity, onNotSuccessful = { openPlayStoreListing(activity) })
+        openPlayStoreListing(activity)
     }
 
     private suspend fun isEligible(): Boolean {
@@ -62,13 +66,11 @@ class ReviewService @Inject constructor(
         return packageInfo.firstInstallTime
     }
 
-    private fun launchReviewFlow(activity: Activity, onNotSuccessful: (() -> Unit)? = null) {
+    private fun launchReviewFlow(activity: Activity) {
         val manager = ReviewManagerFactory.create(context)
         manager.requestReviewFlow().addOnCompleteListener { request ->
             if (request.isSuccessful) {
                 manager.launchReviewFlow(activity, request.result)
-            } else {
-                onNotSuccessful?.invoke()
             }
         }
     }

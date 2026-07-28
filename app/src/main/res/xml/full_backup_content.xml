@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 12 미만(API 26~30)용 Auto Backup 규칙 — data_extraction_rules.xml과 동일한 제외 대상 -->
+<full-backup-content>
+    <exclude domain="file" path="datastore/achievement_pending.preferences_pb" />
+</full-backup-content>

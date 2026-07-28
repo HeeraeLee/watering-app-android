@@ -114,7 +114,7 @@ class ReviewServiceTest {
         )
         val service = createService(settings)
 
-        service.requestManualReview(mockk<Activity>())
+        service.requestManualReview(mockk<Activity>(relaxed = true))
 
         coVerify { settingsRepository.markReviewRequested(now.toEpochMilli()) }
     }
