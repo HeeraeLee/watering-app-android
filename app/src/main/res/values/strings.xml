@@ -158,7 +158,7 @@
     <string name="record_sheet_title">음료 기록</string>
     <string name="record_drink_type_label">음료 종류</string>
     <string name="record_amount_label">양</string>
-    <string name="record_button">%1$s %2$s %3$dml 기록하기</string>
+    <string name="record_button">%1$s %2$dml 기록하기</string>
     <string name="record_custom_input">직접 입력</string>
     <string name="record_amount_size_hint">%1$s 사이즈예요</string>
 

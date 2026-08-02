@@ -155,7 +155,7 @@
     <string name="record_sheet_title">Log a Drink</string>
     <string name="record_drink_type_label">Drink Type</string>
     <string name="record_amount_label">Amount</string>
-    <string name="record_button">Log %1$s %2$s %3$dml</string>
+    <string name="record_button">Log %1$s %2$dml</string>
     <string name="record_custom_input">Custom</string>
     <string name="record_amount_size_hint">%1$s size</string>
 

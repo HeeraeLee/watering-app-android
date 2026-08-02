@@ -41,7 +41,9 @@ private fun drinkBadgeColors(type: DrinkType, dark: Boolean): DrinkBadgeColors =
         else DrinkBadgeColors(Color(0xFFEAE1F5), Color(0xFF7B5EA7))
 }
 
-private fun drinkIconRes(type: DrinkType): Int = when (type) {
+// RecordSheet의 확인 버튼도 동일한 벡터 아이콘을 써야 해서(2026-08-02, iOS와 동일하게 이모지 대신
+// 벡터 아이콘으로 통일) internal로 노출
+internal fun drinkIconRes(type: DrinkType): Int = when (type) {
     DrinkType.COFFEE -> R.drawable.ic_drink_coffee
     DrinkType.TEA -> R.drawable.ic_drink_tea
     DrinkType.JUICE -> R.drawable.ic_drink_juice

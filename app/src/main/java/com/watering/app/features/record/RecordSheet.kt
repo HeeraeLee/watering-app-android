@@ -8,13 +8,18 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
@@ -23,6 +28,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -34,6 +40,7 @@ import com.watering.app.core.model.DrinkType
 import com.watering.app.ui.theme.AppCardBackgroundColor
 import com.watering.app.ui.theme.AquaCtaContentColor
 import com.watering.app.ui.theme.DrinkBadge
+import com.watering.app.ui.theme.drinkIconRes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -107,15 +114,28 @@ fun RecordSheet(
                 // 파스텔 아쿠아 배경 위 흰 글자 저대비(약 1.8:1) 수정 — AquaCtaContentColor 주석 참고
                 colors = ButtonDefaults.buttonColors(contentColor = AquaCtaContentColor)
             ) {
+                // 이모지 대신 홈 화면 "물 마셨어요" 버튼(Icons.Filled.WaterDrop)과 동일한 벡터
+                // 아이콘 사용 — 물방울 모양이 서로 다르게 보이던 문제(owner 스크린샷 제보, iOS와
+                // 동일하게 수정, 2026-08-02). DrinkBadge와 동일한 drinkIconRes 매핑이라 음료
+                // 종류를 바꿔도 항상 벡터 아이콘으로 일관되게 표시됨
                 Text(
                     text = stringResource(
                         R.string.record_button,
-                        uiState.selectedDrinkType.emoji,
                         stringResource(uiState.selectedDrinkType.displayNameRes),
                         uiState.selectedAmount
                     ),
                     fontWeight = FontWeight.SemiBold
                 )
+                Spacer(Modifier.width(8.dp))
+                if (uiState.selectedDrinkType == DrinkType.WATER) {
+                    Icon(Icons.Filled.WaterDrop, contentDescription = null, modifier = Modifier.size(20.dp))
+                } else {
+                    Icon(
+                        painter = painterResource(drinkIconRes(uiState.selectedDrinkType)),
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
             }
         }
     }
